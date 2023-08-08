@@ -2,19 +2,18 @@ package main
 
 import (
 	"fmt"
-	"html/template"
+	"github.com/hielkefellinger/go-dnd/app/controller"
+	"github.com/hielkefellinger/go-dnd/app/helpers"
 	"log"
-	"net/http"
 )
 
 func main() {
 	fmt.Println("Test")
 
-	root := func(w http.ResponseWriter, r *http.Request) {
-		tmpl := template.Must(template.ParseFiles("index.html"))
-		_ = tmpl.Execute(w, nil)
-	}
+	r := controller.LoadRoutes()
 
-	http.HandleFunc("/", root)
-	log.Fatal(http.ListenAndServe(":8081", nil))
+	helpers.ServerStaticWebContent()
+	httpServer := helpers.ServeHttpServer(r)
+
+	log.Fatal(httpServer.ListenAndServe())
 }
