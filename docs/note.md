@@ -7,7 +7,7 @@
   - type
     - player
     - gm
-  - character(s)
+  - character(s) (campaign)
     - status
     - health
 - Grid overlay
