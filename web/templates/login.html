@@ -3,10 +3,17 @@
 <!--Embed the header.html template at this location-->
 {{ template "header.html" .}}
 
-<h1> Login the world </h1>
+<h1> Login</h1>
 
 <div class="panel panel-default col-sm-6">
     <div class="panel-body">
+        <!--If there's an error, display the error-->
+        {{ if .ErrorTitle}}
+        <p class="bg-danger">
+            {{.ErrorTitle}}: {{.ErrorMessage}}
+        </p>
+        {{end}}
+
         <!--Create a form that POSTs to the `/u/login` route-->
         <form class="form" action="/u/login" method="POST">
             <div class="form-group">

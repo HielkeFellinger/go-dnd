@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-var minCryptoCost int = 16
+var minCryptoCost = 16
 
 func HashPassword(password string) ([]byte, error) {
 

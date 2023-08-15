@@ -27,7 +27,7 @@ func Login(c *gin.Context) {
 	}
 
 	if c.Bind(&body) != nil {
-		handeError(c, "login.html", "GO-DND Login", "Failed to read request")
+		handeError(c, "login.html", "GO-DND Login", "Failed to read request", "Error")
 		return
 	}
 
@@ -35,13 +35,13 @@ func Login(c *gin.Context) {
 	var user models.User
 	initializers.DB.First(&user, "name = ?", body.Username)
 	if user.ID == 0 {
-		handeError(c, "login.html", "GO-DND Login", "Invalid username and or password")
+		handeError(c, "login.html", "GO-DND Login", "Invalid username and or password", "Error")
 		return
 	}
 
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password))
 	if err != nil {
-		handeError(c, "login.html", "GO-DND Login", "Invalid username and or password")
+		handeError(c, "login.html", "GO-DND Login", "Invalid username and or password", "Error")
 		return
 	}
 
@@ -52,7 +52,7 @@ func Login(c *gin.Context) {
 	})
 	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 	if err != nil {
-		handeError(c, "login.html", "GO-DND Login", "Failure while setting auth. token")
+		handeError(c, "login.html", "GO-DND Login", "Failure while setting auth. token", "Error")
 		return
 	}
 
@@ -79,18 +79,18 @@ func Register(c *gin.Context) {
 	}
 
 	if c.Bind(&body) != nil {
-		handeError(c, "register.html", "GO-DND Register", "Failed to read request")
+		handeError(c, "register.html", "GO-DND Register", "Failed to read request", "Error")
 		return
 	}
 
 	if body.PasswordCheck != body.Password {
-		handeError(c, "register.html", "GO-DND Register", "Passwords do not match")
+		handeError(c, "register.html", "GO-DND Register", "Passwords do not match", "Error")
 		return
 	}
 
 	hashByteArray, err := util.HashPassword(body.Password)
 	if err != nil {
-		handeError(c, "register.html", "GO-DND Register", "Password could not be hashed")
+		handeError(c, "register.html", "GO-DND Register", "Password could not be hashed", "Error")
 		return
 	}
 
@@ -98,7 +98,7 @@ func Register(c *gin.Context) {
 	user := models.User{Name: body.Username, Password: string(hashByteArray)}
 	result := initializers.DB.Create(&user)
 	if result.Error != nil {
-		handeError(c, "register.html", "GO-DND Register", "User could not created")
+		handeError(c, "register.html", "GO-DND Register", "User could not created", "Error")
 		return
 	}
 
@@ -106,10 +106,12 @@ func Register(c *gin.Context) {
 	c.Redirect(http.StatusCreated, "/u/login")
 }
 
-func handeError(c *gin.Context, template string, title string, errorMessage string) {
+func handeError(c *gin.Context, template string, title string, errorMessage string, errorTitle string) {
 	c.HTML(
 		http.StatusBadRequest,
 		template,
-		gin.H{"title": errorMessage, "errorMessage": errorMessage},
+		gin.H{"title": title,
+			"ErrorMessage": errorMessage,
+			"ErrorTitle":   errorTitle},
 	)
 }
