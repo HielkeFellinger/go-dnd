@@ -5,12 +5,21 @@
             <a class="navbar-brand" href="/">
                 Home
             </a>
+            {{ if .user }}
+            <a class="navbar-brand" href="/u/logout">
+                Logout
+            </a>
+            <a class="navbar-brand" href="/campaign/select">
+                Campaigns
+            </a>
+            {{ else }}
             <a class="navbar-brand" href="/u/login">
                 Login
             </a>
             <a class="navbar-brand" href="/u/register">
                 Register
             </a>
+            {{end}}
         </div>
     </div>
 </nav>

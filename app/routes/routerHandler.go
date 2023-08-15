@@ -3,24 +3,27 @@ package routes
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/hielkefellinger/go-dnd/app/controller"
+	"github.com/hielkefellinger/go-dnd/app/middelware"
 )
 
 func HandleControllerRoutes(router *gin.Engine) {
 	// Home (Page) Routes
-	router.GET("/", controller.HomePage)
+	router.GET("/", middelware.OptionalAuth, controller.HomePage)
 
 	// User Routes
 	userRoutes := router.Group("/u")
 	{
-		userRoutes.GET("/login", controller.LoginPage)
-		userRoutes.POST("/login", controller.Login)
-		userRoutes.GET("/register", controller.RegisterPage)
-		userRoutes.POST("/register", controller.Register)
+		userRoutes.GET("/login", middelware.OptionalAuth, controller.LoginPage)
+		userRoutes.POST("/login", middelware.OptionalAuth, controller.Login)
+		userRoutes.GET("/logout", controller.Logout)
+		userRoutes.POST("/logout", controller.Logout)
+		userRoutes.GET("/register", middelware.OptionalAuth, controller.RegisterPage)
+		userRoutes.POST("/register", middelware.OptionalAuth, controller.Register)
 	}
 
 	campaignRoutes := router.Group("/campaign")
 	{
-		campaignRoutes.GET("/select", controller.CampaignSelectPage)
+		campaignRoutes.GET("/select", middelware.RequireAuth, controller.CampaignSelectPage)
 	}
 }
 

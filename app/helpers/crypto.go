@@ -1,4 +1,4 @@
-package util
+package helpers
 
 import (
 	"golang.org/x/crypto/bcrypt"
@@ -8,9 +8,8 @@ import (
 
 var minCryptoCost = 16
 
+// HashPassword Hash a models.User password
 func HashPassword(password string) ([]byte, error) {
-
-	// Hash the password
 	return bcrypt.GenerateFromPassword([]byte(password), getCryptoCost())
 }
 

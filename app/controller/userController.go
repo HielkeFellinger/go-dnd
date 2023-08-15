@@ -2,14 +2,11 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
+	"github.com/hielkefellinger/go-dnd/app/helpers"
 	"github.com/hielkefellinger/go-dnd/app/initializers"
 	"github.com/hielkefellinger/go-dnd/app/models"
-	"github.com/hielkefellinger/go-dnd/app/util"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
-	"os"
-	"time"
 )
 
 func LoginPage(c *gin.Context) {
@@ -26,8 +23,11 @@ func Login(c *gin.Context) {
 		Password string `form:"password"`
 	}
 
+	const loginTemplate = "login.html"
+	const title = "GO-DND Login"
+
 	if c.Bind(&body) != nil {
-		handeError(c, "login.html", "GO-DND Login", "Failed to read request", "Error")
+		handeError(c, loginTemplate, title, "Failed to read request", "Error")
 		return
 	}
 
@@ -35,29 +35,21 @@ func Login(c *gin.Context) {
 	var user models.User
 	initializers.DB.First(&user, "name = ?", body.Username)
 	if user.ID == 0 {
-		handeError(c, "login.html", "GO-DND Login", "Invalid username and or password", "Error")
+		handeError(c, loginTemplate, title, "Invalid username and or password", "Error")
 		return
 	}
 
-	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password))
-	if err != nil {
-		handeError(c, "login.html", "GO-DND Login", "Invalid username and or password", "Error")
+	errBcrypt := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password))
+	if errBcrypt != nil {
+		handeError(c, loginTemplate, title, "Invalid username and or password", "Error")
 		return
 	}
 
-	// Generate a JWT token and Sign
-	token := jwt.NewWithClaims(jwt.SigningMethodHS512, jwt.MapClaims{
-		"ID":        user.ID,
-		"ExpiresAt": time.Now().Add(time.Hour * 24).Unix(),
-	})
-	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
-	if err != nil {
-		handeError(c, "login.html", "GO-DND Login", "Failure while setting auth. token", "Error")
-		return
+	var authCookieContent = helpers.AuthCookieContent{ID: user.ID}
+	errCookie := helpers.SetAuthJWTCookie(authCookieContent, c)
+	if errCookie != nil {
+		handeError(c, loginTemplate, title, "Failed create Cookie", "Error")
 	}
-
-	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("Session", tokenString, 3600*24, "", "", false, false)
 
 	// Redirect
 	c.Redirect(http.StatusFound, "/campaign/select")
@@ -78,19 +70,22 @@ func Register(c *gin.Context) {
 		PasswordCheck string `form:"passwordCheck"`
 	}
 
+	const registerTemplate = "register.html"
+	const title = "GO-DND Register"
+
 	if c.Bind(&body) != nil {
-		handeError(c, "register.html", "GO-DND Register", "Failed to read request", "Error")
+		handeError(c, registerTemplate, title, "Failed to read request", "Error")
 		return
 	}
 
 	if body.PasswordCheck != body.Password {
-		handeError(c, "register.html", "GO-DND Register", "Passwords do not match", "Error")
+		handeError(c, registerTemplate, title, "Passwords do not match", "Error")
 		return
 	}
 
-	hashByteArray, err := util.HashPassword(body.Password)
+	hashByteArray, err := helpers.HashPassword(body.Password)
 	if err != nil {
-		handeError(c, "register.html", "GO-DND Register", "Password could not be hashed", "Error")
+		handeError(c, registerTemplate, title, "Password could not be hashed", "Error")
 		return
 	}
 
@@ -98,12 +93,17 @@ func Register(c *gin.Context) {
 	user := models.User{Name: body.Username, Password: string(hashByteArray)}
 	result := initializers.DB.Create(&user)
 	if result.Error != nil {
-		handeError(c, "register.html", "GO-DND Register", "User could not created", "Error")
+		handeError(c, registerTemplate, title, "User could not created", "Error")
 		return
 	}
 
 	// Redirect
 	c.Redirect(http.StatusCreated, "/u/login")
+}
+
+func Logout(c *gin.Context) {
+	helpers.ResetCookie(helpers.AuthCookieName, c)
+	c.Redirect(http.StatusFound, "/")
 }
 
 func handeError(c *gin.Context, template string, title string, errorMessage string, errorTitle string) {
