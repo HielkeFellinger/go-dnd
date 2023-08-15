@@ -13,7 +13,14 @@ func HandleControllerRoutes(router *gin.Engine) {
 	userRoutes := router.Group("/u")
 	{
 		userRoutes.GET("/login", controller.LoginPage)
+		userRoutes.POST("/login", controller.Login)
 		userRoutes.GET("/register", controller.RegisterPage)
+		userRoutes.POST("/register", controller.Register)
+	}
+
+	campaignRoutes := router.Group("/campaign")
+	{
+		campaignRoutes.GET("/select", controller.CampaignSelectPage)
 	}
 }
 
