@@ -49,6 +49,7 @@ func Login(c *gin.Context) {
 	errCookie := helpers.SetAuthJWTCookie(authCookieContent, c)
 	if errCookie != nil {
 		handeError(c, loginTemplate, title, "Failed create Cookie", "Error")
+		return
 	}
 
 	// Redirect
