@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-var router *gin.Engine
+var engine *gin.Engine
 
 func init() {
 	log.Println("INIT: Starting Initialisation of GO-DND")
@@ -20,16 +20,20 @@ func init() {
 }
 
 func main() {
-	log.Println("MAIN: Creation of Gin.Engine")
-	router = gin.Default()
-
-	// Init Routes
-	log.Println("MAIN: Loading (Static) Content, Templates and Routes")
-	routes.HandleStaticContent(router)
-	routes.HandleTemplates(router)
-	routes.HandleControllerRoutes(router)
+	loadGinEngine()
 
 	// Serve Content
 	log.Println("MAIN: Starting Gin.Engine")
-	log.Fatal(router.Run(fmt.Sprintf("%s:%s", os.Getenv("HOST"), os.Getenv("PORT"))))
+	log.Fatal(engine.Run(fmt.Sprintf("%s:%s", os.Getenv("HOST"), os.Getenv("PORT"))))
+}
+
+func loadGinEngine() {
+	log.Println("MAIN: Creation of Gin.Engine")
+	engine = gin.Default()
+
+	// Load Routes and (static) content
+	log.Println("MAIN: Loading (Static) Content, Templates and Routes")
+	routes.HandleStaticContent(engine)
+	routes.HandleTemplates(engine)
+	routes.HandleControllerRoutes(engine)
 }

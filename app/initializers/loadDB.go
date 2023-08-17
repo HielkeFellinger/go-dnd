@@ -18,8 +18,8 @@ func LoadDatabase() {
 		os.Getenv("POSTGRES_USER"),
 		os.Getenv("POSTGRES_PASS"),
 		os.Getenv("POSTGRES_DB"),
-		os.Getenv("POSTGRES_PORT"),
-	)
+		os.Getenv("POSTGRES_PORT"))
+
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("INIT: Failure connecting to Database", err)
