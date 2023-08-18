@@ -8,8 +8,13 @@ import (
 func SyncDB() {
 	log.Println("INIT: Attempting Sync Database Schema")
 
-	userErr := DB.AutoMigrate(&models.User{})
-	if userErr != nil {
-		log.Fatal("INIT: Failure Syncing User Mode Schema", userErr)
+	if DB.AutoMigrate(&models.User{}) != nil {
+		log.Fatal("INIT: Failure Syncing User Schema")
+	}
+	if DB.AutoMigrate(&models.Character{}) != nil {
+		log.Fatal("INIT: Failure Syncing Character Schema")
+	}
+	if DB.AutoMigrate(&models.Campaign{}) != nil {
+		log.Fatal("INIT: Failure Syncing Campaign Schema")
 	}
 }
