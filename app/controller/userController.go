@@ -23,11 +23,13 @@ func Login(c *gin.Context) {
 		Password string `form:"password"`
 	}
 
-	const loginTemplate = "login.html"
-	const title = "GO-DND Login"
+	templateMap := gin.H{}
+	templateMap["title"] = "GO-DND Login"
+	const template = "login.html"
 
 	if c.Bind(&body) != nil {
-		handeError(c, loginTemplate, title, "Failed to read request", "Error")
+		templateMap[errMessage], templateMap[errTitle] = "Failed to read request", "Error"
+		c.HTML(http.StatusBadRequest, template, templateMap)
 		return
 	}
 
@@ -35,20 +37,23 @@ func Login(c *gin.Context) {
 	var user models.User
 	initializers.DB.First(&user, "name = ?", body.Username)
 	if user.ID == 0 {
-		handeError(c, loginTemplate, title, "Invalid username and or password", "Error")
+		templateMap[errMessage], templateMap[errTitle] = "Invalid username and or password", "Error"
+		c.HTML(http.StatusBadRequest, template, templateMap)
 		return
 	}
 
 	errBcrypt := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password))
 	if errBcrypt != nil {
-		handeError(c, loginTemplate, title, "Invalid username and or password", "Error")
+		templateMap[errMessage], templateMap[errTitle] = "Invalid username and or password", "Error"
+		c.HTML(http.StatusBadRequest, template, templateMap)
 		return
 	}
 
 	var authCookieContent = helpers.AuthCookieContent{ID: user.ID}
 	errCookie := helpers.SetAuthJWTCookie(authCookieContent, c)
 	if errCookie != nil {
-		handeError(c, loginTemplate, title, "Failed create Cookie", "Error")
+		templateMap[errMessage], templateMap[errTitle] = "Failed create Cookie", "Error"
+		c.HTML(http.StatusBadRequest, template, templateMap)
 		return
 	}
 
@@ -71,22 +76,26 @@ func Register(c *gin.Context) {
 		PasswordCheck string `form:"passwordCheck"`
 	}
 
-	const registerTemplate = "register.html"
-	const title = "GO-DND Register"
+	templateMap := gin.H{}
+	templateMap["title"] = "GO-DND Register"
+	const template = "register.html"
 
 	if c.Bind(&body) != nil {
-		handeError(c, registerTemplate, title, "Failed to read request", "Error")
+		templateMap[errMessage], templateMap[errTitle] = "Failed to read request", "Error"
+		c.HTML(http.StatusBadRequest, template, templateMap)
 		return
 	}
 
 	if body.PasswordCheck != body.Password {
-		handeError(c, registerTemplate, title, "Passwords do not match", "Error")
+		templateMap[errMessage], templateMap[errTitle] = "Passwords do not match", "Error"
+		c.HTML(http.StatusBadRequest, template, templateMap)
 		return
 	}
 
 	hashByteArray, err := helpers.HashPassword(body.Password)
 	if err != nil {
-		handeError(c, registerTemplate, title, "Password could not be hashed", "Error")
+		templateMap[errMessage], templateMap[errTitle] = "Password could not be hashed", "Error"
+		c.HTML(http.StatusBadRequest, template, templateMap)
 		return
 	}
 
@@ -94,7 +103,8 @@ func Register(c *gin.Context) {
 	user := models.User{Name: body.Username, Password: string(hashByteArray)}
 	result := initializers.DB.Create(&user)
 	if result.Error != nil {
-		handeError(c, registerTemplate, title, "User could not created", "Error")
+		templateMap[errMessage], templateMap[errTitle] = "User could not created", "Error"
+		c.HTML(http.StatusBadRequest, template, templateMap)
 		return
 	}
 
@@ -105,14 +115,4 @@ func Register(c *gin.Context) {
 func Logout(c *gin.Context) {
 	helpers.ResetCookie(helpers.AuthCookieName, c)
 	c.Redirect(http.StatusFound, "/")
-}
-
-func handeError(c *gin.Context, template string, title string, errorMessage string, errorTitle string) {
-	c.HTML(
-		http.StatusBadRequest,
-		template,
-		gin.H{"title": title,
-			"ErrorMessage": errorMessage,
-			"ErrorTitle":   errorTitle},
-	)
 }

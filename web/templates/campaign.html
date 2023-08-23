@@ -3,7 +3,33 @@
 <!--Embed the header.html template at this location-->
 {{ template "header.html" .}}
 
-<h1> Run Campaign, {{ .user.Name }} </h1>
+<h1> Running Campaign Session, {{ .user.Name }} </h1>
+
+<div class="panel panel-default col-sm-12">
+    <div class="panel-body">
+        <!--If there's an error, display the error-->
+        {{ if .ErrorTitle}}
+        <p class="bg-danger">
+            {{.ErrorTitle}}: {{.ErrorMessage}}
+        </p>
+        {{end}}
+
+        <div class="panel panel-default col-sm-4">
+            <h1> Chat </h1>
+        </div>
+
+        <div class="panel panel-default col-sm-7">
+            <h1> Campaign Content </h1>
+        </div>
+    </div>
+</div>
+
+<script type="application/javascript">
+
+<!--  Starting Websocket  -->
+
+</script>
+
 
 <!--Embed the footer.html template at this location-->
 {{ template "footer.html" .}}

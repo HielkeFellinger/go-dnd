@@ -4,6 +4,20 @@
 {{ template "header.html" .}}
 
 <h1> Select Campaign, {{ .user.Name}} </h1>
+<a href="/campaign/new">Create a new Campaign</a>
+
+<div class="panel panel-default col-sm-6">
+    <div class="panel-body">
+        <h2>Campaign as Leader</h2>
+        ...
+        <hr>
+        <h2>Campaign as Member</h2>
+        ...
+        <hr>
+        <h2>Campaign Open/Public</h2>
+        ...
+    </div>
+</div>
 
 <!--Embed the footer.html template at this location-->
 {{ template "footer.html" .}}
