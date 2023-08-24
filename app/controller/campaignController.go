@@ -3,8 +3,6 @@ package controller
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/hielkefellinger/go-dnd/app/helpers"
-	"github.com/hielkefellinger/go-dnd/app/initializers"
 	"github.com/hielkefellinger/go-dnd/app/models"
 	"net/http"
 )
@@ -19,6 +17,8 @@ func CampaignSelectPage(c *gin.Context) {
 		c.HTML(http.StatusUnauthorized, "campaignSelect.html", templateMap)
 	}
 	templateMap["user"] = rawUser.(models.User)
+
+	// Retrieve campaigns
 
 	c.HTML(http.StatusOK, "campaignSelect.html", templateMap)
 }
@@ -55,47 +55,25 @@ func CampaignNew(c *gin.Context) {
 	}
 	templateMap["user"] = rawUser.(models.User)
 
-	var body struct {
-		Title         string `form:"title"`
-		Description   string `form:"description"`
-		Password      string `form:"password"`
-		PasswordCheck string `form:"passwordCheck"`
-	}
-
-	if c.Bind(&body) != nil {
+	// Parse body to model
+	var campaign models.Campaign
+	if c.Bind(&campaign) != nil {
 		templateMap[errMessage], templateMap[errTitle] = "Failed to read request", "Error"
 		c.HTML(http.StatusBadRequest, template, templateMap)
 		return
 	}
 
-	// Check password
-	if body.PasswordCheck != body.Password {
-		templateMap[errMessage], templateMap[errTitle] = "Passwords do not match", "Error"
-		c.HTML(http.StatusBadRequest, template, templateMap)
-		return
-	}
-
-	hashByteArray, err := helpers.HashPassword(body.Password)
+	// Attempt to insert campaign
+	var service = models.CampaignService{}
+	campaign.LeadId = int(rawUser.(models.User).ID)
+	campaign.Private = false
+	err := service.InsertCampaign(&campaign)
 	if err != nil {
-		templateMap[errMessage], templateMap[errTitle] = "Password could not be hashed", "Error"
+		templateMap[errMessage], templateMap[errTitle] = err.Error(), "Error"
 		c.HTML(http.StatusBadRequest, template, templateMap)
 		return
 	}
 
-	campaign := models.Campaign{
-		Private:     false,
-		Title:       body.Title,
-		Description: body.Description,
-		Password:    string(hashByteArray),
-		LeadId:      int(rawUser.(models.User).ID),
-	}
-	result := initializers.DB.Create(&campaign)
-	if result.Error != nil {
-		templateMap[errMessage], templateMap[errTitle] = "User could not created", "Error"
-		c.HTML(http.StatusBadRequest, template, templateMap)
-		return
-	}
-
-	// Redirect
+	// Redirect  (After creating a successful campaign)
 	c.Redirect(http.StatusCreated, fmt.Sprintf("/campaign/session/%d", campaign.ID))
 }

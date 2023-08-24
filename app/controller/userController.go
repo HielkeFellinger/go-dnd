@@ -70,45 +70,28 @@ func RegisterPage(c *gin.Context) {
 }
 
 func Register(c *gin.Context) {
-	var body struct {
-		Username      string `form:"username"`
-		Password      string `form:"password"`
-		PasswordCheck string `form:"passwordCheck"`
-	}
-
 	templateMap := gin.H{}
 	templateMap["title"] = "GO-DND Register"
 	const template = "register.html"
 
-	if c.Bind(&body) != nil {
+	// Parse body to model
+	var user models.User
+	var service = models.UserService{}
+	if c.Bind(&user) != nil {
 		templateMap[errMessage], templateMap[errTitle] = "Failed to read request", "Error"
 		c.HTML(http.StatusBadRequest, template, templateMap)
 		return
 	}
 
-	if body.PasswordCheck != body.Password {
-		templateMap[errMessage], templateMap[errTitle] = "Passwords do not match", "Error"
-		c.HTML(http.StatusBadRequest, template, templateMap)
-		return
-	}
-
-	hashByteArray, err := helpers.HashPassword(body.Password)
+	// Attempt to insert user
+	err := service.InsertUser(&user)
 	if err != nil {
-		templateMap[errMessage], templateMap[errTitle] = "Password could not be hashed", "Error"
+		templateMap[errMessage], templateMap[errTitle] = err.Error(), "Error"
 		c.HTML(http.StatusBadRequest, template, templateMap)
 		return
 	}
 
-	// Attempt to create user
-	user := models.User{Name: body.Username, Password: string(hashByteArray)}
-	result := initializers.DB.Create(&user)
-	if result.Error != nil {
-		templateMap[errMessage], templateMap[errTitle] = "User could not created", "Error"
-		c.HTML(http.StatusBadRequest, template, templateMap)
-		return
-	}
-
-	// Redirect
+	// Redirect (After creating a successful user)
 	c.Redirect(http.StatusCreated, "/u/login")
 }
 
