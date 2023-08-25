@@ -2,13 +2,12 @@ package initializers
 
 import (
 	"fmt"
+	"github.com/hielkefellinger/go-dnd/app/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
 	"os"
 )
-
-var DB *gorm.DB
 
 func LoadDatabase() {
 	log.Println("INIT: Attempting connecting to Database")
@@ -25,5 +24,5 @@ func LoadDatabase() {
 		log.Fatal("INIT: Failure connecting to Database", err)
 	}
 
-	DB = db
+	models.DB = db
 }

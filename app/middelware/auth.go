@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/hielkefellinger/go-dnd/app/initializers"
 	"github.com/hielkefellinger/go-dnd/app/models"
 	"log"
 	"net/http"
@@ -60,7 +59,7 @@ func retrieveUserFromCookie(c *gin.Context) (models.User, error) {
 			}
 
 			// Get user, if exists
-			initializers.DB.First(&user, claims["ID"])
+			models.DB.First(&user, claims["ID"])
 		}
 	}
 	return user, err

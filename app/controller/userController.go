@@ -3,7 +3,6 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/hielkefellinger/go-dnd/app/helpers"
-	"github.com/hielkefellinger/go-dnd/app/initializers"
 	"github.com/hielkefellinger/go-dnd/app/models"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
@@ -35,7 +34,7 @@ func Login(c *gin.Context) {
 
 	// Check if user exists
 	var user models.User
-	initializers.DB.First(&user, "name = ?", body.Username)
+	models.DB.First(&user, "name = ?", body.Username)
 	if user.ID == 0 {
 		templateMap[errMessage], templateMap[errTitle] = "Invalid username and or password", "Error"
 		c.HTML(http.StatusBadRequest, template, templateMap)

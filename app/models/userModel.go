@@ -3,7 +3,6 @@ package models
 import (
 	"errors"
 	"github.com/hielkefellinger/go-dnd/app/helpers"
-	"github.com/hielkefellinger/go-dnd/app/initializers"
 	"gorm.io/gorm"
 )
 
@@ -38,7 +37,7 @@ func (service UserService) InsertUser(user *User) error {
 	user.Password = string(hashByteArray)
 
 	// Attempt to save
-	result := initializers.DB.Create(&user)
+	result := DB.Create(&user)
 	if result.Error != nil {
 		return errors.New("user could not created")
 	}
