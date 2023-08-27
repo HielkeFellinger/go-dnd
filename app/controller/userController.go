@@ -41,16 +41,14 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	errBcrypt := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password))
-	if errBcrypt != nil {
+	if errBcrypt := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password)); errBcrypt != nil {
 		templateMap[errMessage], templateMap[errTitle] = "Invalid username and or password", "Error"
 		c.HTML(http.StatusBadRequest, template, templateMap)
 		return
 	}
 
 	var authCookieContent = helpers.AuthCookieContent{ID: user.ID}
-	errCookie := helpers.SetAuthJWTCookie(authCookieContent, c)
-	if errCookie != nil {
+	if errCookie := helpers.SetAuthJWTCookie(authCookieContent, c); errCookie != nil {
 		templateMap[errMessage], templateMap[errTitle] = "Failed create Cookie", "Error"
 		c.HTML(http.StatusBadRequest, template, templateMap)
 		return
@@ -75,7 +73,6 @@ func Register(c *gin.Context) {
 
 	// Parse body to model
 	var user models.User
-	var service = models.UserService{}
 	if c.Bind(&user) != nil {
 		templateMap[errMessage], templateMap[errTitle] = "Failed to read request", "Error"
 		c.HTML(http.StatusBadRequest, template, templateMap)
@@ -83,8 +80,8 @@ func Register(c *gin.Context) {
 	}
 
 	// Attempt to insert user
-	err := service.InsertUser(&user)
-	if err != nil {
+	var service = models.UserService{}
+	if err := service.InsertUser(&user); err != nil {
 		templateMap[errMessage], templateMap[errTitle] = err.Error(), "Error"
 		c.HTML(http.StatusBadRequest, template, templateMap)
 		return

@@ -35,8 +35,7 @@ func (service *CampaignService) InsertCampaign(campaign *Campaign) error {
 	campaign.Password = string(hashByteArray)
 
 	// Attempt to save
-	result := DB.Create(&campaign)
-	if result.Error != nil {
+	if result := DB.Create(&campaign); result.Error != nil {
 		return errors.New("user could not created")
 	}
 

@@ -38,7 +38,7 @@ func retrieveUserFromCookie(c *gin.Context) (models.User, error) {
 	tokenString, err := c.Cookie("Session")
 	if err == nil {
 		// Parse tokenString
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		token, jwtErr := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			// Validate the alg is what is expected
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -46,9 +46,9 @@ func retrieveUserFromCookie(c *gin.Context) (models.User, error) {
 			return []byte(os.Getenv("JWT_SECRET")), nil
 		})
 
-		// Send err if failure in parsing
-		if err != nil {
-			return user, err
+		// Send jwtErr if failure in parsing
+		if jwtErr != nil {
+			return user, jwtErr
 		}
 
 		// Validate the cookie content and attempt to retrieve user

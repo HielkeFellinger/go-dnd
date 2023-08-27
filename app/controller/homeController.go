@@ -10,8 +10,7 @@ func HomePage(c *gin.Context) {
 	templateMap := gin.H{}
 	templateMap["title"] = "GO-DND Home Page"
 
-	rawUser, exists := c.Get("user")
-	if exists {
+	if rawUser, exists := c.Get("user"); exists {
 		templateMap["user"] = rawUser.(models.User)
 	}
 

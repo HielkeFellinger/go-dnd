@@ -42,6 +42,7 @@ func CampaignNew(c *gin.Context) {
 	templateMap["title"] = "GO-DND Create Campaign"
 	const template = "crudCampaign.html"
 
+	// Block non post content
 	if c.Request.Method != http.MethodPost {
 		templateMap[errMessage], templateMap[errTitle] = "Failed to read request", "Error"
 		c.HTML(http.StatusBadRequest, template, templateMap)
@@ -67,8 +68,7 @@ func CampaignNew(c *gin.Context) {
 	var service = models.CampaignService{}
 	campaign.LeadId = int(rawUser.(models.User).ID)
 	campaign.Private = false
-	err := service.InsertCampaign(&campaign)
-	if err != nil {
+	if err := service.InsertCampaign(&campaign); err != nil {
 		templateMap[errMessage], templateMap[errTitle] = err.Error(), "Error"
 		c.HTML(http.StatusBadRequest, template, templateMap)
 		return
