@@ -16,17 +16,51 @@
 
         <div class="panel panel-default col-sm-4">
             <h1> Chat </h1>
+            <div id="chat-content">
+
+            </div>
         </div>
 
         <div class="panel panel-default col-sm-7">
             <h1> Campaign Content </h1>
+            <div id="campaign-content">
+
+            </div>
         </div>
     </div>
 </div>
 
 <script type="application/javascript">
 
-<!--  Starting Websocket  -->
+    <!--  Starting Websocket  -->
+    console.log("connecting to compaign: '{{.campaignId}}'")
+
+    if (window["WebSocket"]) {
+        console.log("WS support");
+
+        conn = new WebSocket("ws://" + document.location.host + "/campaign/session/{{.campaignId}}/ws");
+
+        // On Open & Close
+        conn.onopen = function (evt) {
+            document.getElementById("chat-content").innerHTML = "Connected to Websocket: true";
+        }
+        conn.onclose = function (evt) {
+            document.getElementById("chat-content").innerHTML = "Connected to Websocket: false";
+        }
+
+        // On message
+        conn.onmessage = function (evt) {
+            console.log(evt)
+
+            // Parse events
+
+            document.getElementById("chat-content").innerHTML = evt.data;
+        }
+
+
+    } else {
+        alert("No WS support")
+    }
 
 </script>
 

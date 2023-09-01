@@ -8,14 +8,17 @@
 
 <div class="panel panel-default col-sm-6">
     <div class="panel-body">
-        <h2>Campaign as Leader</h2>
-        ...
-        <hr>
-        <h2>Campaign as Member</h2>
-        ...
-        <hr>
-        <h2>Campaign Open/Public</h2>
-        ...
+        <div>
+            <h2>My Campaigns</h2>
+            {{ range .userCampaigns }}
+                {{template "selectCampaignBox.html" .}}
+            {{ end }}
+            <hr>
+        </div>
+        <div>
+            <h2>All Campaigns</h2>
+            ...
+        </div>
     </div>
 </div>
 

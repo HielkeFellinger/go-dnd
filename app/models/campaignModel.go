@@ -41,3 +41,14 @@ func (service *CampaignService) InsertCampaign(campaign *Campaign) error {
 
 	return nil
 }
+
+func (service *CampaignService) RetrieveCampaignsLinkedToUser(user User) ([]Campaign, error) {
+	var campaigns []Campaign
+
+	result := DB.Where(&Campaign{Lead: user}).
+		//Or(&Campaign{Users: []User{user}}).
+		Preload("Users").
+		Find(&campaigns)
+
+	return campaigns, result.Error
+}
