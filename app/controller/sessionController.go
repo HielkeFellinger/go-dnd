@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"log"
 	"net/http"
 	"time"
 )
@@ -28,8 +29,25 @@ func ServeSessionWS(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, jsonReturn)
 	}
 	defer ws.Close()
-	for i := 0; i < 7; i++ {
-		ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("Session '%s' Message '%d'", id, i)))
+
+	ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("Welcome to campaign: '%s'", id)))
+
+	for {
+		// Read message
+		_, p, err := ws.ReadMessage()
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		log.Println(string(p))
+
+		// Reflect message
+		if err := ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("Reflect message: '%s'", p))); err != nil {
+			log.Println(err)
+			return
+		}
+
 		time.Sleep(time.Second)
 	}
 }
