@@ -21,5 +21,10 @@
             </a>
             {{end}}
         </div>
+        {{ if .user }}
+        <p style="float: right; padding: 15px; font-size: 18px; line-height: 20px" >
+            Welcome, {{.user.Name}}
+        </p>
+        {{ end }}
     </div>
 </nav>

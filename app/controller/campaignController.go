@@ -73,7 +73,7 @@ func CampaignNew(c *gin.Context) {
 
 	// Attempt to insert campaign
 	var service = models.CampaignService{}
-	campaign.LeadId = int(rawUser.(models.User).ID)
+	campaign.Lead = rawUser.(models.User)
 	campaign.Private = false
 	if err := service.InsertCampaign(&campaign); err != nil {
 		templateMap[errMessage], templateMap[errTitle] = err.Error(), "Error"
@@ -82,7 +82,7 @@ func CampaignNew(c *gin.Context) {
 	}
 
 	// Redirect  (After creating a successful campaign)
-	c.Redirect(http.StatusCreated, fmt.Sprintf("/campaign/session/%d", campaign.ID))
+	c.Redirect(http.StatusFound, fmt.Sprintf("/campaign/session/%d", campaign.ID))
 }
 
 func CampaignSessionPage(c *gin.Context) {

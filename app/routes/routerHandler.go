@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/hielkefellinger/go-dnd/app/controller"
 	"github.com/hielkefellinger/go-dnd/app/middelware"
+	"github.com/hielkefellinger/go-dnd/app/session"
 )
 
 func HandleControllerRoutes(router *gin.Engine) {
@@ -27,7 +28,7 @@ func HandleControllerRoutes(router *gin.Engine) {
 		campaignRoutes.GET("/new", middelware.RequireAuth, controller.CampaignNewPage)
 		campaignRoutes.POST("/new", middelware.RequireAuth, controller.CampaignNew)
 		campaignRoutes.GET("/session/:id", middelware.RequireAuth, controller.CampaignSessionPage)
-		campaignRoutes.GET("/session/:id/ws", middelware.RequireAuth, controller.ServeSessionWS)
+		campaignRoutes.GET("/session/:id/ws", middelware.RequireAuth, session.ServeSessionWS)
 	}
 }
 

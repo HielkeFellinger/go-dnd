@@ -9,9 +9,9 @@
     <div class="panel-body">
         <!--If there's an error, display the error-->
         {{ if .ErrorTitle}}
-        <p class="bg-danger">
+        <div class="alert alert-danger" role="alert">
             {{.ErrorTitle}}: {{.ErrorMessage}}
-        </p>
+        </div>
         {{end}}
         <!--Create a form that POSTs to the `/u/register` route-->
         <form class="form" action="/u/register" method="POST">

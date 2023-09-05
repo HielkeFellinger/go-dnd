@@ -88,7 +88,7 @@ func Register(c *gin.Context) {
 	}
 
 	// Redirect (After creating a successful user)
-	c.Redirect(http.StatusCreated, "/u/login")
+	c.Redirect(http.StatusFound, "/u/login")
 }
 
 func Logout(c *gin.Context) {
