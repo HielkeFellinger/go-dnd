@@ -6,7 +6,6 @@ import (
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
-	"time"
 )
 
 var upgrader = websocket.Upgrader{
@@ -47,7 +46,5 @@ func ServeSessionWS(c *gin.Context) {
 			log.Println(err)
 			return
 		}
-
-		time.Sleep(time.Second)
 	}
 }

@@ -4,9 +4,7 @@
 {{ template "header.html" .}}
 
 <div class="content">
-    <h1> Running Campaign Session, {{ .user.Name }} </h1>
-
-    <div class="row g-4" style="min-width: 1400px">
+    <div class="row g-4" style="min-width: 1400px; min-height: calc(100vh - 82px)">
         <!--If there's an error, display the error-->
         {{ if .ErrorTitle}}
         <p class="bg-danger">
@@ -28,10 +26,17 @@
         </div>
 
         <div class="col border" style="min-width: 1000px">
-            <h4> Campaign Content </h4>
-            <div id="campaign-content">
-
+            <div id="char-content" class=>
+                <h4> Characters </h4>
             </div>
+            <hr>
+            <div id="campaign-content">
+                <h4> Campaign Content </h4>
+            </div>
+        </div>
+
+        <div class="border" style="width: 50px">
+            <h4> I </h4>
         </div>
     </div>
 </div>
@@ -39,9 +44,9 @@
 <script type="application/javascript">
 
     <!--  Starting Websocket  -->
-    console.log("connecting to compaign: '{{.campaignId}}'")
+    console.log("connecting to campaign: '{{.campaign.Title}}'")
 
-    let socket = new WebSocket("ws://" + document.location.host + "/campaign/session/{{.campaignId}}/ws");
+    let socket = new WebSocket("ws://" + document.location.host + "/campaign/session/{{.campaign.ID}}/ws");
 
     if (window["WebSocket"]) {
         console.log("WS support");

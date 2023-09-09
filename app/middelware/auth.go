@@ -11,6 +11,27 @@ import (
 	"time"
 )
 
+func RequireAuthAndCampaign(c *gin.Context) {
+	// Validate User
+	user, err := retrieveUserFromCookie(c)
+	if err != nil || user.ID == 0 {
+		c.AbortWithStatus(http.StatusUnauthorized)
+	}
+
+	// Validate Campaign @todo; see if user is linked to campaign or "admin"
+	var campaign models.Campaign
+	id := c.Params.ByName("id")
+	models.DB.First(&campaign, id)
+	if campaign.ID == 0 {
+		c.AbortWithStatus(http.StatusNotFound)
+	}
+
+	c.Set("user", user)
+	c.Set("campaign", campaign)
+
+	c.Next()
+}
+
 func RequireAuth(c *gin.Context) {
 	user, err := retrieveUserFromCookie(c)
 	if err != nil || user.ID == 0 {

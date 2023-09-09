@@ -88,19 +88,25 @@ func CampaignNew(c *gin.Context) {
 func CampaignSessionPage(c *gin.Context) {
 	templateMap := gin.H{}
 
-	// Retrieve campaign ID
-	id := c.Params.ByName("id")
-
+	// Retrieve campaign & user (set by middleware)
 	rawUser, exists := c.Get("user")
 	if !exists {
 		templateMap[errMessage], templateMap[errTitle] = "Failed authenticate user", "Error"
 		c.HTML(http.StatusUnauthorized, "campaignSelect.html", templateMap)
 	}
-	templateMap["user"] = rawUser.(models.User)
-	templateMap["campaignId"] = id
-	templateMap["title"] = fmt.Sprintf("GO-DND Campaign %s", id)
+	rawCampaign, exists := c.Get("campaign")
+	if !exists {
+		templateMap[errMessage], templateMap[errTitle] = "Failed find campaign", "Error"
+		c.HTML(http.StatusNotFound, "campaignSelect.html", templateMap)
+	}
 
-	// Load Campaign
+	templateMap["user"] = rawUser.(models.User)
+	templateMap["campaign"] = rawCampaign.(models.Campaign)
+	templateMap["title"] = fmt.Sprintf("GO-DND Campaign %s", rawCampaign.(models.Campaign).Title)
+
+	// Check if campaign is active (A (ws) Pool must be created by the Lead)
+	// - If user != lead && user !in campaign users; fail
+	// If user == lead: 	Load extra Campaign data -> Entity component system?? (ECS)
 
 	c.HTML(http.StatusOK, "campaign.html", templateMap)
 }
