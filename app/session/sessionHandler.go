@@ -1,7 +1,6 @@
 package session
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/hielkefellinger/go-dnd/app/models"
@@ -34,6 +33,20 @@ func ServeSessionWS(c *gin.Context) {
 	}
 	campaign := rawCampaign.(models.Campaign)
 
+	// Check Pools if active or lead
+	campaignRunning := runningCampaignSessionsContainer.IsCampaignRunning(campaign.ID)
+
+	if !campaignRunning && campaign.LeadID != user.ID {
+		// No lead and campaign not running
+		jsonReturn[errMessage], jsonReturn[errTitle] = "Campaign not running!", "Error"
+		c.JSON(http.StatusNotFound, jsonReturn)
+	}
+	if !campaignRunning && campaign.LeadID == user.ID {
+		// Start Campaign! (user is lead of campaign and can init campaign session)
+		log.Printf("Starting campaign '%d'", campaign.ID)
+		runningCampaignSessionsContainer.initAndRegisterCampaignPool(campaign)
+	}
+
 	// Upgrade Connection
 	ws, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
@@ -41,34 +54,12 @@ func ServeSessionWS(c *gin.Context) {
 		c.JSON(http.StatusServiceUnavailable, jsonReturn)
 	}
 
-	defer func(ws *websocket.Conn) {
-		err := ws.Close()
-		if err != nil {
-			jsonReturn[errMessage], jsonReturn[errTitle] = err.Error(), "Error"
-			c.JSON(http.StatusInternalServerError, jsonReturn)
-		}
-	}(ws)
-
-	writeErr := ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("Welcome '%s' to campaign: '%s'", user.Name, campaign.Title)))
-	if writeErr != nil {
-		jsonReturn[errMessage], jsonReturn[errTitle] = writeErr.Error(), "Error"
-		c.JSON(http.StatusServiceUnavailable, jsonReturn)
+	// Create Client and link to pool
+	client := &campaignClient{
+		Id:   user.Name,
+		Lead: campaign.LeadID == user.ID,
+		Conn: ws,
 	}
-
-	for {
-		// Read message
-		_, p, err := ws.ReadMessage()
-		if err != nil {
-			log.Println(err)
-			return
-		}
-
-		log.Println(string(p))
-
-		// Reflect message
-		if err := ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("Reflect message: '%s'", p))); err != nil {
-			log.Println(err)
-			return
-		}
-	}
+	runningCampaignSessionsContainer.addClientToCampaignPool(campaign.ID, client)
+	client.Read()
 }

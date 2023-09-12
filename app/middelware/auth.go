@@ -21,7 +21,7 @@ func RequireAuthAndCampaign(c *gin.Context) {
 	// Validate Campaign @todo; see if user is linked to campaign or "admin"
 	var campaign models.Campaign
 	id := c.Params.ByName("id")
-	models.DB.First(&campaign, id)
+	models.DB.Preload("Users").Preload("Lead").First(&campaign, id)
 	if campaign.ID == 0 {
 		c.AbortWithStatus(http.StatusNotFound)
 	}
