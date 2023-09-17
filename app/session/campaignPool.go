@@ -3,6 +3,7 @@ package session
 import (
 	"fmt"
 	"log"
+	"time"
 )
 
 type campaignPool struct {
@@ -33,7 +34,7 @@ func (pool *campaignPool) Run() {
 			log.Printf("Size of Connection Pool `%d`: %d", pool.Id, len(pool.Clients))
 
 			pool.SendMessage(message{
-				Source: "Server", Type: MSG_TYPE_USER_JOIN,
+				Source: "Server", Type: TypeUserJoin,
 				Body: fmt.Sprintf("User '%s' Joins the game", client.Id),
 			})
 
@@ -41,8 +42,14 @@ func (pool *campaignPool) Run() {
 		case client := <-pool.Unregister:
 			// Test if user is Lead, if so close the pool
 			if client.Lead {
-				// Close game
-				pool.SendMessage(message{Source: "Server", Type: MSG_TYPE_GAME_CLOSE, Body: "Closing Game!"})
+				// Send closing message
+				pool.SendMessage(message{Source: "Server", Type: TypeGameClose, Body: "Closing Game!"})
+
+				// Close game; and remove from session container @todo Save state?
+				for client := range pool.Clients {
+					delete(pool.Clients, client)
+				}
+				runningCampaignSessionsContainer.Unregister <- pool
 				return
 			}
 
@@ -51,6 +58,10 @@ func (pool *campaignPool) Run() {
 
 			break
 		case message := <-pool.Transmit:
+			if message.DateTime == "" {
+				now := time.Now()
+				message.DateTime = fmt.Sprintf("%d-%d-%d %d:%d:%d", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second())
+			}
 
 			// Check Commands like whisper or dice
 

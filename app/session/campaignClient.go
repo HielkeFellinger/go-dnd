@@ -1,7 +1,6 @@
 package session
 
 import (
-	"fmt"
 	"github.com/gorilla/websocket"
 	"log"
 )
@@ -29,8 +28,8 @@ func (c *campaignClient) Read() {
 
 		log.Println(string(p))
 
-		message := message{Source: c.Id, Type: MSG_TYPE_CHAT_BROADCAST, Body: string(p)}
+		message := message{Source: c.Id, Type: TypeChatBroadcast, Body: string(p)}
 		c.Pool.Transmit <- message
-		fmt.Printf("Message Received: %+v\n", message)
+		log.Printf("Message Received: %+v\n", message)
 	}
 }

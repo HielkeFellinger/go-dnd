@@ -14,9 +14,10 @@
 
         <div class="border" style="width: 375px">
             <h4> Chat </h4>
-            <div id="chat-content">
+            <div id="chat-content" style="min-height: calc(100% - 150px); max-height: calc(100% - 150px); overflow-y: scroll">
 
             </div>
+            <hr>
             <div class="form-group">
                 <label for="message">Message</label>
                 <input type="text" id="message" name="message">
@@ -25,8 +26,8 @@
             <br>
         </div>
 
-        <div class="col border" style="min-width: 1000px">
-            <div id="char-content" class=>
+        <div class="col border" style="min-width: 900px">
+            <div id="char-content" class="">
                 <h4> Characters </h4>
             </div>
             <hr>
@@ -35,8 +36,11 @@
             </div>
         </div>
 
-        <div class="border" style="width: 50px">
-            <h4> I </h4>
+        <div class="border" style="width: 325px">
+            <h4> Events </h4>
+            <div id="event-content" class="">
+
+            </div>
         </div>
     </div>
 </div>
@@ -47,24 +51,38 @@
     console.log("connecting to campaign: '{{.campaign.Title}}'")
 
     let socket = new WebSocket("ws://" + document.location.host + "/campaign/session/{{.campaign.ID}}/ws");
+    let currentUser = "{{.user.Name}}"
+    var messages = []
 
     if (window["WebSocket"]) {
         console.log("WS support");
 
         // On Open & Close
         socket.onopen = function (evt) {
-            document.getElementById("chat-content").innerHTML = "Connected to Websocket: true";
+            console.log("Connected to Websocket: true");
         }
         socket.onclose = function (evt) {
-            document.getElementById("chat-content").innerHTML = "Connected to Websocket: false";
+            console.log("Connected to Websocket: false");
         }
 
         // On message
         socket.onmessage = function (evt) {
             console.log(evt)
 
+            // Get Payload
+            const payLoad = JSON.parse(evt.data);
+
             // Parse events
-            document.getElementById("chat-content").innerHTML = document.getElementById("chat-content").innerHTML + evt.data;
+
+            // Parse chat messages
+            if (payLoad.type >= 800 && payLoad.type < 900) {
+                handleChatEvents(payLoad)
+                return
+            }
+
+
+
+            document.getElementById("event-content").innerHTML += evt.data;
         }
     } else {
         alert("No WS support")
@@ -73,8 +91,26 @@
     let sendMessage = () => {
         let msg = '' + document.getElementById("message").value
         document.getElementById("message").value = ''
-        console.log("Sending msg: ", msg)
+        console.log("Sending Chat message to server: ", msg)
         socket.send(msg)
+    }
+
+    let handleChatEvents = (data) => {
+        let chatMessage = '<div style="min-width: 300px; max-width: 300px; padding-left: 0.5em; padding-right: 0.5em; padding-top: 0.5em;';
+        if (data.source === currentUser) {
+            chatMessage += 'float: right;"><div style="padding: 0.5em; background-color: rgba(255, 99, 71, 0.5); ">'
+        } else if (data.source === "server") {
+            chatMessage += 'float: left;"><div style="padding: 0.5em; background-color: rgba(255, 165, 0, 0.5);">'
+        } else {
+            chatMessage += 'float: left;"><div style="padding: 0.5em; background-color: rgba(72, 80, 255, 0.5);">'
+        }
+        chatMessage += '<p style="margin: 0">' + data.source + ' @ ' + data.dateTime + '</p>'
+        chatMessage += '<p style="margin: 0">' + data.body + '</p>'
+        chatMessage += '</div>'
+
+        chatMessage += '</div>'
+
+        document.getElementById("chat-content").innerHTML += chatMessage;
     }
 
 </script>

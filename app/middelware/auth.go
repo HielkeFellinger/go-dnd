@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/hielkefellinger/go-dnd/app/models"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -44,7 +43,6 @@ func RequireAuth(c *gin.Context) {
 
 func OptionalAuth(c *gin.Context) {
 	user, err := retrieveUserFromCookie(c)
-	log.Println(user.ID)
 	if err == nil && user.ID != 0 {
 		c.Set("user", user)
 	}

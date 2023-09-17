@@ -41,7 +41,7 @@ func (c *campaignSessionsContainer) Run() {
 				log.Printf("Adding new Campaign Pool `%d` total count : %d", pool.Id, len(c.Pools))
 			}
 			break
-		case pool := <-c.Register:
+		case pool := <-c.Unregister:
 			delete(c.Pools, pool)
 			log.Printf("Removing Campaign Pool `%d` total count : %d", pool.Id, len(c.Pools))
 			break

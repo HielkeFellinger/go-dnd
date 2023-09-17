@@ -1,17 +1,23 @@
 package session
 
+type event int
+
 const (
-	MSG_TYPE_GAME_CLOSE int = 0
-	MSG_TYPE_GAME_START int = 1
+	TypeGameClose event = 0
+	TypeGameStart event = 1
 
-	MSG_TYPE_USER_JOIN int = 400
+	TypeUserJoin event = 400
 
-	MSG_TYPE_CHAT_BROADCAST int = 800
+	TypeChatBroadcast event = 800
+	TypeChatServerMsg event = 801
+	TypeChatCommand   event = 802
+	TypeChatWhisper   event = 802
 )
 
 type message struct {
 	Source       string   `json:"source"`
 	Destinations []string `json:"-"`
-	Type         int      `json:"type"`
+	Type         event    `json:"type"`
 	Body         string   `json:"body"`
+	DateTime     string   `json:"dateTime"`
 }
