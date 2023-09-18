@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/hielkefellinger/go-dnd/app/models"
+	"github.com/hielkefellinger/go-dnd/app/session"
 	"net/http"
 )
 
@@ -25,6 +26,13 @@ func CampaignSelectPage(c *gin.Context) {
 		templateMap[errMessage], templateMap[errTitle] = err.Error(), "Error"
 		c.HTML(http.StatusUnauthorized, "campaignSelect.html", templateMap)
 	}
+
+	// Test if active
+	for key, campaign := range userCampaigns {
+		userCampaigns[key].Active = session.IsCampaignRunning(campaign.ID)
+		userCampaigns[key].UserIsLead = campaign.LeadID == rawUser.(models.User).ID
+	}
+
 	templateMap["userCampaigns"] = userCampaigns
 
 	c.HTML(http.StatusOK, "campaignSelect.html", templateMap)

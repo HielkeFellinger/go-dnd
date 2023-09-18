@@ -28,6 +28,13 @@ func (c *campaignClient) Read() {
 
 		log.Println(string(p))
 
+		// Do some other actions based on client input
+
+		// Check the rights handle lead actions
+		if c.Lead {
+
+		}
+
 		message := message{Source: c.Id, Type: TypeChatBroadcast, Body: string(p)}
 		c.Pool.Transmit <- message
 		log.Printf("Message Received: %+v\n", message)

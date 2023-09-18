@@ -76,3 +76,9 @@ func (c *campaignSessionsContainer) getCampaignPoolById(id uint) *campaignPool {
 func (c *campaignSessionsContainer) IsCampaignRunning(id uint) bool {
 	return c.getCampaignPoolById(id) != nil
 }
+
+// Public functions
+
+func IsCampaignRunning(id uint) bool {
+	return runningCampaignSessionsContainer.IsCampaignRunning(id)
+}

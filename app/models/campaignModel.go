@@ -10,6 +10,8 @@ import (
 type Campaign struct {
 	gorm.Model
 	Private       bool
+	Active        bool   `gorm:"-"`
+	UserIsLead    bool   `gorm:"-"`
 	Title         string `form:"title"`
 	Description   string `form:"description"`
 	Password      string `form:"password"`
