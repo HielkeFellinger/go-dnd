@@ -8,6 +8,12 @@ const (
 
 	TypeUserJoin event = 400
 
+	TypeLoadCharacters  event = 500
+	TypeAddCharacter    event = 501
+	TypeRemoveCharacter event = 502
+
+	TypeLoadMap event = 600
+
 	TypeChatBroadcast event = 800
 	TypeChatServerMsg event = 801
 	TypeChatCommand   event = 802

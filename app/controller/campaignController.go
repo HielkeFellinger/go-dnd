@@ -102,14 +102,21 @@ func CampaignSessionPage(c *gin.Context) {
 		templateMap[errMessage], templateMap[errTitle] = "Failed authenticate user", "Error"
 		c.HTML(http.StatusUnauthorized, "campaignSelect.html", templateMap)
 	}
+	user := rawUser.(models.User)
+
 	rawCampaign, exists := c.Get("campaign")
 	if !exists {
 		templateMap[errMessage], templateMap[errTitle] = "Failed find campaign", "Error"
 		c.HTML(http.StatusNotFound, "campaignSelect.html", templateMap)
 	}
+	campaign := rawCampaign.(models.Campaign)
 
-	templateMap["user"] = rawUser.(models.User)
-	templateMap["campaign"] = rawCampaign.(models.Campaign)
+	if user.ID == campaign.LeadID {
+		campaign.UserIsLead = true
+	}
+
+	templateMap["user"] = user
+	templateMap["campaign"] = campaign
 	templateMap["title"] = fmt.Sprintf("GO-DND Campaign %s", rawCampaign.(models.Campaign).Title)
 
 	// Check if campaign is active (A (ws) Pool must be created by the Lead)

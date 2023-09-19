@@ -2,6 +2,7 @@ package session
 
 import (
 	"github.com/gorilla/websocket"
+	"html"
 	"log"
 )
 
@@ -20,13 +21,16 @@ func (c *campaignClient) Read() {
 	}()
 
 	for {
+		// user input unsafe!
 		_, p, err := c.Conn.ReadMessage()
 		if err != nil {
 			log.Println(err)
 			return
 		}
 
-		log.Println(string(p))
+		pSafe := html.EscapeString(string(p))
+
+		log.Println(pSafe)
 
 		// Do some other actions based on client input
 
@@ -35,7 +39,7 @@ func (c *campaignClient) Read() {
 
 		}
 
-		message := message{Source: c.Id, Type: TypeChatBroadcast, Body: string(p)}
+		message := message{Source: c.Id, Type: TypeChatBroadcast, Body: pSafe}
 		c.Pool.Transmit <- message
 		log.Printf("Message Received: %+v\n", message)
 	}

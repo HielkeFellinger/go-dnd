@@ -4,7 +4,7 @@
 {{ template "header.html" .}}
 
 <div class="content">
-    <div class="row g-4" style="min-width: 1400px; min-height: calc(100vh - 82px)">
+    <div class="row g-4 campaign-screen">
         <!--If there's an error, display the error-->
         {{ if .ErrorTitle}}
         <p class="bg-danger">
@@ -12,9 +12,9 @@
         </p>
         {{end}}
 
-        <div class="border" style="width: 375px">
+        <div class="border chat-screen" style="">
             <h4> Chat </h4>
-            <div id="chat-content" style="min-height: calc(100% - 150px); max-height: calc(100% - 150px); overflow-y: scroll">
+            <div id="chat-content" class="chat-content">
 
             </div>
             <hr>
@@ -32,7 +32,35 @@
             </div>
             <hr>
             <div id="campaign-content">
-                <h4> Campaign Content </h4>
+                <ul id="campaign-tabs" class="nav nav-tabs">
+                    {{ if .campaign.UserIsLead }}
+                    <li class="nav-item">
+                        <button id="manageMapsLink" class="nav-link" onclick="openTab('manageMaps')" style="color: goldenrod">Edit Maps</button>
+                    </li>
+                    <li class="nav-item">
+                        <button id="manageCharactersLink" class="nav-link" onclick="openTab('manageCharacters')" style="color: goldenrod">Edit Characters</button>
+                    </li>
+                    {{ end }}
+                    <li class="nav-item">
+                        <button id="currentLink" class="nav-link active" onclick="openTab('current')">Current</button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                {{ if .campaign.UserIsLead }}
+                <div id="manageMaps" class="tab-content" style="display: none">
+                    <h3>CRUD Map!</h3>
+                    <p>Map stuff</p>
+                </div>
+                <div id="manageCharacters" class="tab-content" style="display: none">
+                    <h3>Add Character!</h3>
+                    <p>Character</p>
+                </div>
+                {{end}}
+
+                <div id="current" class="tab-content">
+                    <h3> No active event </h3>
+                </div>
             </div>
         </div>
 
@@ -52,7 +80,6 @@
 
     let socket = new WebSocket("ws://" + document.location.host + "/campaign/session/{{.campaign.ID}}/ws");
     let currentUser = "{{.user.Name}}"
-    var messages = []
 
     if (window["WebSocket"]) {
         console.log("WS support");
@@ -80,12 +107,17 @@
                 return
             }
 
-
-
             document.getElementById("event-content").innerHTML += evt.data;
         }
     } else {
         alert("No WS support")
+    }
+
+    let updateCharacterList = () => {
+        let msg = '' + document.getElementById("message").value
+        document.getElementById("message").value = ''
+        console.log("Sending Chat message to server: ", msg)
+        socket.send(msg)
     }
 
     let sendMessage = () => {
@@ -95,22 +127,43 @@
         socket.send(msg)
     }
 
+    let handleCharacterEvents = (data) => {
+
+    }
+
     let handleChatEvents = (data) => {
-        let chatMessage = '<div style="min-width: 300px; max-width: 300px; padding-left: 0.5em; padding-right: 0.5em; padding-top: 0.5em;';
+        let chatMessage = '';
         if (data.source === currentUser) {
-            chatMessage += 'float: right;"><div style="padding: 0.5em; background-color: rgba(255, 99, 71, 0.5); ">'
+            chatMessage += '<div class="chat-box chat-box-me">'
         } else if (data.source === "server") {
-            chatMessage += 'float: left;"><div style="padding: 0.5em; background-color: rgba(255, 165, 0, 0.5);">'
+            chatMessage += '<div class="chat-box chat-box-server">'
         } else {
-            chatMessage += 'float: left;"><div style="padding: 0.5em; background-color: rgba(72, 80, 255, 0.5);">'
+            chatMessage += '<div class="chat-box chat-box-other">'
         }
         chatMessage += '<p style="margin: 0">' + data.source + ' @ ' + data.dateTime + '</p>'
         chatMessage += '<p style="margin: 0">' + data.body + '</p>'
         chatMessage += '</div>'
 
-        chatMessage += '</div>'
-
         document.getElementById("chat-content").innerHTML += chatMessage;
+    }
+
+    let openTab = (targetId) => {
+        // Declare all variables
+        let i;
+
+        // Hide all
+        let tabContent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabContent.length; i++) {
+            tabContent[i].style.display = "none";
+        }
+        let navLinks = document.getElementsByClassName("nav-link");
+        for (i = 0; i < navLinks.length; i++) {
+            navLinks[i].className = navLinks[i].className.replace(" active", "");
+        }
+
+        // Show the current tab, and add an "active" class to the button that opened the tab
+        document.getElementById(targetId).style.display = "block";
+        document.getElementById(targetId + 'Link').className += " active";
     }
 
 </script>

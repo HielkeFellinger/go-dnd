@@ -1,0 +1,47 @@
+
+
+/* Chat */
+
+.chat-screen .chat-content {
+    width: 375px;
+}
+
+.chat-screen .chat-content {
+    min-height: calc(100% - 150px);
+    max-height: calc(100% - 150px);
+    overflow-y: scroll
+}
+
+.chat-screen .chat-content .chat-box {
+    max-width: 350px;
+    word-break: break-all;
+    white-space: normal;
+    float: none;
+    padding: 0.5em;
+    margin-top: 0.5em;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+}
+
+.chat-screen .chat-content .chat-box.chat-box-me {
+    float: right;
+    background-color: rgba(255, 99, 71, 0.5);
+}
+
+.chat-screen .chat-content .chat-box.chat-box-server {
+    float: left;
+    background-color: rgba(255, 165, 0, 0.5);
+}
+
+.chat-screen .chat-content .chat-box.chat-box-other {
+    float: left;
+    background-color: rgba(72, 80, 255, 0.5);
+}
+
+/* Campaign Screens */
+.campaign-screen {
+    min-width: 1400px;
+    min-height: calc(100vh - 82px)
+}
+
+/* Campaign Tabs */
