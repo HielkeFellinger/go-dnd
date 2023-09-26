@@ -1,8 +1,12 @@
 package session
 
 import (
+	"bytes"
 	"fmt"
+	"github.com/hielkefellinger/go-dnd/app/models"
+	"html/template"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -64,6 +68,24 @@ func (pool *campaignPool) Run() {
 			}
 
 			// Check Commands like whisper or dice
+
+			// HTML over Websocket Test!
+			if strings.Contains(message.Body, "char") {
+				message.Type = TypeLoadCharacters
+				chars := []models.Character{
+					{Name: "Kaas - 1"}, {Name: "Kaas - 2"},
+				}
+				data := make(map[string]any)
+				data["chars"] = chars
+
+				var buf bytes.Buffer
+				tmpl := template.Must(template.ParseFiles("web/templates/test.html"))
+				err := tmpl.ExecuteTemplate(&buf, "chars", data)
+				if err != nil {
+					log.Printf("Error parsing test.html `%s`", err.Error())
+				}
+				message.Body = string(buf.Bytes())
+			}
 
 			// Pass-trough
 

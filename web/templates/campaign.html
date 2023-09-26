@@ -101,7 +101,13 @@
 
             // Parse events
 
-            // Parse chat messages
+            // Parse Character Events
+            if (payLoad.type >= 500 && payLoad.type < 600) {
+                handleCharacterEvents(payLoad)
+                return
+            }
+
+            // Parse Chat-messages
             if (payLoad.type >= 800 && payLoad.type < 900) {
                 handleChatEvents(payLoad)
                 return
@@ -128,7 +134,7 @@
     }
 
     let handleCharacterEvents = (data) => {
-
+        document.getElementById("char-content").innerHTML += data.body;
     }
 
     let handleChatEvents = (data) => {
