@@ -1,7 +1,14 @@
 package ecs
 
-type Entity interface {
+type BaseEntity struct {
+	Id          string
+	Name        string
+	Description string
+	Components  []Component
 }
 
-type BasicEntity struct {
-}
+// Inventory
+
+// Stats
+
+// Player

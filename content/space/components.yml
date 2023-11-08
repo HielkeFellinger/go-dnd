@@ -1,0 +1,10 @@
+# TYPES
+types:
+  - id: TWeaponComponent
+
+components:
+  - type: TWeaponComponent
+    properties:
+      - name
+      - description
+      -

@@ -39,7 +39,7 @@ func (pool *campaignPool) Run() {
 
 			pool.SendMessage(message{
 				Source: "Server", Type: TypeUserJoin,
-				Body: fmt.Sprintf("User '%s' Joins the game", client.Id),
+				Body: fmt.Sprintf("User '%s' Joins the content", client.Id),
 			})
 
 			break
@@ -49,7 +49,7 @@ func (pool *campaignPool) Run() {
 				// Send closing message
 				pool.SendMessage(message{Source: "Server", Type: TypeGameClose, Body: "Closing Game!"})
 
-				// Close game; and remove from session container @todo Save state?
+				// Close content; and remove from session container @todo Save state?
 				for client := range pool.Clients {
 					delete(pool.Clients, client)
 				}
