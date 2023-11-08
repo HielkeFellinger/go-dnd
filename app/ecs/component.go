@@ -21,6 +21,10 @@ type BaseComponent struct {
 	Id uuid.UUID
 }
 
+// 		Slots (container)
+
+// 		Stats? Health.. Exp.. Lvl
+
 // Relation Component
 
 type HasRelationComponent struct {
@@ -29,10 +33,4 @@ type HasRelationComponent struct {
 	Entity BaseEntity
 }
 
-type StatusComponent struct {
-	BaseComponent
-	AllowNegative bool
-	CurrentValue  int
-	MaxValue      int
-	MinValue      int
-}
+// 		Filter, Need (template)
