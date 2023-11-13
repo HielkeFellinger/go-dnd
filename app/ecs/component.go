@@ -11,6 +11,7 @@ const (
 	ItemComponentType     uint64 = 1 << 5
 	ValueComponentType    uint64 = 1 << 6
 	WeightComponentType   uint64 = 1 << 7
+	SlotsComponentType    uint64 = 1 << 8
 )
 
 type Component interface {
@@ -21,7 +22,16 @@ type BaseComponent struct {
 	Id uuid.UUID
 }
 
-// 		Slots (container)
+type LevelComponent struct {
+	BaseComponent
+	Level uint
+}
+
+type WeaponComponent struct {
+}
+
+type SkillComponent struct {
+}
 
 // 		Stats? Health.. Exp.. Lvl
 
@@ -29,8 +39,18 @@ type BaseComponent struct {
 
 type HasRelationComponent struct {
 	BaseComponent
-	Count  int
+	Count  uint
 	Entity BaseEntity
 }
 
-// 		Filter, Need (template)
+type RequirementComponent struct {
+	BaseComponent
+	Count  uint
+	Entity BaseEntity
+}
+
+type FilterComponent struct {
+	BaseComponent
+	// Block vs Allow boolean?
+	// ComponentTypeFilter uint (mask)
+}
