@@ -9,9 +9,13 @@ const (
 	DamageComponentType   uint64 = 1 << 3
 	RestoreComponentType  uint64 = 1 << 4
 	ItemComponentType     uint64 = 1 << 5
-	ValueComponentType    uint64 = 1 << 6
+	AmountComponentType   uint64 = 1 << 6
 	WeightComponentType   uint64 = 1 << 7
 	SlotsComponentType    uint64 = 1 << 8
+	LevelComponentType    uint64 = 1 << 9
+	TypeComponentType     uint64 = 1 << 10
+	ValutaComponentType   uint64 = 1 << 11
+	ResourceComponentType uint64 = 1 << 12
 )
 
 type Component interface {
@@ -22,18 +26,23 @@ type BaseComponent struct {
 	Id uuid.UUID
 }
 
-type LevelComponent struct {
+type TransportComponent struct {
 	BaseComponent
-	Level uint
+	Name        string
+	Description string
 }
 
-type WeaponComponent struct {
+type TurnDistanceComponent struct {
+	BaseComponent
+	Distance uint
 }
 
-type SkillComponent struct {
+type VisibilityComponent struct {
+	BaseComponent
+	Hidden bool
 }
 
-// 		Stats? Health.. Exp.. Lvl
+// 		Stats? Player (Enemy/ Faction), Health.. Exp.. Lvl
 
 // Relation Component
 
@@ -49,8 +58,15 @@ type RequirementComponent struct {
 	Entity BaseEntity
 }
 
+type FilterMode uint64
+
+const (
+	AllowFilter FilterMode = 1 << 0
+	BlockFilter FilterMode = 1 << 1
+)
+
 type FilterComponent struct {
 	BaseComponent
-	// Block vs Allow boolean?
-	// ComponentTypeFilter uint (mask)
+	Mode  FilterMode
+	Value Component
 }

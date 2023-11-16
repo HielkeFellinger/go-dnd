@@ -5,22 +5,22 @@ import (
 	"github.com/hielkefellinger/go-dnd/app/ecs"
 )
 
-type WeightComponent struct {
+type AmountComponent struct {
 	ecs.BaseComponent
-	Amount string
+	Amount int
 }
 
-func NewWeightComponent() AmountComponent {
+func NewValueComponent() AmountComponent {
 	return AmountComponent{
 		BaseComponent: ecs.BaseComponent{Id: uuid.New()},
 	}
 }
 
-func (c *WeightComponent) WithAmount(amount string) *WeightComponent {
+func (c *AmountComponent) WithAmount(amount int) *AmountComponent {
 	c.Amount = amount
 	return c
 }
 
-func (c *WeightComponent) ComponentType() uint64 {
-	return ecs.WeightComponentType
+func (c *AmountComponent) ComponentType() uint64 {
+	return ecs.AmountComponentType
 }
