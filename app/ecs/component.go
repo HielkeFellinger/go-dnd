@@ -1,6 +1,8 @@
 package ecs
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+)
 
 const (
 	PositionComponentType     uint64 = 1 << 0
@@ -31,6 +33,18 @@ type BaseComponent struct {
 	Id uuid.UUID
 }
 
+type FactionComponent struct {
+	BaseComponent
+	Name        string
+	Description string
+}
+
+func NewFactionComponent() FactionComponent {
+	return FactionComponent{
+		BaseComponent: BaseComponent{Id: uuid.New()},
+	}
+}
+
 // 		Stats? Player (Enemy/ Faction), Exp..
 
 // Relation Component
@@ -50,8 +64,10 @@ type RequirementComponent struct {
 type FilterMode uint64
 
 const (
-	AllowFilter FilterMode = 1 << 0
-	BlockFilter FilterMode = 1 << 1
+	AllowFilterMode      FilterMode = 1 << 0
+	BlockFilterMode      FilterMode = 1 << 1
+	LesserThanFilterMode FilterMode = 1 << 1
+	MoreThanFilterMode   FilterMode = 1 << 1
 )
 
 type FilterComponent struct {
