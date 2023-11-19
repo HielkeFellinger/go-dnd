@@ -23,6 +23,7 @@ const (
 	VisibilityComponentType   uint64 = 1 << 15
 	HealthComponentType       uint64 = 1 << 16
 	StatComponentType         uint64 = 1 << 17
+	FactionComponentType      uint64 = 1 << 18
 )
 
 type Component interface {
@@ -33,21 +34,15 @@ type BaseComponent struct {
 	Id uuid.UUID
 }
 
-type FactionComponent struct {
-	BaseComponent
-	Name        string
-	Description string
-}
-
-func NewFactionComponent() FactionComponent {
-	return FactionComponent{
-		BaseComponent: BaseComponent{Id: uuid.New()},
-	}
-}
-
 // 		Stats? Player (Enemy/ Faction), Exp..
 
 // Relation Component
+
+type ControlledByComponent struct {
+	BaseComponent
+	Controller string
+	Entity     BaseEntity
+}
 
 type HasRelationComponent struct {
 	BaseComponent
@@ -66,8 +61,8 @@ type FilterMode uint64
 const (
 	AllowFilterMode      FilterMode = 1 << 0
 	BlockFilterMode      FilterMode = 1 << 1
-	LesserThanFilterMode FilterMode = 1 << 1
-	MoreThanFilterMode   FilterMode = 1 << 1
+	LesserThanFilterMode FilterMode = 1 << 2
+	MoreThanFilterMode   FilterMode = 1 << 3
 )
 
 type FilterComponent struct {
