@@ -24,49 +24,38 @@ const (
 	HealthComponentType       uint64 = 1 << 16
 	StatComponentType         uint64 = 1 << 17
 	FactionComponentType      uint64 = 1 << 18
+	CharacterComponentType    uint64 = 1 << 19
+	MapComponentType          uint64 = 1 << 20
+
+	/* Relational ComponentTypes */
+
+	ControlsRelationComponentType uint64 = 1 << 40
+	HasRelationComponentType      uint64 = 1 << 41
+	RequiresRelationComponentType uint64 = 1 << 42
+	CreatesRelationComponentType  uint64 = 1 << 43
+	FilterRelationComponentType   uint64 = 1 << 44
 )
 
 type Component interface {
 	ComponentType() uint64
+	GetVersion() uint
 }
 
 type BaseComponent struct {
-	Id uuid.UUID
+	Version uint // Placeholder; take changes into account
+	Id      uuid.UUID
 }
 
-// 		Stats? Player (Enemy/ Faction), Exp..
-
-// Relation Component
-
-type ControlledByComponent struct {
-	BaseComponent
-	Controller string
-	Entity     BaseEntity
-}
-
-type HasRelationComponent struct {
-	BaseComponent
-	Count  uint
-	Entity BaseEntity
-}
-
-type RequirementComponent struct {
-	BaseComponent
-	Count  uint
-	Entity BaseEntity
+func (c *BaseComponent) GetVersion() uint {
+	return c.Version
 }
 
 type FilterMode uint64
 
 const (
-	AllowFilterMode      FilterMode = 1 << 0
-	BlockFilterMode      FilterMode = 1 << 1
-	LesserThanFilterMode FilterMode = 1 << 2
-	MoreThanFilterMode   FilterMode = 1 << 3
+	NoFilterMode         FilterMode = 1 << 0
+	AllowFilterMode      FilterMode = 1 << 1
+	BlockFilterMode      FilterMode = 1 << 2
+	LesserThanFilterMode FilterMode = 1 << 3
+	MoreThanFilterMode   FilterMode = 1 << 4
 )
-
-type FilterComponent struct {
-	BaseComponent
-	Mode  FilterMode
-	Value Component
-}

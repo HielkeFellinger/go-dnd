@@ -1,0 +1,39 @@
+version: 0.1
+type_translation:
+  PositionComponentType: 0
+  AreaComponentType: 1
+  RangeComponentType: 2
+  DamageComponentType: 3
+  RestoreComponentType: 4
+  ItemComponentType: 5
+  AmountComponentType: 6
+  WeightComponentType: 7
+  SlotsComponentType: 8
+  LevelComponentType: 9
+  TypeComponentType: 10
+  ValutaComponentType: 11
+  ResourceComponentType: 12
+  TransportComponentType: 13
+  TurnDistanceComponentType: 14
+  VisibilityComponentType: 15
+  HealthComponentType: 16
+  StatComponentType: 17
+  FactionComponentType: 18
+  CharacterComponentType: 19
+  MapComponentType: 20
+  # Relational ComponentTypes
+  ControlsRelationComponentType: 40
+  HasRelationComponentType: 41
+  RequiresRelationComponentType: 42
+  CreatesRelationComponentType: 43
+  FilterRelationComponentType: 44
+
+base_components:
+  - id:
+    name: Knife
+    components:
+      - type: DamageComponentType
+        amount: 1d4+1
+      - type: ItemComponentType
+        name: Knife
+        description: A Sharp Knife
