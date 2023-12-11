@@ -28,8 +28,8 @@ type_translation:
   CreatesRelationComponentType: 43
   FilterRelationComponentType: 44
 
-base_components:
-  - id:
+base_items:
+  - id: knife
     name: Knife
     components:
       - type: DamageComponentType
@@ -37,3 +37,22 @@ base_components:
       - type: ItemComponentType
         name: Knife
         description: A Sharp Knife
+
+base_characters:
+  - id: inventory
+    name: inventory
+    components:
+      - type: SlotsComponentType
+        count: 200
+      - type: HasRelationComponentType
+        count: 1
+        entity: knife
+  - id: player
+    name: piet
+    components:
+      - type: CharacterComponent
+        name: Piet
+        description: test
+      - type: HasRelationComponentType
+        count: 1
+        entity: inventory

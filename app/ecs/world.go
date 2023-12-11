@@ -4,4 +4,6 @@ type World interface {
 }
 
 type BaseWorld struct {
+	Systems  []System
+	Entities []Entity
 }
