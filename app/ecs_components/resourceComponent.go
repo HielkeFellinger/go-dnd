@@ -7,8 +7,8 @@ import (
 
 type ResourceComponent struct {
 	ecs.BaseComponent
-	Name        string
-	Description string
+	Name        string `yaml:"name"`
+	Description string `yaml:"description"`
 }
 
 func NewResourceComponent() ResourceComponent {

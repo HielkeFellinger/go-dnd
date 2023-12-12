@@ -7,7 +7,7 @@ import (
 
 type TurnDistanceComponent struct {
 	ecs.BaseComponent
-	Distance uint
+	Distance uint `yaml:"distance"`
 }
 
 func NewTurnDistanceComponent() TurnDistanceComponent {

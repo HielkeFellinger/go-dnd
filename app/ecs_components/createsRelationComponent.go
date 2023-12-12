@@ -7,7 +7,7 @@ import (
 
 type CreatesRelationComponent struct {
 	ecs.BaseComponent
-	Count  uint
+	Count  uint `yaml:"count"`
 	Entity ecs.BaseEntity
 }
 

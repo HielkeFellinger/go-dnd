@@ -1,58 +1,74 @@
 version: 0.1
 type_translation:
-  PositionComponentType: 0
-  AreaComponentType: 1
-  RangeComponentType: 2
-  DamageComponentType: 3
-  RestoreComponentType: 4
-  ItemComponentType: 5
-  AmountComponentType: 6
-  WeightComponentType: 7
-  SlotsComponentType: 8
-  LevelComponentType: 9
-  TypeComponentType: 10
-  ValutaComponentType: 11
-  ResourceComponentType: 12
-  TransportComponentType: 13
-  TurnDistanceComponentType: 14
-  VisibilityComponentType: 15
-  HealthComponentType: 16
-  StatComponentType: 17
-  FactionComponentType: 18
-  CharacterComponentType: 19
-  MapComponentType: 20
-  # Relational ComponentTypes
-  ControlsRelationComponentType: 40
-  HasRelationComponentType: 41
-  RequiresRelationComponentType: 42
-  CreatesRelationComponentType: 43
-  FilterRelationComponentType: 44
+  Position: 0
+  Area: 1
+  Range: 2
+  Damage: 3
+  Restore: 4
+  Item: 5
+  Amount: 6
+  Weight: 7
+  Slots: 8
+  Level: 9
+  Type: 10
+  Valuta: 11
+  Resource: 12
+  Transport: 13
+  TurnDistance: 14
+  Visibility: 15
+  Health: 16
+  Stat: 17
+  Faction: 18
+  Character: 19
+  Map: 20
+  # Relational Types
+  ControlsRelation: 40
+  HasRelation: 41
+  RequiresRelation: 42
+  CreatesRelation: 43
+  FilterRelation: 44
 
 base_items:
   - id: knife
     name: Knife
     components:
-      - type: DamageComponentType
-        amount: 1d4+1
-      - type: ItemComponentType
-        name: Knife
-        description: A Sharp Knife
+      - type: Damage
+        params:
+         amount: 1d4+1
+      - type: Item
+        params:
+          name: Knife
+          description: A Sharp Knife
+
+base_maps:
+  - id: map
+    name: plane_0
+    components:
+      - type: Map
+      - type: Area
+        params:
+          length: 5
+          width: 5
 
 base_characters:
   - id: inventory
     name: inventory
     components:
-      - type: SlotsComponentType
-        count: 200
-      - type: HasRelationComponentType
-        count: 1
-        entity: knife
+      - type: Slots
+        params:
+          count: 200
+      - type: HasRelation
+        params:
+          count: 1
+          entity: knife
   - id: player
     name: piet
     components:
-      - type: CharacterComponent
-        name: Piet
-        description: test
-      - type: HasRelationComponentType
-        count: 1
-        entity: inventory
+      - type: Character
+        params:
+          name: Piet
+          description: test
+      - type: HasRelation
+        params:
+          count: 1
+          entity: inventory

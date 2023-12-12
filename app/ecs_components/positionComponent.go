@@ -7,8 +7,8 @@ import (
 
 type PositionComponent struct {
 	ecs.BaseComponent
-	X int // Column
-	Y int // Row
+	X int `yaml:"x"` // Column
+	Y int `yaml:"y"` // Row
 }
 
 func NewPositionComponent() PositionComponent {

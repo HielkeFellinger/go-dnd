@@ -7,8 +7,8 @@ import (
 
 type CharacterComponent struct {
 	ecs.BaseComponent
-	Name        string
-	Description string
+	Name        string `yaml:"name"`
+	Description string `yaml:"description"`
 }
 
 func NewCharacterComponent() CharacterComponent {

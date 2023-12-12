@@ -7,8 +7,8 @@ import (
 
 type RangeComponent struct {
 	ecs.BaseComponent
-	Min int
-	Max int
+	Min int `yaml:"min"`
+	Max int `yaml:"max"`
 }
 
 func NewRangeComponent() RangeComponent {

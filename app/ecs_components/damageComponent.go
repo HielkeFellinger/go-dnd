@@ -7,7 +7,7 @@ import (
 
 type DamageComponent struct {
 	ecs.BaseComponent
-	Amount string
+	Amount string `yaml:"amount"`
 }
 
 func NewDamageComponent() DamageComponent {

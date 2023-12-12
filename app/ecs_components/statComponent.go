@@ -7,8 +7,8 @@ import (
 
 type StatComponent struct {
 	ecs.BaseComponent
-	Name  string
-	Value uint
+	Name  string `yaml:"name"`
+	Value uint   `yaml:"value"`
 }
 
 func NewStatComponent() StatComponent {

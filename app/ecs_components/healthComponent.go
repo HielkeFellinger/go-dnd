@@ -7,9 +7,9 @@ import (
 
 type HealthComponent struct {
 	ecs.BaseComponent
-	Damage    uint
-	Temporary uint
-	Maximum   uint
+	Damage    uint `yaml:"damage"`
+	Temporary uint `yaml:"temporary"`
+	Maximum   uint `yaml:"maximum"`
 }
 
 func NewHealthComponent() HealthComponent {

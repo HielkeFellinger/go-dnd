@@ -7,8 +7,8 @@ import (
 
 type AreaComponent struct {
 	ecs.BaseComponent
-	Length int
-	Width  int
+	Length int `yaml:"length"`
+	Width  int `yaml:"width"`
 }
 
 func NewAreaComponent() AreaComponent {

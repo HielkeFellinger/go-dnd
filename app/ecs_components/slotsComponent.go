@@ -7,7 +7,7 @@ import (
 
 type SlotsComponent struct {
 	ecs.BaseComponent
-	Count uint
+	Count uint `yaml:"count"`
 }
 
 func NewSlotsComponent() SlotsComponent {

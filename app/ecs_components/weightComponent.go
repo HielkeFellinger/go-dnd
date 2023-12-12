@@ -7,7 +7,7 @@ import (
 
 type WeightComponent struct {
 	ecs.BaseComponent
-	Amount string
+	Amount string `yaml:"amount"`
 }
 
 func NewWeightComponent() AmountComponent {

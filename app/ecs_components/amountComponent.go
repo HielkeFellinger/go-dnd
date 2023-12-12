@@ -7,7 +7,7 @@ import (
 
 type AmountComponent struct {
 	ecs.BaseComponent
-	Amount int
+	Amount int `yaml:"amount"`
 }
 
 func NewValueComponent() AmountComponent {

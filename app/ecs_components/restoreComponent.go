@@ -7,7 +7,7 @@ import (
 
 type RestoreComponent struct {
 	ecs.BaseComponent
-	Amount string
+	Amount string `yaml:"amount"`
 }
 
 func NewRestoreComponent() RestoreComponent {

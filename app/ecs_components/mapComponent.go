@@ -7,7 +7,7 @@ import (
 
 type MapComponent struct {
 	ecs.BaseComponent
-	Active bool
+	Active bool `yaml:"active"`
 }
 
 func NewMapComponent() MapComponent {

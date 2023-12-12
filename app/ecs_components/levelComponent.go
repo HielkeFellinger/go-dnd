@@ -7,7 +7,7 @@ import (
 
 type LevelComponent struct {
 	ecs.BaseComponent
-	Level uint
+	Level uint `yaml:"level"`
 }
 
 func NewLevelComponent() LevelComponent {

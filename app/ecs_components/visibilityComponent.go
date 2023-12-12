@@ -7,7 +7,7 @@ import (
 
 type VisibilityComponent struct {
 	ecs.BaseComponent
-	Hidden bool
+	Hidden bool `yaml:"hidden"`
 }
 
 func NewVisibilityComponent() VisibilityComponent {
