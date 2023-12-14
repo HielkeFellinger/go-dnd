@@ -47,11 +47,13 @@ func parseRawEntity(rawEntities []RawEntity,
 
 	entities := make([]ecs.Entity, len(rawEntities))
 
-	for rawEntity := range rawEntities {
-
+	for index, rawEntity := range rawEntities {
+		entity := ecs.NewEntity()
 		// Test if ID is unique
 		// Test if
 
+		idToUuidDict[rawEntity.Id] = entity.Id
+		entities[index] = &entity
 	}
 
 	return nil, entities
