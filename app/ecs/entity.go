@@ -1,9 +1,12 @@
 package ecs
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+)
 
 type Entity interface {
 	AddComponent(c Component)
+	LoadFromRawEntity(raw RawEntity) error
 }
 
 type BaseEntity struct {
@@ -19,12 +22,17 @@ func NewEntity() BaseEntity {
 	}
 }
 
-func (e *BaseEntity) widthName(name string) *BaseEntity {
+func (e *BaseEntity) LoadFromRawEntity(raw RawEntity) error {
+	e.WithName(raw.Name).WithDescription(raw.Description)
+	return nil
+}
+
+func (e *BaseEntity) WithName(name string) *BaseEntity {
 	e.Name = name
 	return e
 }
 
-func (e *BaseEntity) widthDescription(description string) *BaseEntity {
+func (e *BaseEntity) WithDescription(description string) *BaseEntity {
 	e.Description = description
 	return e
 }

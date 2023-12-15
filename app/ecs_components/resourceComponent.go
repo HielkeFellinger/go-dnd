@@ -11,20 +11,24 @@ type ResourceComponent struct {
 	Description string `yaml:"description"`
 }
 
-func NewResourceComponent() ResourceComponent {
-	return ResourceComponent{
+func NewResourceComponent() ecs.Component {
+	return &ResourceComponent{
 		BaseComponent: ecs.BaseComponent{Id: uuid.New()},
 	}
 }
 
-func (c *ResourceComponent) WidthName(name string) *ResourceComponent {
-	c.Name = name
-	return c
-}
+func (c *ResourceComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
+	loadedValues := 0
+	if value, ok := raw.Params["name"]; ok {
+		c.Name = value
+		loadedValues++
+	}
+	if value, ok := raw.Params["description"]; ok {
+		c.Description = value
+		loadedValues++
+	}
 
-func (c *ResourceComponent) WidthDescription(description string) *ResourceComponent {
-	c.Description = description
-	return c
+	return c.CheckValuesParsedFromRaw(loadedValues, raw)
 }
 
 func (c *ResourceComponent) ComponentType() uint64 {

@@ -3,6 +3,7 @@ package ecs_components
 import (
 	"github.com/google/uuid"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
+	"strconv"
 )
 
 type HealthComponent struct {
@@ -12,25 +13,52 @@ type HealthComponent struct {
 	Maximum   uint `yaml:"maximum"`
 }
 
-func NewHealthComponent() HealthComponent {
-	return HealthComponent{
+func NewHealthComponent() ecs.Component {
+	return &HealthComponent{
 		BaseComponent: ecs.BaseComponent{Id: uuid.New()},
 	}
 }
 
-func (c *HealthComponent) WidthDamage(damage uint) *HealthComponent {
-	c.Damage = damage
-	return c
+func (c *HealthComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
+	loadedValues := 0
+	if value, ok := raw.Params["damage"]; ok {
+		if err := c.DamageFromString(value); err != nil {
+			return err
+		}
+		loadedValues++
+	}
+	if value, ok := raw.Params["temporary"]; ok {
+		if err := c.TemporaryFromString(value); err != nil {
+			return err
+		}
+		loadedValues++
+	}
+	if value, ok := raw.Params["maximum"]; ok {
+		if err := c.MaximumFromString(value); err != nil {
+			return err
+		}
+		loadedValues++
+	}
+
+	return c.CheckValuesParsedFromRaw(loadedValues, raw)
 }
 
-func (c *HealthComponent) WidthTemporary(temporary uint) *HealthComponent {
-	c.Temporary = temporary
-	return c
+func (c *HealthComponent) DamageFromString(damage string) error {
+	n, err := strconv.Atoi(damage)
+	c.Damage = uint(n)
+	return err
 }
 
-func (c *HealthComponent) WidthMaximum(maximum uint) *HealthComponent {
-	c.Maximum = maximum
-	return c
+func (c *HealthComponent) TemporaryFromString(temporary string) error {
+	n, err := strconv.Atoi(temporary)
+	c.Temporary = uint(n)
+	return err
+}
+
+func (c *HealthComponent) MaximumFromString(maximum string) error {
+	n, err := strconv.Atoi(maximum)
+	c.Maximum = uint(n)
+	return err
 }
 
 func (c *HealthComponent) ComponentType() uint64 {

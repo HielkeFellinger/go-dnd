@@ -1,3 +1,123 @@
 package ecs_components
 
-//
+import "github.com/hielkefellinger/go-dnd/app/ecs"
+
+func MapIntToTypeV0(rawId int) uint64 {
+	switch rawId {
+	case 0:
+		return ecs.PositionComponentType
+	case 1:
+		return ecs.AreaComponentType
+	case 2:
+		return ecs.RangeComponentType
+	case 3:
+		return ecs.DamageComponentType
+	case 4:
+		return ecs.RestoreComponentType
+	case 5:
+		return ecs.ItemComponentType
+	case 6:
+		return ecs.AmountComponentType
+	case 7:
+		return ecs.WeightComponentType
+	case 8:
+		return ecs.SlotsComponentType
+	case 9:
+		return ecs.LevelComponentType
+	case 10:
+		return ecs.TypeComponentType
+	case 11:
+		return ecs.ValutaComponentType
+	case 12:
+		return ecs.ResourceComponentType
+	case 13:
+		return ecs.TransportComponentType
+	case 14:
+		return ecs.TurnDistanceComponentType
+	case 15:
+		return ecs.VisibilityComponentType
+	case 16:
+		return ecs.HealthComponentType
+	case 17:
+		return ecs.StatComponentType
+	case 18:
+		return ecs.FactionComponentType
+	case 19:
+		return ecs.CharacterComponentType
+	case 20:
+		return ecs.MapComponentType
+
+	case 40:
+		return ecs.ControlsRelationComponentType
+	case 41:
+		return ecs.HasRelationComponentType
+	case 42:
+		return ecs.RequiresRelationComponentType
+	case 43:
+		return ecs.CreatesRelationComponentType
+	case 44:
+		return ecs.FilterRelationComponentType
+	default:
+		return ecs.UnknownComponentType
+	}
+}
+
+func MapTypeToConstructorFunction(componentType uint64) func() ecs.Component {
+	switch componentType {
+	case ecs.PositionComponentType:
+		return NewPositionComponent
+	case ecs.AreaComponentType:
+		return NewAreaComponent
+	case ecs.RangeComponentType:
+		return NewRangeComponent
+	case ecs.DamageComponentType:
+		return NewDamageComponent
+	case ecs.RestoreComponentType:
+		return NewRestoreComponent
+	case ecs.ItemComponentType:
+		return NewItemComponent
+	case ecs.AmountComponentType:
+		return NewAmountComponent
+	case ecs.WeightComponentType:
+		return NewWeightComponent
+	case ecs.SlotsComponentType:
+		return NewSlotsComponent
+	case ecs.LevelComponentType:
+		return NewLevelComponent
+	case ecs.TypeComponentType:
+		return NewTypeComponent
+	case ecs.ValutaComponentType:
+		return NewValutaComponent
+	case ecs.ResourceComponentType:
+		return NewResourceComponent
+	case ecs.TransportComponentType:
+		return NewTransportComponent
+	case ecs.TurnDistanceComponentType:
+		return NewTurnDistanceComponent
+	case ecs.VisibilityComponentType:
+		return NewVisibilityComponent
+	case ecs.HealthComponentType:
+		return NewHealthComponent
+	case ecs.StatComponentType:
+		return NewStatComponent
+	case ecs.FactionComponentType:
+		return NewFactionComponent
+	case ecs.CharacterComponentType:
+		return NewCharacterComponent
+	case ecs.MapComponentType:
+		return NewMapComponent
+
+	case ecs.ControlsRelationComponentType:
+		return NewControlsRelationComponent
+	case ecs.HasRelationComponentType:
+		return NewHasRelationComponent
+	case ecs.RequiresRelationComponentType:
+		return NewRequiresRelationComponent
+	case ecs.CreatesRelationComponentType:
+		return NewCreatesRelationComponent
+	case ecs.FilterRelationComponentType:
+		return NewFilterRelationComponent
+	default:
+		return nil
+	}
+}

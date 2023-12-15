@@ -11,8 +11,8 @@ type CreatesRelationComponent struct {
 	Entity ecs.BaseEntity
 }
 
-func NewCreatesRelationComponent() CreatesRelationComponent {
-	return CreatesRelationComponent{
+func NewCreatesRelationComponent() ecs.Component {
+	return &CreatesRelationComponent{
 		BaseComponent: ecs.BaseComponent{Id: uuid.New()},
 		Count:         1,
 	}

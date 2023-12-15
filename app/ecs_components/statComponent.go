@@ -3,6 +3,7 @@ package ecs_components
 import (
 	"github.com/google/uuid"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
+	"strconv"
 )
 
 type StatComponent struct {
@@ -11,20 +12,32 @@ type StatComponent struct {
 	Value uint   `yaml:"value"`
 }
 
-func NewStatComponent() StatComponent {
-	return StatComponent{
+func NewStatComponent() ecs.Component {
+	return &StatComponent{
 		BaseComponent: ecs.BaseComponent{Id: uuid.New()},
 	}
 }
 
-func (c *StatComponent) WidthName(name string) *StatComponent {
-	c.Name = name
-	return c
+func (c *StatComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
+	loadedValues := 0
+	if value, ok := raw.Params["name"]; ok {
+		c.Name = value
+		loadedValues++
+	}
+	if value, ok := raw.Params["count"]; ok {
+		if err := c.ValueFromString(value); err != nil {
+			return err
+		}
+		loadedValues++
+	}
+
+	return c.CheckValuesParsedFromRaw(loadedValues, raw)
 }
 
-func (c *StatComponent) WidthValue(value uint) *StatComponent {
-	c.Value = value
-	return c
+func (c *StatComponent) ValueFromString(value string) error {
+	n, err := strconv.Atoi(value)
+	c.Value = uint(n)
+	return err
 }
 
 func (c *StatComponent) ComponentType() uint64 {

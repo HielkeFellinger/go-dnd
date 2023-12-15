@@ -10,8 +10,8 @@ type ControlsRelationComponent struct {
 	Entity ecs.BaseEntity
 }
 
-func NewControlsRelationComponent() ControlsRelationComponent {
-	return ControlsRelationComponent{
+func NewControlsRelationComponent() ecs.Component {
+	return &ControlsRelationComponent{
 		BaseComponent: ecs.BaseComponent{Id: uuid.New()},
 	}
 }

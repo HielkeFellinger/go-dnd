@@ -11,20 +11,24 @@ type TypeComponent struct {
 	Description string `yaml:"description"`
 }
 
-func NewTypeComponent() TypeComponent {
-	return TypeComponent{
+func NewTypeComponent() ecs.Component {
+	return &TypeComponent{
 		BaseComponent: ecs.BaseComponent{Id: uuid.New()},
 	}
 }
 
-func (c *TypeComponent) WithName(name string) *TypeComponent {
-	c.Name = name
-	return c
-}
+func (c *TypeComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
+	loadedValues := 0
+	if value, ok := raw.Params["name"]; ok {
+		c.Name = value
+		loadedValues++
+	}
+	if value, ok := raw.Params["description"]; ok {
+		c.Description = value
+		loadedValues++
+	}
 
-func (c *TypeComponent) WithDescription(Description string) *TypeComponent {
-	c.Description = Description
-	return c
+	return c.CheckValuesParsedFromRaw(loadedValues, raw)
 }
 
 func (c *TypeComponent) ComponentType() uint64 {

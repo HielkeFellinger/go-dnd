@@ -11,20 +11,24 @@ type ValutaComponent struct {
 	Description string `yaml:"description"`
 }
 
-func NewValutaComponent() ValutaComponent {
-	return ValutaComponent{
+func NewValutaComponent() ecs.Component {
+	return &ValutaComponent{
 		BaseComponent: ecs.BaseComponent{Id: uuid.New()},
 	}
 }
 
-func (c *ValutaComponent) WidthName(name string) *ValutaComponent {
-	c.Name = name
-	return c
-}
+func (c *ValutaComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
+	loadedValues := 0
+	if value, ok := raw.Params["name"]; ok {
+		c.Name = value
+		loadedValues++
+	}
+	if value, ok := raw.Params["description"]; ok {
+		c.Description = value
+		loadedValues++
+	}
 
-func (c *ValutaComponent) WidthDescription(description string) *ValutaComponent {
-	c.Description = description
-	return c
+	return c.CheckValuesParsedFromRaw(loadedValues, raw)
 }
 
 func (c *ValutaComponent) ComponentType() uint64 {

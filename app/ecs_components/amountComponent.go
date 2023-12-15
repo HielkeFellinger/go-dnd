@@ -3,6 +3,7 @@ package ecs_components
 import (
 	"github.com/google/uuid"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
+	"strconv"
 )
 
 type AmountComponent struct {
@@ -10,15 +11,28 @@ type AmountComponent struct {
 	Amount int `yaml:"amount"`
 }
 
-func NewValueComponent() AmountComponent {
-	return AmountComponent{
+func NewAmountComponent() ecs.Component {
+	return &AmountComponent{
 		BaseComponent: ecs.BaseComponent{Id: uuid.New()},
 	}
 }
 
-func (c *AmountComponent) WithAmount(amount int) *AmountComponent {
-	c.Amount = amount
-	return c
+func (c *AmountComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
+	loadedValues := 0
+	if value, ok := raw.Params["amount"]; ok {
+		if err := c.AmountFromString(value); err != nil {
+			return err
+		}
+		loadedValues++
+	}
+
+	return c.CheckValuesParsedFromRaw(loadedValues, raw)
+}
+
+func (c *AmountComponent) AmountFromString(amount string) error {
+	n, err := strconv.Atoi(amount)
+	c.Amount = n
+	return err
 }
 
 func (c *AmountComponent) ComponentType() uint64 {

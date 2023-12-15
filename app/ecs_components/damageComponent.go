@@ -10,15 +10,20 @@ type DamageComponent struct {
 	Amount string `yaml:"amount"`
 }
 
-func NewDamageComponent() DamageComponent {
-	return DamageComponent{
+func NewDamageComponent() ecs.Component {
+	return &DamageComponent{
 		BaseComponent: ecs.BaseComponent{Id: uuid.New()},
 	}
 }
 
-func (c *DamageComponent) WithAmount(amount string) *DamageComponent {
-	c.Amount = amount
-	return c
+func (c *DamageComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
+	loadedValues := 0
+	if value, ok := raw.Params["amount"]; ok {
+		c.Amount = value
+		loadedValues++
+	}
+
+	return c.CheckValuesParsedFromRaw(loadedValues, raw)
 }
 
 func (c *DamageComponent) ComponentType() uint64 {

@@ -10,15 +10,20 @@ type RestoreComponent struct {
 	Amount string `yaml:"amount"`
 }
 
-func NewRestoreComponent() RestoreComponent {
-	return RestoreComponent{
+func NewRestoreComponent() ecs.Component {
+	return &RestoreComponent{
 		BaseComponent: ecs.BaseComponent{Id: uuid.New()},
 	}
 }
 
-func (c *RestoreComponent) WithAmount(amount string) *RestoreComponent {
-	c.Amount = amount
-	return c
+func (c *RestoreComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
+	loadedValues := 0
+	if value, ok := raw.Params["amount"]; ok {
+		c.Amount = value
+		loadedValues++
+	}
+
+	return c.CheckValuesParsedFromRaw(loadedValues, raw)
 }
 
 func (c *RestoreComponent) ComponentType() uint64 {

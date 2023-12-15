@@ -11,8 +11,8 @@ type FilterRelationComponent struct {
 	Entity ecs.BaseEntity
 }
 
-func NewFilterRelationComponent() FilterRelationComponent {
-	return FilterRelationComponent{
+func NewFilterRelationComponent() ecs.Component {
+	return &FilterRelationComponent{
 		BaseComponent: ecs.BaseComponent{Id: uuid.New()},
 		Mode:          ecs.NoFilterMode,
 	}

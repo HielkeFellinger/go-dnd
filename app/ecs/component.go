@@ -1,10 +1,15 @@
 package ecs
 
 import (
+	"errors"
+	"fmt"
 	"github.com/google/uuid"
 )
 
+const RelationalComponentsTypeBorder uint64 = 1 << 40
+
 const (
+	UnknownComponentType      uint64 = 0
 	PositionComponentType     uint64 = 1 << 0
 	AreaComponentType         uint64 = 1 << 1
 	RangeComponentType        uint64 = 1 << 2
@@ -39,6 +44,7 @@ const (
 type Component interface {
 	ComponentType() uint64
 	GetVersion() uint
+	LoadFromRawComponent(raw RawComponent) error
 }
 
 type BaseComponent struct {
@@ -48,6 +54,22 @@ type BaseComponent struct {
 
 func (c *BaseComponent) GetVersion() uint {
 	return c.Version
+}
+
+func (c *BaseComponent) CheckValuesParsedFromRaw(loadedValues int, raw RawComponent) error {
+	if loadedValues != len(raw.Params) {
+		return errors.New(fmt.Sprintf("Mismatch on Type: (%v)'%v'. Loaded '%d' items total '%d'. Values: '%v'",
+			c.ComponentType(), raw.ComponentType, loadedValues, len(raw.Params), raw.Params))
+	}
+	return nil
+}
+
+func (c *BaseComponent) LoadFromRawComponent(raw RawComponent) error {
+	return errors.New("loadFromRawComponent(raw RawComponent) not implemented")
+}
+
+func (c *BaseComponent) ComponentType() uint64 {
+	return UnknownComponentType
 }
 
 type FilterMode uint64

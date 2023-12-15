@@ -3,6 +3,7 @@ package ecs_components
 import (
 	"github.com/google/uuid"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
+	"strconv"
 )
 
 type MapComponent struct {
@@ -10,16 +11,29 @@ type MapComponent struct {
 	Active bool `yaml:"active"`
 }
 
-func NewMapComponent() MapComponent {
-	return MapComponent{
+func NewMapComponent() ecs.Component {
+	return &MapComponent{
 		BaseComponent: ecs.BaseComponent{Id: uuid.New()},
 		Active:        false,
 	}
 }
 
-func (c *MapComponent) WidthActive(active bool) *MapComponent {
-	c.Active = active
-	return c
+func (c *MapComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
+	loadedValues := 0
+	if value, ok := raw.Params["hidden"]; ok {
+		if err := c.ActiveFromString(value); err != nil {
+			return err
+		}
+		loadedValues++
+	}
+
+	return c.CheckValuesParsedFromRaw(loadedValues, raw)
+}
+
+func (c *MapComponent) ActiveFromString(bool string) error {
+	b, err := strconv.ParseBool(bool)
+	c.Active = b
+	return err
 }
 
 func (c *MapComponent) ComponentType() uint64 {

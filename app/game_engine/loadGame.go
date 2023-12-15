@@ -3,6 +3,7 @@ package game_engine
 import (
 	"github.com/google/uuid"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
+	"github.com/hielkefellinger/go-dnd/app/ecs_components"
 	"gopkg.in/yaml.v3"
 	"log"
 	"os"
@@ -17,7 +18,7 @@ func loadGame() ecs.BaseWorld {
 	}
 
 	log.Println("Unmarshal raw/base Game Data")
-	var game RawGameFile
+	var game ecs.RawGameFile
 	if err := yaml.Unmarshal(data, &game); err != nil {
 		log.Fatalln(err)
 	}
@@ -38,21 +39,44 @@ func loadGame() ecs.BaseWorld {
 	err, maps := parseRawEntity(game.Maps, idToUuidDict, uuidToEntityDict)
 	world.Entities = append(world.Entities, maps...)
 
+	// Add Components (TEST) <<<---- To function
+	for _, rawEntity := range game.Items {
+		match := uuidToEntityDict[idToUuidDict[rawEntity.Id]]
+
+		for _, rawComponent := range rawEntity.Components {
+			rawType := game.TypeTranslation[rawComponent.ComponentType]
+			parsedType := ecs_components.MapIntToTypeV0(rawType)
+
+			newComponent := ecs_components.MapTypeToConstructorFunction(parsedType)()
+			if err := newComponent.LoadFromRawComponent(rawComponent); err != nil {
+				log.Fatalf(err.Error())
+			}
+			match.AddComponent(newComponent)
+		}
+	}
+
 	return world
 }
 
-func parseRawEntity(rawEntities []RawEntity,
+func parseRawEntity(rawEntities []ecs.RawEntity,
 	idToUuidDict map[string]uuid.UUID,
 	uuidToEntityDict map[uuid.UUID]ecs.Entity) (error, []ecs.Entity) {
 
 	entities := make([]ecs.Entity, len(rawEntities))
 
 	for index, rawEntity := range rawEntities {
-		entity := ecs.NewEntity()
 		// Test if ID is unique
-		// Test if
+		if _, match := idToUuidDict[rawEntity.Id]; match {
+			log.Fatalf("Duplicate Raw Entity with ID: '%s'. Could not load game", rawEntity.Id)
+		}
 
+		// Create and fill the new Entity
+		entity := ecs.NewEntity()
+		entity.WithName(rawEntity.Name).WithDescription(rawEntity.Description)
+
+		// Update the maps
 		idToUuidDict[rawEntity.Id] = entity.Id
+		uuidToEntityDict[entity.Id] = &entity
 		entities[index] = &entity
 	}
 

@@ -11,22 +11,25 @@ type TransportComponent struct {
 	Description string `yaml:"description"`
 }
 
-func NewTransportComponent() TransportComponent {
-	return TransportComponent{
+func NewTransportComponent() ecs.Component {
+	return &TransportComponent{
 		BaseComponent: ecs.BaseComponent{Id: uuid.New()},
 	}
 }
 
-func (c *TransportComponent) WidthName(name string) *TransportComponent {
-	c.Name = name
-	return c
-}
+func (c *TransportComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
+	loadedValues := 0
+	if value, ok := raw.Params["name"]; ok {
+		c.Name = value
+		loadedValues++
+	}
+	if value, ok := raw.Params["description"]; ok {
+		c.Description = value
+		loadedValues++
+	}
 
-func (c *TransportComponent) WidthDescription(description string) *TransportComponent {
-	c.Description = description
-	return c
+	return c.CheckValuesParsedFromRaw(loadedValues, raw)
 }
-
 func (c *TransportComponent) ComponentType() uint64 {
 	return ecs.TransportComponentType
 }

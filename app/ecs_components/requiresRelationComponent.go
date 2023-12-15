@@ -11,10 +11,10 @@ type RequiresRelationComponent struct {
 	Entity ecs.BaseEntity
 }
 
-func NewRequiresRelationComponent() RequiresRelationComponent {
-	return RequiresRelationComponent{
+func NewRequiresRelationComponent() ecs.Component {
+	return &RequiresRelationComponent{
 		BaseComponent: ecs.BaseComponent{Id: uuid.New()},
-		Count: 1,
+		Count:         1,
 	}
 }
 

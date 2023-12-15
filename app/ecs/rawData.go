@@ -1,4 +1,4 @@
-package game_engine
+package ecs
 
 type RawGameFile struct {
 	Version         string         `yaml:"version"`

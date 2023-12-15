@@ -11,20 +11,24 @@ type FactionComponent struct {
 	Description string `yaml:"description"`
 }
 
-func NewFactionComponent() FactionComponent {
-	return FactionComponent{
+func NewFactionComponent() ecs.Component {
+	return &FactionComponent{
 		BaseComponent: ecs.BaseComponent{Id: uuid.New()},
 	}
 }
 
-func (c *FactionComponent) WidthName(name string) *FactionComponent {
-	c.Name = name
-	return c
-}
+func (c *FactionComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
+	loadedValues := 0
+	if value, ok := raw.Params["name"]; ok {
+		c.Name = value
+		loadedValues++
+	}
+	if value, ok := raw.Params["description"]; ok {
+		c.Description = value
+		loadedValues++
+	}
 
-func (c *FactionComponent) WithDescription(description string) *FactionComponent {
-	c.Description = description
-	return c
+	return c.CheckValuesParsedFromRaw(loadedValues, raw)
 }
 
 func (c *FactionComponent) ComponentType() uint64 {

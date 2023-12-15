@@ -39,6 +39,16 @@ base_items:
         params:
           name: Knife
           description: A Sharp Knife
+  - id: sword
+    name: Sword
+    components:
+      - type: Damage
+        params:
+          amount: 1d6+1
+      - type: Item
+        params:
+          name: Sword
+          description: A Sharp Sword
 
 base_maps:
   - id: map

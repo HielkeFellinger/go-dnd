@@ -11,20 +11,24 @@ type CharacterComponent struct {
 	Description string `yaml:"description"`
 }
 
-func NewCharacterComponent() CharacterComponent {
-	return CharacterComponent{
+func NewCharacterComponent() ecs.Component {
+	return &CharacterComponent{
 		BaseComponent: ecs.BaseComponent{Id: uuid.New()},
 	}
 }
 
-func (c *CharacterComponent) WidthName(name string) *CharacterComponent {
-	c.Name = name
-	return c
-}
+func (c *CharacterComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
+	loadedValues := 0
+	if value, ok := raw.Params["name"]; ok {
+		c.Name = value
+		loadedValues++
+	}
+	if value, ok := raw.Params["description"]; ok {
+		c.Description = value
+		loadedValues++
+	}
 
-func (c *CharacterComponent) WidthDescription(description string) *CharacterComponent {
-	c.Description = description
-	return c
+	return c.CheckValuesParsedFromRaw(loadedValues, raw)
 }
 
 func (c *CharacterComponent) ComponentType() uint64 {
