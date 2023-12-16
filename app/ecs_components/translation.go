@@ -121,3 +121,18 @@ func MapTypeToConstructorFunction(componentType uint64) func() ecs.Component {
 		return nil
 	}
 }
+
+func MapStringToFilterMode(filterMode string) ecs.FilterMode {
+	switch filterMode {
+	case "block":
+		return ecs.BlockFilterMode
+	case "allow":
+		return ecs.AllowFilterMode
+	case "less":
+		return ecs.LessThanFilterMode
+	case "more":
+		return ecs.MoreThanFilterMode
+	default:
+		return ecs.UnknownFilterMode
+	}
+}

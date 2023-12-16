@@ -6,8 +6,6 @@ import (
 	"github.com/google/uuid"
 )
 
-const RelationalComponentsTypeBorder uint64 = 1 << 40
-
 const (
 	UnknownComponentType      uint64 = 0
 	PositionComponentType     uint64 = 1 << 0
@@ -47,6 +45,10 @@ type Component interface {
 	LoadFromRawComponent(raw RawComponent) error
 }
 
+type RelationalComponent interface {
+	LoadFromRawComponentRelation(raw RawComponent, entity Entity) error
+}
+
 type BaseComponent struct {
 	Version uint // Placeholder; take changes into account
 	Id      uuid.UUID
@@ -65,7 +67,7 @@ func (c *BaseComponent) CheckValuesParsedFromRaw(loadedValues int, raw RawCompon
 }
 
 func (c *BaseComponent) LoadFromRawComponent(raw RawComponent) error {
-	return errors.New("loadFromRawComponent(raw RawComponent) not implemented")
+	return errors.New(fmt.Sprintf("loadFromRawComponent(raw RawComponent) not implemented. Raw type: '%s'", raw.ComponentType))
 }
 
 func (c *BaseComponent) ComponentType() uint64 {
@@ -75,9 +77,9 @@ func (c *BaseComponent) ComponentType() uint64 {
 type FilterMode uint64
 
 const (
-	NoFilterMode         FilterMode = 1 << 0
-	AllowFilterMode      FilterMode = 1 << 1
-	BlockFilterMode      FilterMode = 1 << 2
-	LesserThanFilterMode FilterMode = 1 << 3
-	MoreThanFilterMode   FilterMode = 1 << 4
+	UnknownFilterMode  FilterMode = 1 << 0
+	AllowFilterMode    FilterMode = 1 << 1
+	BlockFilterMode    FilterMode = 1 << 2
+	LessThanFilterMode FilterMode = 1 << 3
+	MoreThanFilterMode FilterMode = 1 << 4
 )

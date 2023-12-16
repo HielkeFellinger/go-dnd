@@ -7,7 +7,7 @@ import (
 
 type ControlsRelationComponent struct {
 	ecs.BaseComponent
-	Entity ecs.BaseEntity
+	Entity ecs.Entity
 }
 
 func NewControlsRelationComponent() ecs.Component {
@@ -16,9 +16,11 @@ func NewControlsRelationComponent() ecs.Component {
 	}
 }
 
-func (c *ControlsRelationComponent) WithEntity(entity ecs.BaseEntity) *ControlsRelationComponent {
+func (c *ControlsRelationComponent) LoadFromRawComponentRelation(raw ecs.RawComponent, entity ecs.Entity) error {
+	loadedValues := 1
 	c.Entity = entity
-	return c
+
+	return c.CheckValuesParsedFromRaw(loadedValues, raw)
 }
 
 func (c *ControlsRelationComponent) ComponentType() uint64 {

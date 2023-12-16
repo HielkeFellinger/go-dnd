@@ -27,6 +27,9 @@ type_translation:
   RequiresRelation: 42
   CreatesRelation: 43
   FilterRelation: 44
+filerModes:
+  unknown: 0
+
 
 base_items:
   - id: knife

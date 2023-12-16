@@ -3,12 +3,13 @@ package ecs_components
 import (
 	"github.com/google/uuid"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
+	"strconv"
 )
 
 type CreatesRelationComponent struct {
 	ecs.BaseComponent
 	Count  uint `yaml:"count"`
-	Entity ecs.BaseEntity
+	Entity ecs.Entity
 }
 
 func NewCreatesRelationComponent() ecs.Component {
@@ -18,14 +19,24 @@ func NewCreatesRelationComponent() ecs.Component {
 	}
 }
 
-func (c *CreatesRelationComponent) WithCount(count uint) *CreatesRelationComponent {
-	c.Count = count
-	return c
+func (c *CreatesRelationComponent) LoadFromRawComponentRelation(raw ecs.RawComponent, entity ecs.Entity) error {
+	loadedValues := 0
+	if value, ok := raw.Params["count"]; ok {
+		if err := c.CountFromString(value); err != nil {
+			return err
+		}
+		loadedValues++
+	}
+	c.Entity = entity
+	loadedValues++
+
+	return c.CheckValuesParsedFromRaw(loadedValues, raw)
 }
 
-func (c *CreatesRelationComponent) WithEntity(entity ecs.BaseEntity) *CreatesRelationComponent {
-	c.Entity = entity
-	return c
+func (c *CreatesRelationComponent) CountFromString(count string) error {
+	n, err := strconv.Atoi(count)
+	c.Count = uint(n)
+	return err
 }
 
 func (c *CreatesRelationComponent) ComponentType() uint64 {
