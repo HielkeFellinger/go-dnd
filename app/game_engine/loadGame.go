@@ -9,10 +9,12 @@ import (
 	"os"
 )
 
-func loadGame() ecs.BaseWorld {
+const SpaceGame string = "../../content/space/entities.yml"
+
+func loadGame(gameFile string) ecs.BaseWorld {
 
 	log.Println("Loading raw/base Game File")
-	data, err := os.ReadFile("../../content/space/entities.yml")
+	data, err := os.ReadFile(gameFile)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -29,14 +31,23 @@ func loadGame() ecs.BaseWorld {
 	world := ecs.BaseWorld{}
 	log.Println("Parsing raw/base Game Items (Entities)")
 	err, items := parseRawEntity(game.Items, idToUuidDict, uuidToEntityDict)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
 	world.Entities = append(world.Entities, items...)
 
 	log.Println("Parsing raw/base Game Characters (Entities)")
 	err, chars := parseRawEntity(game.Chars, idToUuidDict, uuidToEntityDict)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
 	world.Entities = append(world.Entities, chars...)
 
 	log.Println("Parsing raw/base Game Maps (Entities)")
 	err, maps := parseRawEntity(game.Maps, idToUuidDict, uuidToEntityDict)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
 	world.Entities = append(world.Entities, maps...)
 
 	log.Println("Parsing raw/base Game Items (Entity Components)")
@@ -60,7 +71,7 @@ func parseRawComponentsOfEntity(game ecs.RawGameFile, rawEntities []ecs.RawEntit
 			newComponent := ecs_components.MapTypeToConstructorFunction(parsedType)()
 
 			// Check if relational component or regular
-			if relComponent, ok := interface{}(newComponent).(ecs.RelationalComponent); ok {
+			if relComponent, ok := newComponent.(ecs.RelationalComponent); ok {
 				// Find Target
 				targetMatch := uuidToEntityDict[idToUuidDict[rawComponent.Params["entity"]]]
 				if err := relComponent.LoadFromRawComponentRelation(rawComponent, targetMatch); err != nil {
