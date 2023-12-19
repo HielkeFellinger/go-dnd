@@ -40,18 +40,30 @@ const (
 )
 
 type Component interface {
+	GetId() uuid.UUID
 	ComponentType() uint64
 	GetVersion() uint
 	LoadFromRawComponent(raw RawComponent) error
+	IsRelationalComponent() bool
 }
 
 type RelationalComponent interface {
+	Component
 	LoadFromRawComponentRelation(raw RawComponent, entity Entity) error
+	GetEntity() Entity
 }
 
 type BaseComponent struct {
 	Version uint // Placeholder; take changes into account
 	Id      uuid.UUID
+}
+
+func (c *BaseComponent) GetId() uuid.UUID {
+	return c.Id
+}
+
+func (c *BaseComponent) IsRelationalComponent() bool {
+	return false
 }
 
 func (c *BaseComponent) GetVersion() uint {

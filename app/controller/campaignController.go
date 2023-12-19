@@ -8,14 +8,17 @@ import (
 	"net/http"
 )
 
+const FailedAuthMessage = "Failed authenticate user"
+const CampaignSelectHtmlFile = "campaignSelect.html"
+
 func CampaignSelectPage(c *gin.Context) {
 	templateMap := gin.H{}
 	templateMap["title"] = "GO-DND Campaign Select"
 
 	rawUser, exists := c.Get("user")
 	if !exists {
-		templateMap[errMessage], templateMap[errTitle] = "Failed authenticate user", "Error"
-		c.HTML(http.StatusUnauthorized, "campaignSelect.html", templateMap)
+		templateMap[errMessage], templateMap[errTitle] = FailedAuthMessage, "Error"
+		c.HTML(http.StatusUnauthorized, CampaignSelectHtmlFile, templateMap)
 	}
 	templateMap["user"] = rawUser.(models.User)
 
@@ -24,7 +27,7 @@ func CampaignSelectPage(c *gin.Context) {
 	userCampaigns, err := service.RetrieveCampaignsLinkedToUser(rawUser.(models.User))
 	if err != nil {
 		templateMap[errMessage], templateMap[errTitle] = err.Error(), "Error"
-		c.HTML(http.StatusUnauthorized, "campaignSelect.html", templateMap)
+		c.HTML(http.StatusUnauthorized, CampaignSelectHtmlFile, templateMap)
 	}
 
 	// Test if active
@@ -35,7 +38,7 @@ func CampaignSelectPage(c *gin.Context) {
 
 	templateMap["userCampaigns"] = userCampaigns
 
-	c.HTML(http.StatusOK, "campaignSelect.html", templateMap)
+	c.HTML(http.StatusOK, CampaignSelectHtmlFile, templateMap)
 }
 
 func CampaignNewPage(c *gin.Context) {
@@ -44,7 +47,7 @@ func CampaignNewPage(c *gin.Context) {
 
 	rawUser, exists := c.Get("user")
 	if !exists {
-		templateMap[errMessage], templateMap[errTitle] = "Failed authenticate user", "Error"
+		templateMap[errMessage], templateMap[errTitle] = FailedAuthMessage, "Error"
 		c.HTML(http.StatusUnauthorized, "index.html", templateMap)
 	}
 	templateMap["user"] = rawUser.(models.User)
@@ -66,7 +69,7 @@ func CampaignNew(c *gin.Context) {
 
 	rawUser, exists := c.Get("user")
 	if !exists {
-		templateMap[errMessage], templateMap[errTitle] = "Failed authenticate user", "Error"
+		templateMap[errMessage], templateMap[errTitle] = FailedAuthMessage, "Error"
 		c.HTML(http.StatusUnauthorized, "campaign.html", templateMap)
 	}
 	templateMap["user"] = rawUser.(models.User)
@@ -99,15 +102,15 @@ func CampaignSessionPage(c *gin.Context) {
 	// Retrieve campaign & user (set by middleware)
 	rawUser, exists := c.Get("user")
 	if !exists {
-		templateMap[errMessage], templateMap[errTitle] = "Failed authenticate user", "Error"
-		c.HTML(http.StatusUnauthorized, "campaignSelect.html", templateMap)
+		templateMap[errMessage], templateMap[errTitle] = FailedAuthMessage, "Error"
+		c.HTML(http.StatusUnauthorized, CampaignSelectHtmlFile, templateMap)
 	}
 	user := rawUser.(models.User)
 
 	rawCampaign, exists := c.Get("campaign")
 	if !exists {
 		templateMap[errMessage], templateMap[errTitle] = "Failed find campaign", "Error"
-		c.HTML(http.StatusNotFound, "campaignSelect.html", templateMap)
+		c.HTML(http.StatusNotFound, CampaignSelectHtmlFile, templateMap)
 	}
 	campaign := rawCampaign.(models.Campaign)
 

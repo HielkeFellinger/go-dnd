@@ -26,3 +26,11 @@ func (c *ControlsRelationComponent) LoadFromRawComponentRelation(raw ecs.RawComp
 func (c *ControlsRelationComponent) ComponentType() uint64 {
 	return ecs.ControlsRelationComponentType
 }
+
+func (c *ControlsRelationComponent) IsRelationalComponent() bool {
+	return true
+}
+
+func (c *ControlsRelationComponent) GetEntity() ecs.Entity {
+	return c.Entity
+}

@@ -44,3 +44,11 @@ func (c *FilterRelationComponent) ModeFromString(mode string) error {
 func (c *FilterRelationComponent) ComponentType() uint64 {
 	return ecs.FilterRelationComponentType
 }
+
+func (c *FilterRelationComponent) IsRelationalComponent() bool {
+	return true
+}
+
+func (c *FilterRelationComponent) GetEntity() ecs.Entity {
+	return c.Entity
+}

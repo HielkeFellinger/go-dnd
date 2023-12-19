@@ -34,21 +34,21 @@ func loadGame(gameFile string) ecs.BaseWorld {
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-	world.Entities = append(world.Entities, items...)
+	world.AddEntities(items)
 
 	log.Println("Parsing raw/base Game Characters (Entities)")
 	err, chars := parseRawEntity(game.Chars, idToUuidDict, uuidToEntityDict)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-	world.Entities = append(world.Entities, chars...)
+	world.AddEntities(chars)
 
 	log.Println("Parsing raw/base Game Maps (Entities)")
 	err, maps := parseRawEntity(game.Maps, idToUuidDict, uuidToEntityDict)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-	world.Entities = append(world.Entities, maps...)
+	world.AddEntities(maps)
 
 	log.Println("Parsing raw/base Game Items (Entity Components)")
 	parseRawComponentsOfEntity(game, game.Items, uuidToEntityDict, idToUuidDict)
@@ -83,7 +83,9 @@ func parseRawComponentsOfEntity(game ecs.RawGameFile, rawEntities []ecs.RawEntit
 				}
 			}
 
-			match.AddComponent(newComponent)
+			if err := match.AddComponent(newComponent); err != nil {
+				log.Fatalf(err.Error() + " Raw Entity ID: " + rawEntity.Id)
+			}
 		}
 	}
 }

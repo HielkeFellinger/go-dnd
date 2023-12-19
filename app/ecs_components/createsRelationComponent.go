@@ -42,3 +42,11 @@ func (c *CreatesRelationComponent) CountFromString(count string) error {
 func (c *CreatesRelationComponent) ComponentType() uint64 {
 	return ecs.CreatesRelationComponentType
 }
+
+func (c *CreatesRelationComponent) IsRelationalComponent() bool {
+	return true
+}
+
+func (c *CreatesRelationComponent) GetEntity() ecs.Entity {
+	return c.Entity
+}

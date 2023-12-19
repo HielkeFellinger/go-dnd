@@ -1,25 +1,38 @@
 package ecs
 
 import (
+	"errors"
+	"fmt"
 	"github.com/google/uuid"
 )
 
 type Entity interface {
-	AddComponent(c Component)
+	GetId() uuid.UUID
+	AddComponent(c Component) error
 	LoadFromRawEntity(raw RawEntity) error
+	hasCircularRef(uuid uuid.UUID) bool
 }
 
 type BaseEntity struct {
-	Id          uuid.UUID
-	Name        string
-	Description string
-	Components  []Component
+	Id              uuid.UUID
+	Name            string
+	Description     string
+	Components      []Component
+	RefEntities     []Entity
+	uuidToComponent map[uuid.UUID]Component
+	uuidToRelEntity map[uuid.UUID]Entity
 }
 
 func NewEntity() BaseEntity {
 	return BaseEntity{
-		Id: uuid.New(),
+		Id:              uuid.New(),
+		uuidToComponent: make(map[uuid.UUID]Component),
+		uuidToRelEntity: make(map[uuid.UUID]Entity),
 	}
+}
+
+func (e *BaseEntity) GetId() uuid.UUID {
+	return e.Id
 }
 
 func (e *BaseEntity) LoadFromRawEntity(raw RawEntity) error {
@@ -37,6 +50,81 @@ func (e *BaseEntity) WithDescription(description string) *BaseEntity {
 	return e
 }
 
-func (e *BaseEntity) AddComponent(c Component) {
+func (e *BaseEntity) AddComponent(c Component) error {
+	// Check uniqueness
+	if !e.isComponentUuidUnique(c) {
+		return errors.New(fmt.Sprintf("Skip adding component '%s' due to duplicate "+
+			"component UUID in Entity: '%s'", c.GetId().String(), e.Id.String()))
+	}
+	if !e.isComponentTypeAllowedToBeAdded(c) {
+		return errors.New(fmt.Sprintf("Skip adding component '%d' due to duplicate "+
+			"component type in Entity: '%s'", c.ComponentType(), e.Id.String()))
+	}
+
+	// Check Nesting
+	err := e.checkIfRelationalComponentIsAllowedToBeAdded(c)
+	if err != nil {
+		return err
+	}
+
 	e.Components = append(e.Components, c)
+	e.uuidToComponent[c.GetId()] = c
+	return nil
+}
+
+func (e *BaseEntity) checkIfRelationalComponentIsAllowedToBeAdded(c Component) error {
+	if c.IsRelationalComponent() {
+		if relEntity, ok := c.(RelationalComponent); ok {
+			childEntity := relEntity.GetEntity()
+			if childEntity != nil {
+				if childEntity.GetId() == e.GetId() {
+					return errors.New(fmt.Sprintf("Skip adding component '%s' due to containing "+
+						"its parent Entity: '%s'", c.GetId().String(), e.Id.String()))
+				}
+				if relEntity.GetEntity().hasCircularRef(e.Id) {
+					return errors.New(fmt.Sprintf("Skip adding component '%s' due to containing "+
+						"its parent Entity: '%s' in one of its RelationComponents", c.GetId().String(), e.Id.String()))
+				}
+			} else {
+				return errors.New(fmt.Sprintf("Skip adding component '%s' due to not containing an Entity.",
+					c.GetId().String()))
+			}
+
+			// Add to map
+			e.uuidToRelEntity[childEntity.GetId()] = childEntity
+		} else {
+			return errors.New(fmt.Sprintf("Skip adding component '%s' due not implementing RelationalComponent interface.",
+				c.GetId().String()))
+		}
+	}
+	return nil
+}
+
+// Recursive Check if an Uuid is present is children @todo Optimize; is this REALLY needed?
+func (e *BaseEntity) hasCircularRef(uuid uuid.UUID) bool {
+	for _, relEntity := range e.uuidToRelEntity {
+		if relEntity.GetId() == uuid {
+			return true
+		}
+		if relEntity.hasCircularRef(uuid) {
+			return true
+		}
+	}
+	return false
+}
+
+func (e *BaseEntity) isComponentTypeAllowedToBeAdded(c Component) bool {
+	if !c.IsRelationalComponent() {
+		for _, component := range e.Components {
+			if component.ComponentType() == c.ComponentType() {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+func (e *BaseEntity) isComponentUuidUnique(c Component) bool {
+	_, match := e.uuidToComponent[c.GetId()]
+	return !match
 }
