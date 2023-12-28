@@ -3,6 +3,7 @@ package session
 import (
 	"bytes"
 	"fmt"
+	"github.com/hielkefellinger/go-dnd/app/ecs"
 	"github.com/hielkefellinger/go-dnd/app/models"
 	"html/template"
 	"log"
@@ -17,6 +18,7 @@ type campaignPool struct {
 	Unregister chan *campaignClient
 	Clients    map[*campaignClient]bool
 	Transmit   chan message
+	World      ecs.World
 }
 
 func initCampaignPool(id uint, leadId string) *campaignPool {

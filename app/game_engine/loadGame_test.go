@@ -9,7 +9,7 @@ func TestLoadingGame(t *testing.T) {
 	// Arrange
 
 	// Act
-	world := loadGame(SpaceGame)
+	world := loadGame(SpaceGameTest)
 
 	// Assert
 	assert.NotNil(t, world)

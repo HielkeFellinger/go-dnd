@@ -40,11 +40,11 @@ const (
 )
 
 type Component interface {
-	GetId() uuid.UUID
 	ComponentType() uint64
-	GetVersion() uint
 	LoadFromRawComponent(raw RawComponent) error
 	IsRelationalComponent() bool
+	GetId() uuid.UUID
+	GetVersion() uint
 }
 
 type RelationalComponent interface {

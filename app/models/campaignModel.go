@@ -13,6 +13,7 @@ type Campaign struct {
 	Active        bool   `gorm:"-"`
 	UserIsLead    bool   `gorm:"-"`
 	Title         string `form:"title"`
+	GameFile      string
 	Description   string `form:"description"`
 	Password      string `form:"password"`
 	PasswordCheck string `gorm:"-" form:"passwordCheck"`

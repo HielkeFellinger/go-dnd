@@ -1,6 +1,7 @@
 package session
 
 import (
+	"github.com/hielkefellinger/go-dnd/app/game_engine"
 	"github.com/hielkefellinger/go-dnd/app/models"
 	"log"
 )
@@ -51,6 +52,7 @@ func (c *campaignSessionsContainer) Run() {
 
 func (c *campaignSessionsContainer) initAndRegisterCampaignPool(campaign models.Campaign) {
 	pool := initCampaignPool(campaign.ID, campaign.Lead.Name)
+	pool.World = game_engine.InitCampaignWorld(campaign)
 	go pool.Run()
 	runningCampaignSessionsContainer.Register <- pool
 }

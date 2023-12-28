@@ -1,6 +1,7 @@
 package game_engine
 
 import (
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
 	"github.com/hielkefellinger/go-dnd/app/ecs_components"
@@ -9,11 +10,17 @@ import (
 	"os"
 )
 
-const SpaceGame string = "../../content/space/entities.yml"
+const SpaceGameTest string = "../../content/space/entities.yml"
+const SpaceGame string = "./content/space/entities.yml"
 
 func loadGame(gameFile string) ecs.BaseWorld {
 
 	log.Println("Loading raw/base Game File")
+	path, err := os.Getwd()
+	if err != nil {
+		log.Println(err)
+	}
+	fmt.Println(path)
 	data, err := os.ReadFile(gameFile)
 	if err != nil {
 		log.Fatalln(err)
@@ -104,7 +111,10 @@ func parseRawEntity(rawEntities []ecs.RawEntity,
 
 		// Create and fill the new Entity
 		entity := ecs.NewEntity()
-		entity.WithName(rawEntity.Name).WithDescription(rawEntity.Description)
+		err := entity.LoadFromRawEntity(rawEntity)
+		if err != nil {
+			log.Fatalf(err.Error() + " Raw Entity ID: " + rawEntity.Id)
+		}
 
 		// Update the maps
 		idToUuidDict[rawEntity.Id] = entity.Id

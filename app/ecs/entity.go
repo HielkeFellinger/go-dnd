@@ -8,6 +8,8 @@ import (
 
 type Entity interface {
 	GetId() uuid.UUID
+	GetName() string
+	GetVersion() uint
 	AddComponent(c Component) error
 	LoadFromRawEntity(raw RawEntity) error
 	hasCircularRef(uuid uuid.UUID) bool
@@ -16,6 +18,7 @@ type Entity interface {
 type BaseEntity struct {
 	Id              uuid.UUID
 	Name            string
+	Version         uint // Placeholder; take changes into account
 	Description     string
 	Components      []Component
 	RefEntities     []Entity
@@ -35,19 +38,17 @@ func (e *BaseEntity) GetId() uuid.UUID {
 	return e.Id
 }
 
+func (e *BaseEntity) GetVersion() uint {
+	return e.Version
+}
+
+func (e *BaseEntity) GetName() string {
+	return e.Name
+}
+
 func (e *BaseEntity) LoadFromRawEntity(raw RawEntity) error {
 	e.WithName(raw.Name).WithDescription(raw.Description)
 	return nil
-}
-
-func (e *BaseEntity) WithName(name string) *BaseEntity {
-	e.Name = name
-	return e
-}
-
-func (e *BaseEntity) WithDescription(description string) *BaseEntity {
-	e.Description = description
-	return e
 }
 
 func (e *BaseEntity) AddComponent(c Component) error {
@@ -70,6 +71,29 @@ func (e *BaseEntity) AddComponent(c Component) error {
 	e.Components = append(e.Components, c)
 	e.uuidToComponent[c.GetId()] = c
 	return nil
+}
+
+// Recursive Check if an Uuid is present is children @todo Optimize; is this REALLY needed?
+func (e *BaseEntity) hasCircularRef(uuid uuid.UUID) bool {
+	for _, relEntity := range e.uuidToRelEntity {
+		if relEntity.GetId() == uuid {
+			return true
+		}
+		if relEntity.hasCircularRef(uuid) {
+			return true
+		}
+	}
+	return false
+}
+
+func (e *BaseEntity) WithName(name string) *BaseEntity {
+	e.Name = name
+	return e
+}
+
+func (e *BaseEntity) WithDescription(description string) *BaseEntity {
+	e.Description = description
+	return e
 }
 
 func (e *BaseEntity) checkIfRelationalComponentIsAllowedToBeAdded(c Component) error {
@@ -98,19 +122,6 @@ func (e *BaseEntity) checkIfRelationalComponentIsAllowedToBeAdded(c Component) e
 		}
 	}
 	return nil
-}
-
-// Recursive Check if an Uuid is present is children @todo Optimize; is this REALLY needed?
-func (e *BaseEntity) hasCircularRef(uuid uuid.UUID) bool {
-	for _, relEntity := range e.uuidToRelEntity {
-		if relEntity.GetId() == uuid {
-			return true
-		}
-		if relEntity.hasCircularRef(uuid) {
-			return true
-		}
-	}
-	return false
 }
 
 func (e *BaseEntity) isComponentTypeAllowedToBeAdded(c Component) bool {
