@@ -31,7 +31,6 @@ func loadGame(gameFile string) ecs.BaseWorld {
 	if err := yaml.Unmarshal(data, &game); err != nil {
 		log.Fatalln(err)
 	}
-	log.Printf("The data '%v'", game)
 
 	idToUuidDict := make(map[string]uuid.UUID)
 	uuidToEntityDict := make(map[uuid.UUID]ecs.Entity)

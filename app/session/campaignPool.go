@@ -17,7 +17,7 @@ type campaignPool struct {
 	Register   chan *campaignClient
 	Unregister chan *campaignClient
 	Clients    map[*campaignClient]bool
-	Transmit   chan message
+	Transmit   chan eventMessage
 	World      ecs.World
 }
 
@@ -28,7 +28,7 @@ func initCampaignPool(id uint, leadId string) *campaignPool {
 		Register:   make(chan *campaignClient),
 		Unregister: make(chan *campaignClient),
 		Clients:    make(map[*campaignClient]bool),
-		Transmit:   make(chan message),
+		Transmit:   make(chan eventMessage),
 	}
 }
 
@@ -39,17 +39,23 @@ func (pool *campaignPool) Run() {
 			pool.Clients[client] = true
 			log.Printf("Size of Connection Pool `%d`: %d", pool.Id, len(pool.Clients))
 
-			pool.SendMessage(message{
+			pool.SendMessage(eventMessage{
 				Source: "Server", Type: TypeUserJoin,
 				Body: fmt.Sprintf("User '%s' Joins the content", client.Id),
 			})
+
+			// Send game initially
+			//pool.SendMessage(eventMessage{
+			//	Source: "Server", Type: TypeLoadGame,
+			//	Body: pool.World,
+			//})
 
 			break
 		case client := <-pool.Unregister:
 			// Test if user is Lead, if so close the pool
 			if client.Lead {
-				// Send closing message
-				pool.SendMessage(message{Source: "Server", Type: TypeGameClose, Body: "Closing Game!"})
+				// Send closing eventMessage
+				pool.SendMessage(eventMessage{Source: "Server", Type: TypeGameClose, Body: "Closing Game!"})
 
 				// Close content; and remove from session container @todo Save state?
 				for client := range pool.Clients {
@@ -63,17 +69,17 @@ func (pool *campaignPool) Run() {
 			log.Printf("Size of Connection Pool `%d`: %d", pool.Id, len(pool.Clients))
 
 			break
-		case message := <-pool.Transmit:
-			if message.DateTime == "" {
+		case eventMessage := <-pool.Transmit:
+			if eventMessage.DateTime == "" {
 				now := time.Now()
-				message.DateTime = fmt.Sprintf("%d-%d-%d %d:%d:%d", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second())
+				eventMessage.DateTime = fmt.Sprintf("%d-%d-%d %d:%d:%d", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second())
 			}
 
 			// Check Commands like whisper or dice
 
 			// HTML over Websocket Test!
-			if strings.Contains(message.Body, "char") {
-				message.Type = TypeLoadCharacters
+			if strings.Contains(eventMessage.Body, "char") {
+				eventMessage.Type = TypeLoadCharacters
 				chars := []models.Character{
 					{Name: "Kaas - 1"}, {Name: "Kaas - 2"},
 				}
@@ -86,22 +92,22 @@ func (pool *campaignPool) Run() {
 				if err != nil {
 					log.Printf("Error parsing test.html `%s`", err.Error())
 				}
-				message.Body = string(buf.Bytes())
+				eventMessage.Body = string(buf.Bytes())
 			}
 
 			// Pass-trough
 
 			// Just broadcast for now
-			pool.SendMessage(message)
+			pool.SendMessage(eventMessage)
 
 			break
 		}
 	}
 }
 
-func (pool *campaignPool) SendMessage(message message) {
+func (pool *campaignPool) SendMessage(message eventMessage) {
 	for client := range pool.Clients {
-		// Skip message on clients who are not recipient
+		// Skip eventMessage on clients who are not recipient
 		if message.Destinations != nil && len(message.Destinations) > 1 && !contains(message.Destinations, client.Id) {
 			continue
 		}

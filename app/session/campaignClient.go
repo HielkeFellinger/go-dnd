@@ -1,6 +1,7 @@
 package session
 
 import (
+	"encoding/json"
 	"github.com/gorilla/websocket"
 	"html"
 	"log"
@@ -22,25 +23,28 @@ func (c *campaignClient) Read() {
 
 	for {
 		// user input unsafe!
-		_, p, err := c.Conn.ReadMessage()
+		_, rawEvent, err := c.Conn.ReadMessage()
 		if err != nil {
 			log.Println(err)
 			return
 		}
 
-		pSafe := html.EscapeString(string(p))
-
-		log.Println(pSafe)
-
-		// Do some other actions based on client input
+		log.Println(string(rawEvent))
 
 		// Check the rights handle lead actions
-		if c.Lead {
-
+		var parsedMessage eventMessage
+		err = json.Unmarshal(rawEvent, &parsedMessage)
+		if err != nil {
+			log.Printf("Message failed with error: %+v\n", err.Error())
+			return
 		}
 
-		message := message{Source: c.Id, Type: TypeChatBroadcast, Body: pSafe}
-		c.Pool.Transmit <- message
-		log.Printf("Message Received: %+v\n", message)
+		// Make "safe"
+		parsedMessage.Body = html.EscapeString(parsedMessage.Body)
+
+		// Update with user credentials and send to channel
+		parsedMessage.Source = c.Id
+		log.Printf("Message Received: %+v\n", parsedMessage)
+		c.Pool.Transmit <- parsedMessage
 	}
 }

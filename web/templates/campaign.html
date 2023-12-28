@@ -21,7 +21,7 @@
             <div class="form-group">
                 <label for="message">Message</label>
                 <input type="text" id="message" name="message">
-                <button onclick="sendMessage()" class="btn btn-primary">Send</button>
+                <button onclick="sendChatMessage()" class="btn btn-primary">Send</button>
             </div>
             <br>
         </div>
@@ -78,59 +78,78 @@
     <!--  Starting Websocket  -->
     console.log("connecting to campaign: '{{.campaign.Title}}'")
 
-    let socket = new WebSocket("ws://" + document.location.host + "/campaign/session/{{.campaign.ID}}/ws");
+    var socket;
     let currentUser = "{{.user.Name}}"
+    let backoff = 1
 
-    if (window["WebSocket"]) {
-        console.log("WS support");
+    let connectWs = () => {
+        socket = new WebSocket("ws://" + document.location.host + "/campaign/session/{{.campaign.ID}}/ws")
 
         // On Open & Close
         socket.onopen = function (evt) {
             console.log("Connected to Websocket: true");
+            backoff = 1;
+            fullRefresh();
         }
         socket.onclose = function (evt) {
             console.log("Connected to Websocket: false");
+            // Attempting reconnect
+            setTimeout(() => {
+                console.log("Attempting to re-establish connection");
+                backoff ++;
+                connectWs();
+            }, (backoff * 1000))
         }
 
         // On message
-        socket.onmessage = function (evt) {
-            console.log(evt)
+        socket.onmessage = onSocketMessage
+    }
 
-            // Get Payload
-            const payLoad = JSON.parse(evt.data);
+    let onSocketMessage = (evt) => {
+        console.log(evt)
 
-            // Parse events
+        // Get Payload
+        const payLoad = JSON.parse(evt.data);
 
-            // Parse Character Events
-            if (payLoad.type >= 500 && payLoad.type < 600) {
-                handleCharacterEvents(payLoad)
-                return
-            }
+        // Parse events
 
-            // Parse Chat-messages
-            if (payLoad.type >= 800 && payLoad.type < 900) {
-                handleChatEvents(payLoad)
-                return
-            }
-
-            document.getElementById("event-content").innerHTML += evt.data;
+        // Parse Character Events
+        if (payLoad.type >= 500 && payLoad.type < 600) {
+            handleCharacterEvents(payLoad)
+            return
         }
-    } else {
-        alert("No WS support")
+
+        // Parse Chat-messages
+        if (payLoad.type >= 800 && payLoad.type < 900) {
+            handleChatEvents(payLoad)
+            return
+        }
+
+        document.getElementById("event-content").innerHTML += evt.data;
+    }
+
+    let fullRefresh = () => {
+        updateCharacterList()
+    }
+
+    let wrapMessage = (body, type) => {
+        return {body: body, type: type}
+    }
+
+    let sendEvent = (event) => {
+        console.log("Sending event to server: ", event)
+        socket.send(JSON.stringify(event))
     }
 
     let updateCharacterList = () => {
-        let msg = '' + document.getElementById("message").value
-        document.getElementById("message").value = ''
-        console.log("Sending Chat message to server: ", msg)
-        socket.send(msg)
+        let body = ''
+        sendEvent(wrapMessage(body, 500))
     }
 
-    let sendMessage = () => {
-        let msg = '' + document.getElementById("message").value
+    let sendChatMessage = () => {
+        let body = '' + document.getElementById("message").value
         document.getElementById("message").value = ''
-        console.log("Sending Chat message to server: ", msg)
-        socket.send(msg)
+        sendEvent(wrapMessage(body, 800))
     }
 
     let handleCharacterEvents = (data) => {
@@ -170,6 +189,14 @@
         // Show the current tab, and add an "active" class to the button that opened the tab
         document.getElementById(targetId).style.display = "block";
         document.getElementById(targetId + 'Link').className += " active";
+    }
+
+    // Innit Websocket only after loading all JS
+    if (window["WebSocket"]) {
+        console.log("WS support");
+        connectWs();
+    } else {
+        alert("No WS support");
     }
 
 </script>

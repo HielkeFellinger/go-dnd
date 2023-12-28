@@ -8,9 +8,10 @@ const (
 
 	TypeUserJoin event = 400
 
-	TypeLoadCharacters  event = 500
-	TypeAddCharacter    event = 501
-	TypeRemoveCharacter event = 502
+	TypeLoadGame        event = 500
+	TypeLoadCharacters  event = 501
+	TypeAddCharacter    event = 502
+	TypeRemoveCharacter event = 503
 
 	TypeLoadMap event = 600
 
@@ -20,7 +21,7 @@ const (
 	TypeChatWhisper   event = 802
 )
 
-type message struct {
+type eventMessage struct {
 	Source       string   `json:"source"`
 	Destinations []string `json:"-"`
 	Type         event    `json:"type"`
