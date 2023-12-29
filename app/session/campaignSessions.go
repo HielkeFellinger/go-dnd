@@ -9,16 +9,16 @@ import (
 var runningCampaignSessionsContainer = initCampaignSessionsContainer()
 
 type campaignSessionsContainer struct {
-	Register   chan *campaignPool
-	Unregister chan *campaignPool
-	Pools      map[*campaignPool]bool
+	Register   chan *baseCampaignPool
+	Unregister chan *baseCampaignPool
+	Pools      map[*baseCampaignPool]bool
 }
 
 func initCampaignSessionsContainer() *campaignSessionsContainer {
 	c := &campaignSessionsContainer{
-		Register:   make(chan *campaignPool),
-		Unregister: make(chan *campaignPool),
-		Pools:      make(map[*campaignPool]bool),
+		Register:   make(chan *baseCampaignPool),
+		Unregister: make(chan *baseCampaignPool),
+		Pools:      make(map[*baseCampaignPool]bool),
 	}
 	go c.Run()
 
@@ -52,7 +52,7 @@ func (c *campaignSessionsContainer) Run() {
 
 func (c *campaignSessionsContainer) initAndRegisterCampaignPool(campaign models.Campaign) {
 	pool := initCampaignPool(campaign.ID, campaign.Lead.Name)
-	pool.World = game_engine.InitCampaignWorld(campaign)
+	pool.Engine = game_engine.InitGameEngine(campaign)
 	go pool.Run()
 	runningCampaignSessionsContainer.Register <- pool
 }
@@ -66,7 +66,7 @@ func (c *campaignSessionsContainer) addClientToCampaignPool(id uint, client *cam
 	return false
 }
 
-func (c *campaignSessionsContainer) getCampaignPoolById(id uint) *campaignPool {
+func (c *campaignSessionsContainer) getCampaignPoolById(id uint) *baseCampaignPool {
 	for pool := range c.Pools {
 		if pool != nil && pool.Id == id {
 			return pool

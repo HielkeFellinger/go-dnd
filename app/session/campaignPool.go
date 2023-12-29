@@ -1,61 +1,68 @@
 package session
 
 import (
-	"bytes"
 	"fmt"
-	"github.com/hielkefellinger/go-dnd/app/ecs"
-	"github.com/hielkefellinger/go-dnd/app/models"
-	"html/template"
+	"github.com/hielkefellinger/go-dnd/app/game_engine"
 	"log"
-	"strings"
 	"time"
 )
 
-type campaignPool struct {
+type baseCampaignPool struct {
 	Id         uint
 	LeadId     string
 	Register   chan *campaignClient
 	Unregister chan *campaignClient
 	Clients    map[*campaignClient]bool
-	Transmit   chan eventMessage
-	World      ecs.World
+	Receive    chan game_engine.EventMessage
+	Engine     game_engine.Engine
 }
 
-func initCampaignPool(id uint, leadId string) *campaignPool {
-	return &campaignPool{
+func (pool *baseCampaignPool) GetId() uint {
+	return pool.Id
+}
+
+func (pool *baseCampaignPool) GetLeadId() string {
+	return pool.LeadId
+}
+
+func (pool *baseCampaignPool) GetEngine() game_engine.Engine {
+	return pool.Engine
+}
+
+func (pool *baseCampaignPool) TransmitEventMessage(message game_engine.EventMessage) {
+	log.Printf("Pool internal: %+v\n", message)
+	pool.transmitMessage(message)
+}
+
+func initCampaignPool(id uint, leadId string) *baseCampaignPool {
+	return &baseCampaignPool{
 		Id:         id,
 		LeadId:     leadId,
 		Register:   make(chan *campaignClient),
 		Unregister: make(chan *campaignClient),
 		Clients:    make(map[*campaignClient]bool),
-		Transmit:   make(chan eventMessage),
+		Receive:    make(chan game_engine.EventMessage),
 	}
 }
 
-func (pool *campaignPool) Run() {
+func (pool *baseCampaignPool) Run() {
 	for {
 		select {
 		case client := <-pool.Register:
 			pool.Clients[client] = true
 			log.Printf("Size of Connection Pool `%d`: %d", pool.Id, len(pool.Clients))
 
-			pool.SendMessage(eventMessage{
-				Source: "Server", Type: TypeUserJoin,
+			pool.transmitMessage(game_engine.EventMessage{
+				Source: "Server", Type: game_engine.TypeUserJoin,
 				Body: fmt.Sprintf("User '%s' Joins the content", client.Id),
 			})
-
-			// Send game initially
-			//pool.SendMessage(eventMessage{
-			//	Source: "Server", Type: TypeLoadGame,
-			//	Body: pool.World,
-			//})
 
 			break
 		case client := <-pool.Unregister:
 			// Test if user is Lead, if so close the pool
 			if client.Lead {
-				// Send closing eventMessage
-				pool.SendMessage(eventMessage{Source: "Server", Type: TypeGameClose, Body: "Closing Game!"})
+				// Send closing EventMessage
+				pool.transmitMessage(game_engine.EventMessage{Source: "Server", Type: game_engine.TypeGameClose, Body: "Closing Game!"})
 
 				// Close content; and remove from session container @todo Save state?
 				for client := range pool.Clients {
@@ -69,45 +76,31 @@ func (pool *campaignPool) Run() {
 			log.Printf("Size of Connection Pool `%d`: %d", pool.Id, len(pool.Clients))
 
 			break
-		case eventMessage := <-pool.Transmit:
+		case eventMessage := <-pool.Receive:
+			log.Printf("Message Received Channel: %+v\n", eventMessage)
 			if eventMessage.DateTime == "" {
 				now := time.Now()
 				eventMessage.DateTime = fmt.Sprintf("%d-%d-%d %d:%d:%d", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second())
 			}
 
-			// Check Commands like whisper or dice
-
-			// HTML over Websocket Test!
-			if strings.Contains(eventMessage.Body, "char") {
-				eventMessage.Type = TypeLoadCharacters
-				chars := []models.Character{
-					{Name: "Kaas - 1"}, {Name: "Kaas - 2"},
-				}
-				data := make(map[string]any)
-				data["chars"] = chars
-
-				var buf bytes.Buffer
-				tmpl := template.Must(template.ParseFiles("web/templates/test.html"))
-				err := tmpl.ExecuteTemplate(&buf, "chars", data)
-				if err != nil {
-					log.Printf("Error parsing test.html `%s`", err.Error())
-				}
-				eventMessage.Body = string(buf.Bytes())
+			err := pool.Engine.GetEventMessageHandler().HandleEventMessage(eventMessage, pool)
+			if err != nil {
+				// @todo Handle error
 			}
-
-			// Pass-trough
-
-			// Just broadcast for now
-			pool.SendMessage(eventMessage)
-
 			break
 		}
 	}
 }
 
-func (pool *campaignPool) SendMessage(message eventMessage) {
+func (pool *baseCampaignPool) transmitMessage(message game_engine.EventMessage) {
+	log.Printf("Message Transmit Channel: %+v\n", message)
+	if message.DateTime == "" {
+		now := time.Now()
+		message.DateTime = fmt.Sprintf("%d-%d-%d %d:%d:%d", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second())
+	}
+
 	for client := range pool.Clients {
-		// Skip eventMessage on clients who are not recipient
+		// Skip EventMessage on clients who are not recipient
 		if message.Destinations != nil && len(message.Destinations) > 1 && !contains(message.Destinations, client.Id) {
 			continue
 		}
@@ -115,9 +108,10 @@ func (pool *campaignPool) SendMessage(message eventMessage) {
 		// Send JSON to clients
 		err := client.Conn.WriteJSON(message)
 		if err != nil {
-			// Log failure
+			// @todo Log failure
 		}
 	}
+	log.Printf("Message(s) Transmitted: %+v\n", message)
 }
 
 func contains(s []string, str string) bool {

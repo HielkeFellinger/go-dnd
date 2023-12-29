@@ -3,6 +3,7 @@ package session
 import (
 	"encoding/json"
 	"github.com/gorilla/websocket"
+	"github.com/hielkefellinger/go-dnd/app/game_engine"
 	"html"
 	"log"
 )
@@ -11,7 +12,15 @@ type campaignClient struct {
 	Id   string
 	Lead bool
 	Conn *websocket.Conn
-	Pool *campaignPool
+	Pool *baseCampaignPool
+}
+
+func (c *campaignClient) GetId() string {
+	return c.Id
+}
+
+func (c *campaignClient) IsLead() bool {
+	return c.Lead
 }
 
 func (c *campaignClient) Read() {
@@ -32,7 +41,7 @@ func (c *campaignClient) Read() {
 		log.Println(string(rawEvent))
 
 		// Check the rights handle lead actions
-		var parsedMessage eventMessage
+		var parsedMessage game_engine.EventMessage
 		err = json.Unmarshal(rawEvent, &parsedMessage)
 		if err != nil {
 			log.Printf("Message failed with error: %+v\n", err.Error())
@@ -44,7 +53,6 @@ func (c *campaignClient) Read() {
 
 		// Update with user credentials and send to channel
 		parsedMessage.Source = c.Id
-		log.Printf("Message Received: %+v\n", parsedMessage)
-		c.Pool.Transmit <- parsedMessage
+		c.Pool.Receive <- parsedMessage
 	}
 }
