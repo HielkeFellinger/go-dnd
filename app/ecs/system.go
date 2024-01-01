@@ -1,4 +1,7 @@
 package ecs
 
-type System struct {
+type System interface {
+}
+
+type BaseSystem struct {
 }

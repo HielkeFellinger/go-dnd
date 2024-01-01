@@ -10,27 +10,31 @@ type Entity interface {
 	GetId() uuid.UUID
 	GetName() string
 	GetVersion() uint
+	HasComponentType(ct uint64) bool
 	AddComponent(c Component) error
 	LoadFromRawEntity(raw RawEntity) error
 	hasCircularRef(uuid uuid.UUID) bool
 }
 
 type BaseEntity struct {
-	Id              uuid.UUID
-	Name            string
-	Version         uint // Placeholder; take changes into account
-	Description     string
-	Components      []Component
-	RefEntities     []Entity
-	uuidToComponent map[uuid.UUID]Component
-	uuidToRelEntity map[uuid.UUID]Entity
+	Id                             uuid.UUID
+	Name                           string
+	Version                        uint // Placeholder; take changes into account
+	Description                    string
+	ComponentFlag                  uint64
+	Components                     []Component
+	RefEntities                    []Entity
+	uuidToComponent                map[uuid.UUID]Component
+	uuidToRelEntity                map[uuid.UUID]Entity
+	componentTypeToComponentArrMap map[uint64][]Component
 }
 
 func NewEntity() BaseEntity {
 	return BaseEntity{
-		Id:              uuid.New(),
-		uuidToComponent: make(map[uuid.UUID]Component),
-		uuidToRelEntity: make(map[uuid.UUID]Entity),
+		Id:                             uuid.New(),
+		uuidToComponent:                make(map[uuid.UUID]Component),
+		uuidToRelEntity:                make(map[uuid.UUID]Entity),
+		componentTypeToComponentArrMap: make(map[uint64][]Component),
 	}
 }
 
@@ -49,6 +53,11 @@ func (e *BaseEntity) GetName() string {
 func (e *BaseEntity) LoadFromRawEntity(raw RawEntity) error {
 	e.WithName(raw.Name).WithDescription(raw.Description)
 	return nil
+}
+
+func (e *BaseEntity) HasComponentType(ct uint64) bool {
+	_, ok := e.componentTypeToComponentArrMap[ct]
+	return ok
 }
 
 func (e *BaseEntity) AddComponent(c Component) error {
@@ -70,6 +79,12 @@ func (e *BaseEntity) AddComponent(c Component) error {
 
 	e.Components = append(e.Components, c)
 	e.uuidToComponent[c.GetId()] = c
+	if arr, ok := e.componentTypeToComponentArrMap[c.ComponentType()]; ok {
+		arr = append(arr, c)
+	} else {
+		e.componentTypeToComponentArrMap[c.ComponentType()] = []Component{c}
+	}
+
 	return nil
 }
 

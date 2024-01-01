@@ -3,24 +3,27 @@ package ecs
 import "github.com/google/uuid"
 
 type World interface {
+	AddEntity(e Entity)
+	AddEntities(e []Entity)
 }
 
 type BaseWorld struct {
 	systems  []System
 	entities []Entity
 
-	UuidToEntity map[uuid.UUID]Entity
+	UuidToEntity          map[uuid.UUID]Entity
+	UuidToCharacterEntity map[uuid.UUID]Entity
+	UuidToMapEntity       map[uuid.UUID]Entity
 }
 
 func (w *BaseWorld) AddEntity(e Entity) {
-
-	// Add more checks and mapping + functions
+	w.UuidToEntity[e.GetId()] = e
 
 	w.entities = append(w.entities, e)
 }
 
 func (w *BaseWorld) AddEntities(e []Entity) {
-
-	// Add more checks and mapping + functions
-	w.entities = append(w.entities, e...)
+	for _, entity := range e {
+		w.AddEntity(entity)
+	}
 }
