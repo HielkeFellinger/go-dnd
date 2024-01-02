@@ -13,7 +13,7 @@ import (
 const SpaceGameTest string = "../../content/space/entities.yml"
 const SpaceGame string = "./content/space/entities.yml"
 
-func loadGame(gameFile string) ecs.BaseWorld {
+func loadGame(gameFile string) ecs.World {
 
 	log.Println("Loading raw/base Game File")
 	path, err := os.Getwd()
@@ -34,27 +34,23 @@ func loadGame(gameFile string) ecs.BaseWorld {
 
 	idToUuidDict := make(map[string]uuid.UUID)
 	uuidToEntityDict := make(map[uuid.UUID]ecs.Entity)
-	world := ecs.BaseWorld{}
 	log.Println("Parsing raw/base Game Items (Entities)")
 	err, items := parseRawEntity(game.Items, idToUuidDict, uuidToEntityDict)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-	world.AddEntities(items)
 
 	log.Println("Parsing raw/base Game Characters (Entities)")
 	err, chars := parseRawEntity(game.Chars, idToUuidDict, uuidToEntityDict)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-	world.AddEntities(chars)
 
 	log.Println("Parsing raw/base Game Maps (Entities)")
 	err, maps := parseRawEntity(game.Maps, idToUuidDict, uuidToEntityDict)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-	world.AddEntities(maps)
 
 	log.Println("Parsing raw/base Game Items (Entity Components)")
 	parseRawComponentsOfEntity(game, game.Items, uuidToEntityDict, idToUuidDict)
@@ -63,7 +59,12 @@ func loadGame(gameFile string) ecs.BaseWorld {
 	log.Println("Parsing raw/base Game Maps (Entity Components)")
 	parseRawComponentsOfEntity(game, game.Maps, uuidToEntityDict, idToUuidDict)
 
-	return world
+	// Add the fully updated Entities to the world
+	world := ecs.NewBaseWorld()
+	world.AddEntities(items)
+	world.AddEntities(chars)
+	world.AddEntities(maps)
+	return &world
 }
 
 func parseRawComponentsOfEntity(game ecs.RawGameFile, rawEntities []ecs.RawEntity, uuidToEntityDict map[uuid.UUID]ecs.Entity,

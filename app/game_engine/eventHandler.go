@@ -34,11 +34,16 @@ func (e *baseEventMessageHandler) handleGameLoadEvents(message EventMessage, poo
 		log.Printf("Building Message: %+v\n", message)
 		var transmitMessage = EventMessage{}
 		transmitMessage.Type = TypeLoadCharacters
-		chars := []models.Character{
-			{Name: "Kaas - 1"}, {Name: "Kaas - 2"},
+
+		charEntities := pool.GetEngine().GetWorld().GetCharacterEntities()
+		characters := make([]models.Character, len(charEntities))
+
+		for _, charEntity := range charEntities {
+			characters = append(characters, models.Character{Name: charEntity.GetName()})
 		}
+
 		data := make(map[string]any)
-		data["chars"] = chars
+		data["chars"] = characters
 
 		var buf bytes.Buffer
 		tmpl := template.Must(template.ParseFiles("web/templates/test.html"))
