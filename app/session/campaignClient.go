@@ -41,18 +41,21 @@ func (c *campaignClient) Read() {
 		log.Println(string(rawEvent))
 
 		// Check the rights handle lead actions
-		var parsedMessage game_engine.EventMessage
-		err = json.Unmarshal(rawEvent, &parsedMessage)
+		var rawMessage game_engine.EventMessage
+		err = json.Unmarshal(rawEvent, &rawMessage)
 		if err != nil {
 			log.Printf("Message failed with error: %+v\n", err.Error())
 			return
 		}
 
 		// Make "safe"
-		parsedMessage.Body = html.EscapeString(parsedMessage.Body)
+		parsedMessage := game_engine.NewEventMessage()
+		parsedMessage.Body = html.EscapeString(rawMessage.Body)
+		parsedMessage.Source = c.Id
+		parsedMessage.Type = rawMessage.Type
+		parsedMessage.Destinations = rawMessage.Destinations
 
 		// Update with user credentials and send to channel
-		parsedMessage.Source = c.Id
 		c.Pool.Receive <- parsedMessage
 	}
 }

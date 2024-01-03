@@ -32,13 +32,14 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 func (e *baseEventMessageHandler) handleGameLoadEvents(message EventMessage, pool CampaignPool) error {
 	if message.Type == TypeLoadCharacters || message.Type == TypeLoadGame {
 		log.Printf("Building Message: %+v\n", message)
-		var transmitMessage = EventMessage{}
+		var transmitMessage = NewEventMessage()
 		transmitMessage.Type = TypeLoadCharacters
 
 		charEntities := pool.GetEngine().GetWorld().GetCharacterEntities()
-		characters := make([]models.Character, len(charEntities))
 
+		var characters []models.Character
 		for _, charEntity := range charEntities {
+			log.Printf("%v", charEntity)
 			characters = append(characters, models.Character{Name: charEntity.GetName()})
 		}
 

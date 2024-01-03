@@ -1,5 +1,10 @@
 package game_engine
 
+import (
+	"github.com/google/uuid"
+	"time"
+)
+
 type EventType int
 
 const (
@@ -22,9 +27,21 @@ const (
 )
 
 type EventMessage struct {
+	Id           uuid.UUID `json:"-"`
 	Source       string    `json:"source"`
 	Destinations []string  `json:"-"`
 	Type         EventType `json:"type"`
 	Body         string    `json:"body"`
 	DateTime     string    `json:"dateTime"`
+}
+
+func NewEventMessage() EventMessage {
+	m := EventMessage{Id: uuid.New()}
+	m.ReloadDateTime()
+	return m
+}
+
+func (m *EventMessage) ReloadDateTime() {
+	now := time.Now()
+	m.DateTime = now.Format("2006-01-02 15:04:05")
 }

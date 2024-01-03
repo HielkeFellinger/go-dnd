@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/hielkefellinger/go-dnd/app/game_engine"
 	"log"
-	"time"
 )
 
 type baseCampaignPool struct {
@@ -52,17 +51,22 @@ func (pool *baseCampaignPool) Run() {
 			pool.Clients[client] = true
 			log.Printf("Size of Connection Pool `%d`: %d", pool.Id, len(pool.Clients))
 
-			pool.transmitMessage(game_engine.EventMessage{
-				Source: "Server", Type: game_engine.TypeUserJoin,
-				Body: fmt.Sprintf("User '%s' Joins the content", client.Id),
-			})
+			var transmitMessage = game_engine.NewEventMessage()
+			transmitMessage.Type = game_engine.TypeUserJoin
+			transmitMessage.Source = "Server"
+			transmitMessage.Body = fmt.Sprintf("User '%s' Joins the content", client.Id)
+			pool.transmitMessage(transmitMessage)
 
 			break
 		case client := <-pool.Unregister:
 			// Test if user is Lead, if so close the pool
 			if client.Lead {
 				// Send closing EventMessage
-				pool.transmitMessage(game_engine.EventMessage{Source: "Server", Type: game_engine.TypeGameClose, Body: "Closing Game!"})
+				var transmitMessage = game_engine.NewEventMessage()
+				transmitMessage.Type = game_engine.TypeGameClose
+				transmitMessage.Source = "Server"
+				transmitMessage.Body = "Closing Game!"
+				pool.transmitMessage(transmitMessage)
 
 				// Close content; and remove from session container @todo Save state?
 				for client := range pool.Clients {
@@ -77,11 +81,7 @@ func (pool *baseCampaignPool) Run() {
 
 			break
 		case eventMessage := <-pool.Receive:
-			log.Printf("Message Received Channel: %+v\n", eventMessage)
-			if eventMessage.DateTime == "" {
-				now := time.Now()
-				eventMessage.DateTime = fmt.Sprintf("%d-%d-%d %d:%d:%d", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second())
-			}
+			log.Printf("Received Channel Message ID: '%s'", eventMessage.Id)
 
 			err := pool.Engine.GetEventMessageHandler().HandleEventMessage(eventMessage, pool)
 			if err != nil {
@@ -93,12 +93,6 @@ func (pool *baseCampaignPool) Run() {
 }
 
 func (pool *baseCampaignPool) transmitMessage(message game_engine.EventMessage) {
-	log.Printf("Message Transmit Channel: %+v\n", message)
-	if message.DateTime == "" {
-		now := time.Now()
-		message.DateTime = fmt.Sprintf("%d-%d-%d %d:%d:%d", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second())
-	}
-
 	for client := range pool.Clients {
 		// Skip EventMessage on clients who are not recipient
 		if message.Destinations != nil && len(message.Destinations) > 1 && !contains(message.Destinations, client.Id) {
@@ -111,7 +105,7 @@ func (pool *baseCampaignPool) transmitMessage(message game_engine.EventMessage) 
 			// @todo Log failure
 		}
 	}
-	log.Printf("Message(s) Transmitted: %+v\n", message)
+	log.Printf("Message(s) Transmitted ID: '%s'", message.Id)
 }
 
 func contains(s []string, str string) bool {

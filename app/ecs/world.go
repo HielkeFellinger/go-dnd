@@ -1,6 +1,8 @@
 package ecs
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+)
 
 type World interface {
 	AddEntity(e Entity)
@@ -54,7 +56,7 @@ func (w *BaseWorld) GetMapEntities() []Entity {
 }
 
 func (w *BaseWorld) getEntityValuesOfMap(dict map[uuid.UUID]Entity) []Entity {
-	values := make([]Entity, 0, len(dict))
+	var values []Entity
 	for _, v := range dict {
 		values = append(values, v)
 	}
