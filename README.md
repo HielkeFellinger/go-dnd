@@ -1,5 +1,8 @@
 # go-dnd
 
+[![Build and Test](https://github.com/HielkeFellinger/go-dnd/actions/workflows/go.yml/badge.svg)](https://github.com/HielkeFellinger/go-dnd/actions/workflows/go.yml)
+
+
 This will, most likely, be nothing more than a simple gui+engine for a D&D/TTRPG oneshot, 
 Build for entertainment (On LAN), with friends and getting familiar with Go.
 Do NOT look at this software as an example for anything.
