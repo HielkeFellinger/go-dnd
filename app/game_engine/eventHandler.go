@@ -2,6 +2,7 @@ package game_engine
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/hielkefellinger/go-dnd/app/models"
 	"log"
 	"text/template"
@@ -21,6 +22,10 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 		return e.handleGameLoadEvents(message, pool)
 	}
 
+	if message.Type == TypeLoadMap || message.Type == TypeLoadGame {
+
+	}
+
 	if message.Type >= TypeChatBroadcast && message.Type <= TypeChatWhisper {
 		// Just pass message trough
 		pool.TransmitEventMessage(message)
@@ -31,7 +36,6 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 
 func (e *baseEventMessageHandler) handleGameLoadEvents(message EventMessage, pool CampaignPool) error {
 	if message.Type == TypeLoadCharacters || message.Type == TypeLoadGame {
-		log.Printf("Building Message: %+v\n", message)
 		var transmitMessage = NewEventMessage()
 		transmitMessage.Type = TypeLoadCharacters
 
@@ -40,7 +44,7 @@ func (e *baseEventMessageHandler) handleGameLoadEvents(message EventMessage, poo
 		// Check if GM/DM if not filter non-player controlled characters
 
 		// Load Focus Map Related Details
-		// - Gray out non present players;
+		// - Gray out non-present players;
 
 		var characters []models.Character
 		for _, charEntity := range charEntities {
@@ -51,15 +55,18 @@ func (e *baseEventMessageHandler) handleGameLoadEvents(message EventMessage, poo
 		data := make(map[string]any)
 		data["chars"] = characters
 
-		var buf bytes.Buffer
-		tmpl := template.Must(template.ParseFiles("web/templates/characterRibbon.html"))
-		err := tmpl.ExecuteTemplate(&buf, "chars", data)
-		if err != nil {
-			log.Printf("Error parsing characterRibbon.html `%s`", err.Error())
-		}
-		transmitMessage.Body = string(buf.Bytes())
-		log.Printf("Build Message: %+v\n", transmitMessage)
+		transmitMessage.Body = e.handleLoadHtmlBody("characterRibbon.html", "chars", data)
 		pool.TransmitEventMessage(transmitMessage)
 	}
 	return nil
+}
+
+func (e *baseEventMessageHandler) handleLoadHtmlBody(fileName string, templateName string, data map[string]any) string {
+	var buf bytes.Buffer
+	tmpl := template.Must(template.ParseFiles(fmt.Sprintf("web/templates/%s", fileName)))
+	err := tmpl.ExecuteTemplate(&buf, templateName, data)
+	if err != nil {
+		log.Printf("Error parsing %s `%s`", fileName, err.Error())
+	}
+	return string(buf.Bytes())
 }
