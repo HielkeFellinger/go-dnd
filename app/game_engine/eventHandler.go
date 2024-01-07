@@ -37,6 +37,11 @@ func (e *baseEventMessageHandler) handleGameLoadEvents(message EventMessage, poo
 
 		charEntities := pool.GetEngine().GetWorld().GetCharacterEntities()
 
+		// Check if GM/DM if not filter non-player controlled characters
+
+		// Load Focus Map Related Details
+		// - Gray out non present players;
+
 		var characters []models.Character
 		for _, charEntity := range charEntities {
 			log.Printf("%v", charEntity)
@@ -47,10 +52,10 @@ func (e *baseEventMessageHandler) handleGameLoadEvents(message EventMessage, poo
 		data["chars"] = characters
 
 		var buf bytes.Buffer
-		tmpl := template.Must(template.ParseFiles("web/templates/test.html"))
+		tmpl := template.Must(template.ParseFiles("web/templates/characterRibbon.html"))
 		err := tmpl.ExecuteTemplate(&buf, "chars", data)
 		if err != nil {
-			log.Printf("Error parsing test.html `%s`", err.Error())
+			log.Printf("Error parsing characterRibbon.html `%s`", err.Error())
 		}
 		transmitMessage.Body = string(buf.Bytes())
 		log.Printf("Build Message: %+v\n", transmitMessage)
