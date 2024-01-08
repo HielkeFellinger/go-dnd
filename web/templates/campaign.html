@@ -31,35 +31,37 @@
                 <h4> Characters </h4>
             </div>
             <hr>
-            <div id="campaign-content">
+            <div id="campaign-screen">
                 <ul id="campaign-tabs" class="nav nav-tabs">
                     {{ if .campaign.UserIsLead }}
-                    <li class="nav-item">
+                    <li class="nav-item" id="manageMapsList">
                         <button id="manageMapsLink" class="nav-link" onclick="openTab('manageMaps')" style="color: goldenrod">Edit Maps</button>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item" id="manageCharactersList">
                         <button id="manageCharactersLink" class="nav-link" onclick="openTab('manageCharacters')" style="color: goldenrod">Edit Characters</button>
                     </li>
                     {{ end }}
-                    <li class="nav-item">
+                    <li class="nav-item" id="currentList">
                         <button id="currentLink" class="nav-link active" onclick="openTab('current')">Current</button>
                     </li>
                 </ul>
 
-                <!-- Tab Content -->
-                {{ if .campaign.UserIsLead }}
-                <div id="manageMaps" class="tab-content" style="display: none">
-                    <h3>CRUD Map!</h3>
-                    <p>Map stuff</p>
-                </div>
-                <div id="manageCharacters" class="tab-content" style="display: none">
-                    <h3>Add Character!</h3>
-                    <p>Character</p>
-                </div>
-                {{end}}
+                <div id="campaign-content">
+                    <!-- Tab Content -->
+                    {{ if .campaign.UserIsLead }}
+                    <div id="manageMaps" class="tab-content" style="display: none">
+                        <h3>CRUD Map!</h3>
+                        <p>Map stuff</p>
+                    </div>
+                    <div id="manageCharacters" class="tab-content" style="display: none">
+                        <h3>Add Character!</h3>
+                        <p>Character</p>
+                    </div>
+                    {{end}}
 
-                <div id="current" class="tab-content">
-                    <h3> No active event </h3>
+                    <div id="current" class="tab-content">
+                        <h3> No active event </h3>
+                    </div>
                 </div>
             </div>
         </div>
@@ -114,8 +116,14 @@
         // Parse events
 
         // Parse Character Events
-        if (payLoad.type >= 500 && payLoad.type < 600) {
+        if (payLoad.type >= 500 && payLoad.type < 510) {
             handleCharacterEvents(payLoad)
+            return
+        }
+
+        // Parse Map Events
+        if (payLoad.type >= 530 && payLoad.type < 540) {
+            handleCampaignContentEvents(payLoad)
             return
         }
 
@@ -154,6 +162,33 @@
 
     let handleCharacterEvents = (data) => {
         document.getElementById("char-content").innerHTML = data.body;
+    }
+
+    let handleCampaignContentEvents = (data) => {
+        body = JSON.parse(data.body)
+        var tabs = body.Tabs
+        console.log(tabs)
+        var contentData = body.Content
+        console.log(contentData)
+
+        for (let index in contentData) {
+            let doc = document.getElementById(contentData[index].Id)
+            if (doc) {
+                doc.remove()
+            }
+
+            document.getElementById("campaign-content").innerHTML += contentData[index].Html
+        }
+
+        for (let index in tabs) {
+            let doc = document.getElementById(tabs[index].Id + "List")
+            if (doc) {
+                doc.remove()
+
+            }
+            // campaign-tabs
+            document.getElementById("campaign-tabs").innerHTML += tabs[index].Html
+        }
     }
 
     let handleChatEvents = (data) => {

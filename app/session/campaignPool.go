@@ -29,7 +29,7 @@ func (pool *baseCampaignPool) GetEngine() game_engine.Engine {
 }
 
 func (pool *baseCampaignPool) TransmitEventMessage(message game_engine.EventMessage) {
-	log.Printf("Pool internal: %+v\n", message)
+	log.Printf("Pool internal: %+v\n", message.Id)
 	pool.transmitMessage(message)
 }
 
