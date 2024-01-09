@@ -1,0 +1,17 @@
+{{define "campaignContentMap"}}
+<div id="{{.id}}" class="tab-content" style="display: none">
+    <div>
+        <h3> {{ .name }} </h3>
+        <span>MAP NAV BAR - y.{{.y}}-x.{{.x}}</span>
+    </div>
+    <div style="width: fit-content">
+        {{ range $yVal := .y}}
+            {{ range $xVal := $.x}}
+            <div id="{{$.id}}-y{{$yVal}}-x{{$xVal}}" style="max-height: 3em; max-width: 3em; min-height: 3em; min-width: 3em; border: solid black; float: left"></div>
+            {{ end }}
+            <br>
+        {{ end }}
+
+    </div>
+</div>
+{{end}}

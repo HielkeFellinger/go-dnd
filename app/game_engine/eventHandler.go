@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/hielkefellinger/go-dnd/app/models"
 	"log"
+	"strconv"
 	"text/template"
 )
 
@@ -55,8 +56,8 @@ func (e *baseEventMessageHandler) handleMapEvents(message EventMessage, pool Cam
 
 		log.Printf("----- Maps: '%v'", mapEntities)
 		for _, mapEntity := range mapEntities {
-			var tab = models.CampaignTabItem{}
 			var content = models.CampaignContentItem{}
+			var tab = models.CampaignTabItem{}
 
 			tab.Id = mapEntity.GetId().String()
 			content.Id = mapEntity.GetId().String()
@@ -66,7 +67,24 @@ func (e *baseEventMessageHandler) handleMapEvents(message EventMessage, pool Cam
 			data["name"] = mapEntity.GetName()
 
 			tab.Html = e.handleLoadHtmlBody("campaignSelector.html", "campaignSelector", data)
-			content.Html = e.handleLoadHtmlBody("campaignContent.html", "campaignContent", data)
+
+			// Add extra data, like chars
+			x := 5
+			y := 7
+
+			xVal := make([]string, x)
+			yVal := make([]string, y)
+
+			for i := range xVal {
+				xVal[i] = strconv.Itoa(i)
+			}
+			for i := range yVal {
+				yVal[i] = strconv.Itoa(i)
+			}
+
+			data["x"] = xVal
+			data["y"] = yVal
+			content.Html = e.handleLoadHtmlBody("campaignContentMap.html", "campaignContentMap", data)
 
 			campaignScreenContent.Tabs = append(campaignScreenContent.Tabs, tab)
 			campaignScreenContent.Content = append(campaignScreenContent.Content, content)

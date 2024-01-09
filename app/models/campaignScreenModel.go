@@ -13,8 +13,9 @@ func NewCampaignScreenContent() CampaignScreenContent {
 }
 
 type CampaignContentItem struct {
-	Id   string
-	Html string
+	Id      string
+	Html    string
+	Objects string
 }
 
 type CampaignTabItem struct {
