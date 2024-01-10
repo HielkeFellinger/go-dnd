@@ -21,6 +21,7 @@ type_translation:
   Faction: 18
   Character: 19
   Map: 20
+  Image: 21
   # Relational Types
   ControlsRelation: 40
   HasRelation: 41
@@ -62,8 +63,12 @@ base_maps:
           active: true
       - type: Area
         params:
-          length: 5
-          width: 5
+          length: 30
+          width: 29
+      - type: Image
+        params:
+          name: background
+          url: '/images/map_30x29.png'
 
 base_characters:
   - id: inventory

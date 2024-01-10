@@ -20,7 +20,7 @@ func NewMapComponent() ecs.Component {
 
 func (c *MapComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
 	loadedValues := 0
-	if value, ok := raw.Params["hidden"]; ok {
+	if value, ok := raw.Params["active"]; ok {
 		if err := c.ActiveFromString(value); err != nil {
 			return err
 		}

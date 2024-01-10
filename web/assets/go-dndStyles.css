@@ -1,4 +1,21 @@
 
+/* Defaults */
+
+div {
+    background: #222222;
+    color: #F5F5DC;
+}
+
+nav {
+    background: #222222;
+    color: #F5F5DC;
+}
+
+body {
+    background: #222222;
+    color: #F5F5DC;
+}
+
 
 /* Chat */
 
@@ -7,8 +24,8 @@
 }
 
 .chat-screen .chat-content {
-    min-height: calc(100% - 150px);
-    max-height: calc(100% - 150px);
+    min-height: calc(100vh - 150px);
+    max-height: calc(100vh - 150px);
     overflow-y: scroll
 }
 

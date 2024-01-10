@@ -46,6 +46,8 @@ func MapIntToTypeV0(rawId int) uint64 {
 		return ecs.CharacterComponentType
 	case 20:
 		return ecs.MapComponentType
+	case 21:
+		return ecs.ImageComponentType
 
 	case 40:
 		return ecs.ControlsRelationComponentType
@@ -106,6 +108,8 @@ func MapTypeToConstructorFunction(componentType uint64) func() ecs.Component {
 		return NewCharacterComponent
 	case ecs.MapComponentType:
 		return NewMapComponent
+	case ecs.ImageComponentType:
+		return NewImageComponent
 
 	case ecs.ControlsRelationComponentType:
 		return NewControlsRelationComponent

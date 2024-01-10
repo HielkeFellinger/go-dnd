@@ -34,6 +34,7 @@ func HandleControllerRoutes(router *gin.Engine) {
 
 func HandleStaticContent(router *gin.Engine) {
 	router.Static("/assets", "web/assets")
+	router.Static("/images", "web/images")
 }
 
 func HandleTemplates(router *gin.Engine) {

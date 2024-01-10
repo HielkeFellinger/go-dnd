@@ -29,6 +29,7 @@ const (
 	FactionComponentType      uint64 = 1 << 18
 	CharacterComponentType    uint64 = 1 << 19
 	MapComponentType          uint64 = 1 << 20
+	ImageComponentType        uint64 = 1 << 21
 
 	/* Relational ComponentTypes */
 
