@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/hielkefellinger/go-dnd/app/ecs_model_translation"
 	"github.com/hielkefellinger/go-dnd/app/models"
 	"log"
 	"strconv"
@@ -59,22 +60,22 @@ func (e *baseEventMessageHandler) handleMapEvents(message EventMessage, pool Cam
 			var content = models.CampaignContentItem{}
 			var tab = models.CampaignTabItem{}
 
-			tab.Id = mapEntity.GetId().String()
-			content.Id = mapEntity.GetId().String()
+			componentMap := ecs_model_translation.MapEntityToCampaignMapModel(mapEntity)
+			tab.Id = componentMap.Id
+			content.Id = componentMap.Id
 
 			data := make(map[string]any)
 			data["id"] = tab.Id
-			data["name"] = mapEntity.GetName()
+			data["name"] = componentMap.Name
 
 			tab.Html = e.handleLoadHtmlBody("campaignSelector.html", "campaignSelector", data)
 
 			// Add extra data, like chars
-			x := 5
-			y := 7
+			x := componentMap.X
+			y := componentMap.Y
 
 			xVal := make([]string, x)
 			yVal := make([]string, y)
-
 			for i := range xVal {
 				xVal[i] = strconv.Itoa(i)
 			}
@@ -84,6 +85,7 @@ func (e *baseEventMessageHandler) handleMapEvents(message EventMessage, pool Cam
 
 			data["x"] = xVal
 			data["y"] = yVal
+			data["backgroundImage"] = componentMap.Image.Url
 			content.Html = e.handleLoadHtmlBody("campaignContentMap.html", "campaignContentMap", data)
 
 			campaignScreenContent.Tabs = append(campaignScreenContent.Tabs, tab)

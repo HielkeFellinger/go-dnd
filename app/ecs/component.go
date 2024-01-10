@@ -45,7 +45,6 @@ type Component interface {
 	LoadFromRawComponent(raw RawComponent) error
 	IsRelationalComponent() bool
 	GetId() uuid.UUID
-	GetVersion() uint
 }
 
 type RelationalComponent interface {
@@ -65,10 +64,6 @@ func (c *BaseComponent) GetId() uuid.UUID {
 
 func (c *BaseComponent) IsRelationalComponent() bool {
 	return false
-}
-
-func (c *BaseComponent) GetVersion() uint {
-	return c.Version
 }
 
 func (c *BaseComponent) CheckValuesParsedFromRaw(loadedValues int, raw RawComponent) error {

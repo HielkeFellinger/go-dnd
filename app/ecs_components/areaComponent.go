@@ -8,8 +8,8 @@ import (
 
 type AreaComponent struct {
 	ecs.BaseComponent
-	Length int `yaml:"length"`
-	Width  int `yaml:"width"`
+	Length uint `yaml:"length"`
+	Width  uint `yaml:"width"`
 }
 
 func NewAreaComponent() ecs.Component {
@@ -38,13 +38,13 @@ func (c *AreaComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
 
 func (c *AreaComponent) LengthFromString(length string) error {
 	n, err := strconv.Atoi(length)
-	c.Length = n
+	c.Length = uint(n)
 	return err
 }
 
 func (c *AreaComponent) WidthFromString(width string) error {
 	n, err := strconv.Atoi(width)
-	c.Width = n
+	c.Width = uint(n)
 	return err
 }
 

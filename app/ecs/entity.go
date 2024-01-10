@@ -10,9 +10,11 @@ type Entity interface {
 	GetId() uuid.UUID
 	GetName() string
 	GetVersion() uint
+	GetDescription() string
 	HasComponentType(ct uint64) bool
 	AddComponent(c Component) error
 	LoadFromRawEntity(raw RawEntity) error
+	GetAllComponentsOfType(ct uint64) []Component
 	hasCircularRef(uuid uuid.UUID) bool
 }
 
@@ -48,6 +50,10 @@ func (e *BaseEntity) GetVersion() uint {
 
 func (e *BaseEntity) GetName() string {
 	return e.Name
+}
+
+func (e *BaseEntity) GetDescription() string {
+	return e.Description
 }
 
 func (e *BaseEntity) LoadFromRawEntity(raw RawEntity) error {
@@ -137,6 +143,10 @@ func (e *BaseEntity) checkIfRelationalComponentIsAllowedToBeAdded(c Component) e
 		}
 	}
 	return nil
+}
+
+func (e *BaseEntity) GetAllComponentsOfType(ct uint64) []Component {
+	return e.componentTypeToComponentArrMap[ct]
 }
 
 func (e *BaseEntity) isComponentTypeAllowedToBeAdded(c Component) bool {

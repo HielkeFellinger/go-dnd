@@ -1,10 +1,12 @@
 package models
 
 type CampaignMap struct {
-	Id    string
-	X     string
-	Y     string
-	Image CampaignMapImage
+	Id          string
+	Name        string
+	Description string
+	X           uint
+	Y           uint
+	Image       CampaignMapImage
 }
 
 type CampaignMapImage struct {

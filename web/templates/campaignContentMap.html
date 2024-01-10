@@ -1,17 +1,18 @@
 {{define "campaignContentMap"}}
-<div id="{{.id}}" class="tab-content" style="display: none">
+<div id="{{.id}}" class="tab-content" style="display: none; min-height: calc(100vh - 200px); max-height: calc(100vh - 200px);">
     <div>
         <h3> {{ .name }} </h3>
-        <span>MAP NAV BAR - y.{{.y}}-x.{{.x}}</span>
+        <span>MAP NAV BAR + - ' {{.backgroundImage}} '</span>
     </div>
-    <div style="width: fit-content">
-        {{ range $yVal := .y}}
-            {{ range $xVal := $.x}}
-            <div id="{{$.id}}-y{{$yVal}}-x{{$xVal}}" style="max-height: 3em; max-width: 3em; min-height: 3em; min-width: 3em; border: solid black; float: left"></div>
-            {{ end }}
+    <div style="overflow: scroll; min-height: calc(100vh - 200px); max-height: calc(100vh - 200px);">
+        <div style="min-width: max-content; max-width: max-content; min-height: max-content; max-height: max-content; background-image: url('{{.backgroundImage}}'); background-size: contain; overflow-y: auto">
+            {{ range $yVal := .y}}
+                {{ range $xVal := $.x}}
+                    <div id="{{$.id}}-y{{$yVal}}-x{{$xVal}}" style="max-height: 3em; max-width: 3em; min-height: 3em; min-width: 3em; border: solid black 1px; float: left; background: none"></div>
+                {{ end }}
             <br>
-        {{ end }}
-
+            {{ end }}
+        </div>
     </div>
 </div>
 {{end}}

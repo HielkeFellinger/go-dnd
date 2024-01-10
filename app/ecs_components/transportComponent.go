@@ -30,6 +30,7 @@ func (c *TransportComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
 
 	return c.CheckValuesParsedFromRaw(loadedValues, raw)
 }
+
 func (c *TransportComponent) ComponentType() uint64 {
 	return ecs.TransportComponentType
 }

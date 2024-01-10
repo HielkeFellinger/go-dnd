@@ -63,12 +63,12 @@ base_maps:
           active: true
       - type: Area
         params:
-          length: 30
-          width: 29
+          length: 29
+          width: 30
       - type: Image
         params:
           name: background
-          url: '/images/map_30x29.png'
+          url: "/images/space/map_30x29.png"
 
 base_characters:
   - id: inventory
