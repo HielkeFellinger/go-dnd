@@ -58,6 +58,8 @@ base_maps:
     name: plane_0
     components:
       - type: Map
+        params:
+          active: true
       - type: Area
         params:
           length: 5
