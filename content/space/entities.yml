@@ -55,7 +55,7 @@ base_items:
           description: A Sharp Sword
 
 base_maps:
-  - id: map
+  - id: 1f984588-dce3-47b4-9f64-4bbfcf4df736
     name: plane_0
     components:
       - type: Map
@@ -63,12 +63,26 @@ base_maps:
           active: true
       - type: Area
         params:
-          length: 29
           width: 30
+          length: 29
       - type: Image
         params:
           name: background
           url: "/images/space/map_30x29.png"
+  - id: 1337257c-aac6-46a2-8803-61c581e4f2a5
+    name: plane_1
+    components:
+      - type: Map
+        params:
+          active: false
+      - type: Area
+        params:
+          width: 33
+          length: 27
+      - type: Image
+        params:
+          name: background
+          url: "/images/space/map_33x27.png"
 
 base_characters:
   - id: inventory

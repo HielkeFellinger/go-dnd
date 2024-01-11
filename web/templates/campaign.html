@@ -31,7 +31,7 @@
                 <h4> Characters </h4>
             </div>
             <hr>
-            <div id="campaign-screen">
+            <div id="campaign-screen" class="campaign-screen">
                 <ul id="campaign-tabs" class="nav nav-tabs">
                     {{ if .campaign.UserIsLead }}
                     <li class="nav-item" id="manageMapsList">
@@ -46,7 +46,7 @@
                     </li>
                 </ul>
 
-                <div id="campaign-content">
+                <div id="campaign-content" class="campaign-content">
                     <!-- Tab Content -->
                     {{ if .campaign.UserIsLead }}
                     <div id="manageMaps" class="tab-content" style="display: none">
@@ -165,18 +165,15 @@
     }
 
     let handleCampaignContentEvents = (data) => {
-        body = JSON.parse(data.body)
-        var tabs = body.Tabs
-        console.log(tabs)
-        var contentData = body.Content
-        console.log(contentData)
+        let body = JSON.parse(data.body)
+        let tabs = body.Tabs
+        let contentData = body.Content
 
         for (let index in contentData) {
             let doc = document.getElementById(contentData[index].Id)
             if (doc) {
                 doc.remove()
             }
-
             document.getElementById("campaign-content").innerHTML += contentData[index].Html
         }
 
@@ -195,7 +192,7 @@
         let chatMessage = '';
         if (data.source === currentUser) {
             chatMessage += '<div class="chat-box chat-box-me">'
-        } else if (data.source === "server") {
+        } else if (data.source.toLocaleUpperCase() === "server") {
             chatMessage += '<div class="chat-box chat-box-server">'
         } else {
             chatMessage += '<div class="chat-box chat-box-other">'

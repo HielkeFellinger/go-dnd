@@ -95,7 +95,7 @@ func (pool *baseCampaignPool) Run() {
 func (pool *baseCampaignPool) transmitMessage(message game_engine.EventMessage) {
 	for client := range pool.Clients {
 		// Skip EventMessage on clients who are not recipient
-		if message.Destinations != nil && len(message.Destinations) > 1 && !contains(message.Destinations, client.Id) {
+		if message.Destinations != nil && len(message.Destinations) > 0 && !contains(message.Destinations, client.Id) {
 			continue
 		}
 

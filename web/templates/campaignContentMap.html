@@ -1,14 +1,24 @@
 {{define "campaignContentMap"}}
-<div id="{{.id}}" class="tab-content" style="display: none; min-height: calc(100vh - 200px); max-height: calc(100vh - 200px);">
+<div id="{{.id}}" class="tab-content">
+    {{ if .lead }}
     <div>
-        <h3> {{ .name }} </h3>
+        <h3> Bench </h3>
+        <span>Bench Grid; add chars / interactive elements</span>
+    </div>
+    {{ end }}
+    <div>
+        <h3> {{ .name }} {{.lead}} </h3>
         <span>MAP NAV BAR + - ' {{.backgroundImage}} '</span>
     </div>
-    <div style="overflow: scroll; min-height: calc(100vh - 200px); max-height: calc(100vh - 200px);">
-        <div style="min-width: max-content; max-width: max-content; min-height: max-content; max-height: max-content; background-image: url('{{.backgroundImage}}'); background-size: contain; overflow-y: auto">
+    <div class="campaign-map">
+        <div class="grid" style="background-image: url('{{.backgroundImage}}')">
             {{ range $yVal := .y}}
                 {{ range $xVal := $.x}}
-                    <div id="{{$.id}}-y{{$yVal}}-x{{$xVal}}" style="max-height: 3em; max-width: 3em; min-height: 3em; min-width: 3em; border: solid black 1px; float: left; background: none"></div>
+                    <div class="cell" id="{{$.id}}-cell-y{{$yVal}}-x{{$xVal}}">
+                        <div class="content" id="{{$.id}}-cell-y{{$yVal}}-x{{$xVal}}-content">
+
+                        </div>
+                    </div>
                 {{ end }}
             <br>
             {{ end }}

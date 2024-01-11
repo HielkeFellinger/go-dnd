@@ -2,12 +2,9 @@ package game_engine
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
-	"github.com/hielkefellinger/go-dnd/app/ecs_model_translation"
 	"github.com/hielkefellinger/go-dnd/app/models"
 	"log"
-	"strconv"
 	"text/template"
 )
 
@@ -38,67 +35,6 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 	if message.Type >= TypeChatBroadcast && message.Type <= TypeChatWhisper {
 		// Just pass message trough
 		pool.TransmitEventMessage(message)
-	}
-
-	return nil
-}
-
-func (e *baseEventMessageHandler) handleMapEvents(message EventMessage, pool CampaignPool) error {
-	log.Printf("- Map. Event: '%s'", message.Id)
-	if message.Type == TypeLoadMap || message.Type == TypeLoadFullGame {
-		var transmitMessage = NewEventMessage()
-		transmitMessage.Type = TypeLoadMap
-
-		// Load Focus Map Related Details
-		// - Gray out non-present players;
-
-		var campaignScreenContent = models.NewCampaignScreenContent()
-		mapEntities := pool.GetEngine().GetWorld().GetMapEntities()
-
-		log.Printf("----- Maps: '%v'", mapEntities)
-		for _, mapEntity := range mapEntities {
-			var content = models.CampaignContentItem{}
-			var tab = models.CampaignTabItem{}
-
-			componentMap := ecs_model_translation.MapEntityToCampaignMapModel(mapEntity)
-			tab.Id = componentMap.Id
-			content.Id = componentMap.Id
-
-			data := make(map[string]any)
-			data["id"] = tab.Id
-			data["name"] = componentMap.Name
-
-			tab.Html = e.handleLoadHtmlBody("campaignSelector.html", "campaignSelector", data)
-
-			// Add extra data, like chars
-			x := componentMap.X
-			y := componentMap.Y
-
-			xVal := make([]string, x)
-			yVal := make([]string, y)
-			for i := range xVal {
-				xVal[i] = strconv.Itoa(i)
-			}
-			for i := range yVal {
-				yVal[i] = strconv.Itoa(i)
-			}
-
-			data["x"] = xVal
-			data["y"] = yVal
-			data["backgroundImage"] = componentMap.Image.Url
-			content.Html = e.handleLoadHtmlBody("campaignContentMap.html", "campaignContentMap", data)
-
-			campaignScreenContent.Tabs = append(campaignScreenContent.Tabs, tab)
-			campaignScreenContent.Content = append(campaignScreenContent.Content, content)
-		}
-
-		rawJsonBytes, err := json.Marshal(campaignScreenContent)
-		if err != nil {
-			log.Printf("Error parsing Loading Map content `%s`", err.Error())
-		}
-
-		transmitMessage.Body = string(rawJsonBytes)
-		pool.TransmitEventMessage(transmitMessage)
 	}
 
 	return nil

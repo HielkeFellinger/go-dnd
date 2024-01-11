@@ -61,4 +61,14 @@ body {
     min-height: calc(100vh - 82px)
 }
 
+.campaign-screen .campaign-content {
+    /* TO ADD */
+}
+
 /* Campaign Tabs */
+
+.campaign-screen .campaign-content .tab-content {
+    display: none;
+    min-height: calc(100vh - 200px);
+    max-height: calc(100vh - 200px);
+}

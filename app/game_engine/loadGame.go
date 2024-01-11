@@ -111,6 +111,12 @@ func parseRawEntity(rawEntities []ecs.RawEntity,
 
 		// Create and fill the new Entity
 		entity := ecs.NewEntity()
+
+		// Test if ID is a UUID, if so use this!
+		if savedUuid, err := uuid.Parse(rawEntity.Id); err == nil {
+			entity.Id = savedUuid
+		}
+
 		err := entity.LoadFromRawEntity(rawEntity)
 		if err != nil {
 			log.Fatalf(err.Error() + " Raw Entity ID: " + rawEntity.Id)
