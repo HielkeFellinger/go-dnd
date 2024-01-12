@@ -8,8 +8,8 @@ import (
 
 type PositionComponent struct {
 	ecs.BaseComponent
-	X int `yaml:"x"` // Column
-	Y int `yaml:"y"` // Row
+	X uint `yaml:"x"` // Column
+	Y uint `yaml:"y"` // Row
 }
 
 func NewPositionComponent() ecs.Component {
@@ -38,13 +38,13 @@ func (c *PositionComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
 
 func (c *PositionComponent) XFromString(x string) error {
 	n, err := strconv.Atoi(x)
-	c.X = n
+	c.X = uint(n)
 	return err
 }
 
 func (c *PositionComponent) YFromString(y string) error {
 	n, err := strconv.Atoi(y)
-	c.Y = n
+	c.Y = uint(n)
 	return err
 }
 

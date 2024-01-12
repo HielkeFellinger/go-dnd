@@ -4,5 +4,6 @@ import "gorm.io/gorm"
 
 type Character struct {
 	gorm.Model
-	Name string
+	Name  string
+	Image CampaignImage `gorm:"-"`
 }

@@ -3,6 +3,8 @@ package game_engine
 import (
 	"bytes"
 	"fmt"
+	"github.com/hielkefellinger/go-dnd/app/ecs"
+	"github.com/hielkefellinger/go-dnd/app/ecs_components"
 	"github.com/hielkefellinger/go-dnd/app/models"
 	"log"
 	"text/template"
@@ -56,7 +58,25 @@ func (e *baseEventMessageHandler) handleCharacterEvents(message EventMessage, po
 
 		var characters []models.Character
 		for _, charEntity := range charEntities {
-			characters = append(characters, models.Character{Name: charEntity.GetName()})
+
+			var image *ecs_components.ImageComponent
+			var imageDetails = charEntity.GetAllComponentsOfType(ecs.ImageComponentType)
+			if imageDetails != nil && len(imageDetails) == 1 {
+				image = imageDetails[0].(any).(*ecs_components.ImageComponent)
+			} else {
+				// Set default
+				image = ecs_components.NewImageComponent().(any).(*ecs_components.ImageComponent)
+				image.Name = "MISSING IMAGE"
+				image.Url = "/images/unknown_item.png"
+			}
+
+			characters = append(characters, models.Character{
+				Name: charEntity.GetName(),
+				Image: models.CampaignImage{
+					Name: image.Name,
+					Url:  image.Url,
+				},
+			})
 		}
 
 		data := make(map[string]any)

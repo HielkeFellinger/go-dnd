@@ -38,6 +38,7 @@ const (
 	RequiresRelationComponentType uint64 = 1 << 42
 	CreatesRelationComponentType  uint64 = 1 << 43
 	FilterRelationComponentType   uint64 = 1 << 44
+	MapItemRelationComponentType  uint64 = 1 << 45
 )
 
 type Component interface {

@@ -1,5 +1,10 @@
 {{define "campaignContentMapCell"}}
-<div id="{{.mapId}}-{{.id}}-cell-element" class="element" style="background-image: url('{{.backgroundImage}}')">
-
+<div id="{{.mapId}}-{{.id}}-cell-element" class="element" draggable="true" ondragstart="drag(event)" style="background-image: url('{{.backgroundImage}}')">
+    <span>{{.entityName}}</span>
+    <!--  Hide / Hidden icon  -->
+    <!--  Health bar  -->
+    {{ if .healthPercentage }}
+    <progress id="{{.mapId}}-{{.id}}-health" value="{{.healthPercentage}}" max="100" style="max-width: 100%; min-width: 100%"></progress>
+    {{ end }}
 </div>
 {{end}}

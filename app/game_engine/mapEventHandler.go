@@ -2,6 +2,7 @@ package game_engine
 
 import (
 	"encoding/json"
+	"github.com/hielkefellinger/go-dnd/app/ecs"
 	"github.com/hielkefellinger/go-dnd/app/ecs_model_translation"
 	"github.com/hielkefellinger/go-dnd/app/models"
 	"log"
@@ -58,6 +59,62 @@ func (e *baseEventMessageHandler) handleMapEvents(message EventMessage, pool Cam
 
 		transmitMessage.Body = string(rawJsonBytes)
 		pool.TransmitEventMessage(transmitMessage)
+	}
+	if message.Type == TypeLoadMapEntities || message.Type == TypeLoadFullGame {
+		var transmitMessage = NewEventMessage()
+		transmitMessage.Type = TypeLoadMapEntities
+		transmitMessage.Destinations = append(transmitMessage.Destinations, message.Source)
+
+		isLead := message.Source == pool.GetLeadId()
+
+		mapEntities := pool.GetEngine().GetWorld().GetMapEntities()
+
+		for _, mapEntity := range mapEntities {
+
+			componentMap := ecs_model_translation.MapEntityToCampaignMapModel(mapEntity)
+
+			// Only show enabled maps for player
+			if !componentMap.Enabled && !isLead {
+				continue
+			}
+
+			// Only show filtered form body
+			if len(message.Body) > 0 && componentMap.Id != message.Body {
+				continue
+			}
+
+			// load sub elements
+			mapItems := mapEntity.GetAllComponentsOfType(ecs.MapItemRelationComponentType)
+
+			mapItemsModel := models.CampaignScreenMapItems{
+				MapId:    componentMap.Id,
+				Elements: make(map[string]models.CampaignScreenMapItemElement, len(mapItems)),
+			}
+
+			// Translate Entity to
+			data := make(map[string]any)
+			for _, mapItem := range mapItems {
+				var mapItemModel = ecs_model_translation.MapItemEntityToCampaignMapItemElement(mapItem, mapItemsModel.MapId)
+
+				data["id"] = mapItemModel.Id
+				data["mapId"] = mapItemModel.MapId
+				data["entityName"] = mapItemModel.EntityName
+				data["backgroundImage"] = mapItemModel.Image.Url
+				data["healthPercentage"] = 70
+
+				mapItemModel.Html = e.handleLoadHtmlBody("campaignContentMapCell.html", "campaignContentMapCell", data)
+				mapItemsModel.Elements[mapItemModel.Id] = mapItemModel
+			}
+
+			rawJsonBytes, err := json.Marshal(mapItemsModel)
+			if err != nil {
+				log.Printf("Error parsing Loading Map Item content `%s`", err.Error())
+			}
+
+			transmitMessage.Body = string(rawJsonBytes)
+			pool.TransmitEventMessage(transmitMessage)
+		}
+
 	}
 
 	return nil

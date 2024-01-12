@@ -19,9 +19,13 @@ const (
 	TypeAddCharacter    EventType = 502
 	TypeRemoveCharacter EventType = 503
 
-	TypeLoadMap   EventType = 531
-	TypeAddMap    EventType = 532
-	TypeRemoveMap EventType = 533
+	TypeLoadMap         EventType = 531
+	TypeLoadMapEntities EventType = 532
+	TypeLoadMapEntity   EventType = 532
+	TypeAddMap          EventType = 533
+	TypeRemoveMap       EventType = 534
+
+	// Set attention to a specific tab
 
 	TypeChatBroadcast EventType = 800
 	TypeChatServerMsg EventType = 801

@@ -27,18 +27,17 @@
         </div>
 
         <div class="col border" style="min-width: 900px">
-            <div id="char-content" class="">
+            <div id="char-content" style="padding-top: 0.5em; padding-bottom: 0.5em">
                 <h4> Characters </h4>
             </div>
-            <hr>
             <div id="campaign-screen" class="campaign-screen">
                 <ul id="campaign-tabs" class="nav nav-tabs">
                     {{ if .campaign.UserIsLead }}
                     <li class="nav-item" id="manageMapsList">
-                        <button id="manageMapsLink" class="nav-link" onclick="openTab('manageMaps')" style="color: goldenrod">Edit Maps</button>
+                        <button id="manageMapsLink" class="nav-link" onclick="openTab('manageMaps')" style="color: goldenrod">Manage Maps</button>
                     </li>
                     <li class="nav-item" id="manageCharactersList">
-                        <button id="manageCharactersLink" class="nav-link" onclick="openTab('manageCharacters')" style="color: goldenrod">Edit Characters</button>
+                        <button id="manageCharactersLink" class="nav-link" onclick="openTab('manageCharacters')" style="color: goldenrod">Manage Characters</button>
                     </li>
                     {{ end }}
                     <li class="nav-item" id="currentList">
@@ -123,7 +122,12 @@
 
         // Parse Map Events
         if (payLoad.type >= 530 && payLoad.type < 540) {
-            handleCampaignContentEvents(payLoad)
+            if (payLoad.type === 531) {
+                handleCampaignContentMapEvents(payLoad)
+            }
+            if (payLoad.type === 532) {
+                handleCampaignContentMapItemsEvents(payLoad)
+            }
             return
         }
 
@@ -164,7 +168,7 @@
         document.getElementById("char-content").innerHTML = data.body;
     }
 
-    let handleCampaignContentEvents = (data) => {
+    let handleCampaignContentMapEvents = (data) => {
         let body = JSON.parse(data.body)
         let tabs = body.Tabs
         let contentData = body.Content
@@ -185,6 +189,45 @@
             }
             // campaign-tabs
             document.getElementById("campaign-tabs").innerHTML += tabs[index].Html
+        }
+    }
+
+    const mapItems = new Map();
+    const mapItemIdToEntityId = new Map();
+    const mapItemHtmlIdToMapItem = new Map();
+    let handleCampaignContentMapItemsEvents = (data) => {
+        let body = JSON.parse(data.body)
+        let MapId = body.MapId
+        let MapElements = body.Elements
+
+        // Remove or create empty
+        if (mapItems.has(MapId)) {
+            for (let [elemId, mapItem] of mapItems[MapId]) {
+                if (!MapElements.has(elemId)) {
+                    let mapItemHtmlId = MapId + "-" + mapItem.Id +"-cell-element"
+                    document.getElementById(mapItemHtmlId).remove()
+                    mapItemIdToEntityId.delete(mapItem.Id)
+                    mapItemHtmlIdToMapItem.delete(mapItemHtmlId)
+                }
+            }
+        } else {
+            mapItems[MapId] = new Map()
+        }
+
+        // Add/Modify
+        for (let elemId in MapElements) {
+            let mapItem = MapElements[elemId]
+
+            // Get the Cell
+            let cell = document.getElementById(MapId + "-cell-y" + mapItem.Position.Y + "-x" + mapItem.Position.X + '-content')
+            let mapItemHtmlId = MapId + "-" + mapItem.Id +"-cell-element"
+
+            if (cell != null) {
+                cell.innerHTML = mapItem.Html
+                mapItems[MapId][elemId] = mapItem
+                mapItemIdToEntityId[elemId] = mapItem.EntityId
+                mapItemHtmlIdToMapItem[mapItemHtmlId] = mapItem
+            }
         }
     }
 
@@ -221,6 +264,60 @@
         // Show the current tab, and add an "active" class to the button that opened the tab
         document.getElementById(targetId).style.display = "block";
         document.getElementById(targetId + 'Link').className += " active";
+    }
+
+    let cellSize = 4
+    let makeMapsSmaller = () => {
+        if (cellSize > 1) {
+            cellSize--
+            applyMapZoom()
+        }
+    }
+
+    let makeMapsBigger = () => {
+        if (cellSize < 20) {
+            cellSize++
+            applyMapZoom()
+        }
+    }
+
+    let applyMapZoom = () => {
+        // Getting the stylesheet
+        const stylesheet = document.styleSheets[2];
+        let elementRules;
+
+        // looping through all its rules and getting your rule
+        for (const element of stylesheet.cssRules) {
+            console.log(element.selectorText)
+            if (element.selectorText === '.campaign-map .grid .cell') {
+                elementRules = element;
+            }
+        }
+
+        // modifying the rule in the stylesheet
+        elementRules.style.setProperty('max-height', '' + cellSize + 'em' );
+        elementRules.style.setProperty('max-width', '' + cellSize + 'em' );
+        elementRules.style.setProperty('min-height', '' + cellSize + 'em' );
+        elementRules.style.setProperty('min-width', '' + cellSize + 'em' );
+    }
+
+    let allowDrop = (ev) => {
+        ev.preventDefault();
+    }
+
+    let drag = (ev) => {
+        console.warn(ev.target.id)
+        console.warn(ev.target.parentNode.id)
+        console.warn(ev)
+        ev.dataTransfer.setData("cell-element", ev.target.id);
+    }
+
+    let drop = (ev) => {
+        ev.preventDefault();
+        let data = ev.dataTransfer.getData("cell-element");
+        console.warn(data)
+        console.warn(ev.target.id)
+        ev.target.appendChild(document.getElementById(data));
     }
 
     // Innit Websocket only after loading all JS

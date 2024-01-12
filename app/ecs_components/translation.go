@@ -59,6 +59,8 @@ func MapIntToTypeV0(rawId int) uint64 {
 		return ecs.CreatesRelationComponentType
 	case 44:
 		return ecs.FilterRelationComponentType
+	case 45:
+		return ecs.MapItemRelationComponentType
 	default:
 		return ecs.UnknownComponentType
 	}
@@ -121,6 +123,8 @@ func MapTypeToConstructorFunction(componentType uint64) func() ecs.Component {
 		return NewCreatesRelationComponent
 	case ecs.FilterRelationComponentType:
 		return NewFilterRelationComponent
+	case ecs.MapItemRelationComponentType:
+		return NewMapItemRelationComponent
 	default:
 		return nil
 	}

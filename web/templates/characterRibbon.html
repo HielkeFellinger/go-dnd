@@ -1,11 +1,7 @@
 {{define "chars"}}
-<div class="container">
-    <div class="navbar-header">
-        {{ range .chars }}
-        <a class="navbar-brand" href="/">
-            {{ .Name }}
-        </a>
-        {{ end }}
-    </div>
+{{ range .chars }}
+<div class="border" style="max-width: 4em; min-width: 4em; max-height: 4em; min-height: 4em; background-size: contain; background-image: url('{{.Image.Url}}')">
+    <span>{{ .Name }}</span>
 </div>
+{{ end }}
 {{end}}

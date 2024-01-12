@@ -60,10 +60,12 @@ func loadGame(gameFile string) ecs.World {
 	parseRawComponentsOfEntity(game, game.Maps, uuidToEntityDict, idToUuidDict)
 
 	// Add the fully updated Entities to the world
+	log.Println("Done loading raw/base Game. Now filling world")
 	world := ecs.NewBaseWorld()
 	world.AddEntities(items)
 	world.AddEntities(chars)
 	world.AddEntities(maps)
+	log.Println("Done filling world")
 	return &world
 }
 
