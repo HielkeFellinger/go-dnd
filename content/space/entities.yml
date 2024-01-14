@@ -78,6 +78,17 @@ base_characters:
           count: 1
           entity: inventory
 
+base_factions:
+  - id: united_earth
+    name: United Earth
+    components:
+      - type: Faction
+        params:
+          name: United Earth
+          colour_hex: 5b92e5
+          description: Faction United Nations from Earth
+
+
 base_maps:
   - id: 1f984588-dce3-47b4-9f64-4bbfcf4df736
     name: plane_0

@@ -8,6 +8,7 @@ import (
 type FactionComponent struct {
 	ecs.BaseComponent
 	Name        string `yaml:"name"`
+	ColourHex   string `yaml:"colour_hex"`
 	Description string `yaml:"description"`
 }
 
@@ -21,6 +22,11 @@ func (c *FactionComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
 	loadedValues := 0
 	if value, ok := raw.Params["name"]; ok {
 		c.Name = value
+		loadedValues++
+	}
+	if value, ok := raw.Params["colour_hex"]; ok {
+		// @todo Add HEX check
+		c.ColourHex = value
 		loadedValues++
 	}
 	if value, ok := raw.Params["description"]; ok {

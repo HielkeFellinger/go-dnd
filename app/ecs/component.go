@@ -30,6 +30,7 @@ const (
 	CharacterComponentType    uint64 = 1 << 19
 	MapComponentType          uint64 = 1 << 20
 	ImageComponentType        uint64 = 1 << 21
+	PlayerComponentType       uint64 = 1 << 22
 
 	/* Relational ComponentTypes */
 

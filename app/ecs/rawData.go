@@ -5,6 +5,7 @@ type RawGameFile struct {
 	TypeTranslation map[string]int `yaml:"type_translation"`
 	Items           []RawEntity    `yaml:"base_items"`
 	Maps            []RawEntity    `yaml:"base_maps"`
+	Factions        []RawEntity    `yaml:"base_factions"`
 	Chars           []RawEntity    `yaml:"base_characters"`
 }
 
