@@ -27,6 +27,7 @@ func (c *CreatesRelationComponent) LoadFromRawComponentRelation(raw ecs.RawCompo
 		}
 		loadedValues++
 	}
+
 	c.Entity = entity
 	loadedValues++
 

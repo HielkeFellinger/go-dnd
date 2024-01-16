@@ -9,16 +9,16 @@ import (
 func MapItemEntityToCampaignMapItemElement(rawMapItemComponent ecs.Component, mapId string) models.CampaignScreenMapItemElement {
 
 	// Translate
-	mapItemComponent := rawMapItemComponent.(any).(*ecs_components.MapItemRelationComponent)
+	mapItemComponent := rawMapItemComponent.(*ecs_components.MapItemRelationComponent)
 
 	// Get Photo
 	var image *ecs_components.ImageComponent
 	var imageDetails = mapItemComponent.Entity.GetAllComponentsOfType(ecs.ImageComponentType)
 	if imageDetails != nil && len(imageDetails) == 1 {
-		image = imageDetails[0].(any).(*ecs_components.ImageComponent)
+		image = imageDetails[0].(*ecs_components.ImageComponent)
 	} else {
 		// Set default
-		image = ecs_components.NewImageComponent().(any).(*ecs_components.ImageComponent)
+		image = ecs_components.NewImageComponent().(*ecs_components.ImageComponent)
 		image.Name = "MISSING IMAGE"
 		image.Url = "/images/unknown_item.png"
 	}

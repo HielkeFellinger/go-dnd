@@ -77,6 +77,13 @@ base_characters:
         params:
           count: 1
           entity: inventory
+  - id: pirate
+    name: pirate
+    components:
+      - type: Character
+        params:
+          name: Pirate
+          description: Arrrrrgh
 
 base_factions:
   - id: united_earth
@@ -87,7 +94,6 @@ base_factions:
           name: United Earth
           colour_hex: 5b92e5
           description: Faction United Nations from Earth
-
 
 base_maps:
   - id: 1f984588-dce3-47b4-9f64-4bbfcf4df736
@@ -109,6 +115,11 @@ base_maps:
           x: 7
           y: 8
           entity: player
+      - type: MapItemRelation
+        params:
+          x: 10
+          y: 11
+          entity: pirate
   - id: 1337257c-aac6-46a2-8803-61c581e4f2a5
     name: plane_1
     components:

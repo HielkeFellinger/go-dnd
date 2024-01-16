@@ -62,10 +62,10 @@ func (e *baseEventMessageHandler) handleCharacterEvents(message EventMessage, po
 			var image *ecs_components.ImageComponent
 			var imageDetails = charEntity.GetAllComponentsOfType(ecs.ImageComponentType)
 			if imageDetails != nil && len(imageDetails) == 1 {
-				image = imageDetails[0].(any).(*ecs_components.ImageComponent)
+				image = imageDetails[0].(*ecs_components.ImageComponent)
 			} else {
 				// Set default
-				image = ecs_components.NewImageComponent().(any).(*ecs_components.ImageComponent)
+				image = ecs_components.NewImageComponent().(*ecs_components.ImageComponent)
 				image.Name = "MISSING IMAGE"
 				image.Url = "/images/unknown_item.png"
 			}

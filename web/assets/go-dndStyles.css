@@ -60,17 +60,18 @@ body {
 /* Campaign Screens */
 .campaign-screen {
     min-width: 1400px;
-    min-height: calc(100vh - 82px)
+    min-height: calc(100vh - 90px)
 }
 
 .campaign-screen .campaign-content {
-    /* TO ADD */
+    display: flex;
+    flex-flow: column;
+    height: 100%;
 }
 
 /* Campaign Tabs */
 
 .campaign-screen .campaign-content .tab-content {
     display: none;
-    min-height: calc(100vh - 200px);
-    max-height: calc(100vh - 200px);
+    flex: 0 2 auto;
 }

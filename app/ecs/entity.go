@@ -86,7 +86,7 @@ func (e *BaseEntity) AddComponent(c Component) error {
 	e.Components = append(e.Components, c)
 	e.uuidToComponent[c.GetId()] = c
 	if arr, ok := e.componentTypeToComponentArrMap[c.ComponentType()]; ok {
-		arr = append(arr, c)
+		e.componentTypeToComponentArrMap[c.ComponentType()] = append(arr, c)
 	} else {
 		e.componentTypeToComponentArrMap[c.ComponentType()] = []Component{c}
 	}

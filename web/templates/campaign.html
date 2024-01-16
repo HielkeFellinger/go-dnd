@@ -27,7 +27,7 @@
         </div>
 
         <div class="col border" style="min-width: 900px">
-            <div id="char-content" style="padding-top: 0.5em; padding-bottom: 0.5em">
+            <div id="char-content" style="margin-top: 0.5em; margin-bottom: 1em; min-height: 4em; max-height: 4em">
                 <h4> Characters </h4>
             </div>
             <div id="campaign-screen" class="campaign-screen">
@@ -65,7 +65,7 @@
             </div>
         </div>
 
-        <div class="border" style="width: 325px">
+        <div class="border" style="width: 450px">
             <h4> Events </h4>
             <div id="event-content" class="">
 
@@ -266,17 +266,17 @@
         document.getElementById(targetId + 'Link').className += " active";
     }
 
-    let cellSize = 4
+    let cellSizeInHalfEms = 8
     let makeMapsSmaller = () => {
-        if (cellSize > 1) {
-            cellSize--
+        if (cellSizeInHalfEms > 4) {
+            cellSizeInHalfEms--
             applyMapZoom()
         }
     }
 
     let makeMapsBigger = () => {
-        if (cellSize < 20) {
-            cellSize++
+        if (cellSizeInHalfEms < 20) {
+            cellSizeInHalfEms++
             applyMapZoom()
         }
     }
@@ -295,10 +295,10 @@
         }
 
         // modifying the rule in the stylesheet
-        elementRules.style.setProperty('max-height', '' + cellSize + 'em' );
-        elementRules.style.setProperty('max-width', '' + cellSize + 'em' );
-        elementRules.style.setProperty('min-height', '' + cellSize + 'em' );
-        elementRules.style.setProperty('min-width', '' + cellSize + 'em' );
+        elementRules.style.setProperty('max-height', '' + (cellSizeInHalfEms/2) + 'em' );
+        elementRules.style.setProperty('max-width', '' + (cellSizeInHalfEms/2) + 'em' );
+        elementRules.style.setProperty('min-height', '' + (cellSizeInHalfEms/2) + 'em' );
+        elementRules.style.setProperty('min-width', '' + (cellSizeInHalfEms/2) + 'em' );
     }
 
     let allowDrop = (ev) => {

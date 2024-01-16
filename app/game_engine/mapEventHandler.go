@@ -84,6 +84,7 @@ func (e *baseEventMessageHandler) handleMapEvents(message EventMessage, pool Cam
 			}
 
 			// load sub elements
+
 			mapItems := mapEntity.GetAllComponentsOfType(ecs.MapItemRelationComponentType)
 
 			mapItemsModel := models.CampaignScreenMapItems{
@@ -94,6 +95,7 @@ func (e *baseEventMessageHandler) handleMapEvents(message EventMessage, pool Cam
 			// Translate Entity to
 			data := make(map[string]any)
 			for _, mapItem := range mapItems {
+				log.Printf("mapItem : '%v'", mapItem)
 				var mapItemModel = ecs_model_translation.MapItemEntityToCampaignMapItemElement(mapItem, mapItemsModel.MapId)
 
 				data["id"] = mapItemModel.Id

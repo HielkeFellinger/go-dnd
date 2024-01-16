@@ -22,7 +22,7 @@ func (c *MapItemRelationComponent) LoadFromRawComponentRelation(raw ecs.RawCompo
 	c.Entity = entity
 
 	// Load the position (empty or missing X or Y is on the standby "bench")
-	var position = NewPositionComponent().(any).(*PositionComponent)
+	var position = NewPositionComponent().(*PositionComponent)
 	if value, ok := raw.Params["x"]; ok {
 		if err := position.XFromString(value); err != nil {
 			return err

@@ -11,21 +11,21 @@ func MapEntityToCampaignMapModel(rawMapEntity ecs.Entity) models.CampaignMap {
 	var mapEntity *ecs_components.MapComponent
 	var mapDetails = rawMapEntity.GetAllComponentsOfType(ecs.MapComponentType)
 	if mapDetails != nil && len(mapDetails) == 1 {
-		mapEntity = mapDetails[0].(any).(*ecs_components.MapComponent)
+		mapEntity = mapDetails[0].(*ecs_components.MapComponent)
 	}
 
 	// Get CampaignImage
 	var image *ecs_components.ImageComponent
 	var imageDetails = rawMapEntity.GetAllComponentsOfType(ecs.ImageComponentType)
 	if imageDetails != nil && len(imageDetails) == 1 {
-		image = imageDetails[0].(any).(*ecs_components.ImageComponent)
+		image = imageDetails[0].(*ecs_components.ImageComponent)
 	}
 
 	// Get Area
 	var area *ecs_components.AreaComponent
 	var areaDetails = rawMapEntity.GetAllComponentsOfType(ecs.AreaComponentType)
 	if areaDetails != nil && len(areaDetails) == 1 {
-		area = areaDetails[0].(any).(*ecs_components.AreaComponent)
+		area = areaDetails[0].(*ecs_components.AreaComponent)
 	}
 
 	return models.CampaignMap{
