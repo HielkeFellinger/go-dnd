@@ -18,6 +18,10 @@ body {
     margin: 0;
 }
 
+.content {
+    min-height: calc(100vh - 152px);
+    max-height: calc(100vh - 152px);
+}
 
 /* Chat */
 
@@ -26,9 +30,9 @@ body {
 }
 
 .chat-screen .chat-content {
-    min-height: calc(100vh - 150px);
-    max-height: calc(100vh - 150px);
-    overflow-y: scroll
+    min-height: calc(100vh - 152px);
+    max-height: calc(100vh - 152px);
+    overflow-y: auto;
 }
 
 .chat-screen .chat-content .chat-box {
@@ -60,7 +64,9 @@ body {
 /* Campaign Screens */
 .campaign-screen {
     min-width: 1400px;
-    min-height: calc(100vh - 90px)
+    min-height: calc(100vh - 95px);
+    max-height: calc(100vh);
+    overflow: hidden
 }
 
 .campaign-screen .campaign-content {

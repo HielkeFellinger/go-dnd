@@ -1,5 +1,6 @@
 {{define "campaignContentMapCell"}}
-<div id="{{.mapId}}-{{.id}}-cell-element" class="element" draggable="true" ondragstart="drag(event)" style="background-image: url('{{.backgroundImage}}')">
+<div id="{{.mapId}}-{{.id}}-cell-element" class="element" {{ if .hasControl }} draggable="true" ondragstart="drag(event)" {{ end }}
+     style="background-image: url('{{.backgroundImage}}')">
     <span>{{.entityName}}</span>
     <!--  Hide / Hidden icon  -->
     <!--  Health bar  -->

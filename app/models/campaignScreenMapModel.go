@@ -6,13 +6,14 @@ type CampaignScreenMapItems struct {
 }
 
 type CampaignScreenMapItemElement struct {
-	Id         string
-	EntityName string
-	EntityId   string
-	MapId      string
-	Html       string
-	Position   CampaignScreenMapPosition
-	Image      CampaignImage
+	Id          string
+	EntityName  string
+	EntityId    string
+	Controllers []string
+	MapId       string
+	Html        string
+	Position    CampaignScreenMapPosition
+	Image       CampaignImage
 }
 
 type CampaignScreenMapPosition struct {

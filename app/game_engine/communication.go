@@ -21,9 +21,9 @@ const (
 
 	TypeLoadMap         EventType = 531
 	TypeLoadMapEntities EventType = 532
-	TypeLoadMapEntity   EventType = 532
-	TypeAddMap          EventType = 533
-	TypeRemoveMap       EventType = 534
+	TypeLoadMapEntity   EventType = 533
+	TypeAddMap          EventType = 534
+	TypeRemoveMap       EventType = 535
 
 	// Set attention to a specific tab
 

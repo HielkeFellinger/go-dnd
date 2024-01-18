@@ -22,6 +22,7 @@ type_translation:
   Character: 19
   Map: 20
   Image: 21
+  Player: 22
   # Relational Types
   ControlsRelation: 40
   HasRelation: 41
@@ -77,6 +78,9 @@ base_characters:
         params:
           count: 1
           entity: inventory
+      - type: Player
+        params:
+          name: user
   - id: pirate
     name: pirate
     components:

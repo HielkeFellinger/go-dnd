@@ -11,7 +11,7 @@ func MapItemEntityToCampaignMapItemElement(rawMapItemComponent ecs.Component, ma
 	// Translate
 	mapItemComponent := rawMapItemComponent.(*ecs_components.MapItemRelationComponent)
 
-	// Get Photo
+	// Get (possible) Image
 	var image *ecs_components.ImageComponent
 	var imageDetails = mapItemComponent.Entity.GetAllComponentsOfType(ecs.ImageComponentType)
 	if imageDetails != nil && len(imageDetails) == 1 {
@@ -23,11 +23,22 @@ func MapItemEntityToCampaignMapItemElement(rawMapItemComponent ecs.Component, ma
 		image.Url = "/images/unknown_item.png"
 	}
 
+	// Get (all possible) controlling players
+	var controllingPlayers []string
+	var playerDetails = mapItemComponent.Entity.GetAllComponentsOfType(ecs.PlayerComponentType)
+	if playerDetails != nil && len(playerDetails) > 0 {
+		controllingPlayers = make([]string, len(playerDetails))
+		for i, detail := range playerDetails {
+			controllingPlayers[i] = detail.(*ecs_components.PlayerComponent).Name
+		}
+	}
+
 	model := models.CampaignScreenMapItemElement{
-		Id:         mapItemComponent.GetId().String(),
-		EntityName: mapItemComponent.Entity.GetName(),
-		EntityId:   mapItemComponent.Entity.GetId().String(),
-		MapId:      mapId,
+		Id:          mapItemComponent.GetId().String(),
+		EntityName:  mapItemComponent.Entity.GetName(),
+		EntityId:    mapItemComponent.Entity.GetId().String(),
+		MapId:       mapId,
+		Controllers: controllingPlayers,
 		Image: models.CampaignImage{
 			Name: image.Name,
 			Url:  image.Url,

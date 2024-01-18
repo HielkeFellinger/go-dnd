@@ -6,6 +6,7 @@ import (
 	"github.com/hielkefellinger/go-dnd/app/ecs_model_translation"
 	"github.com/hielkefellinger/go-dnd/app/models"
 	"log"
+	"slices"
 	"strconv"
 )
 
@@ -84,7 +85,6 @@ func (e *baseEventMessageHandler) handleMapEvents(message EventMessage, pool Cam
 			}
 
 			// load sub elements
-
 			mapItems := mapEntity.GetAllComponentsOfType(ecs.MapItemRelationComponentType)
 
 			mapItemsModel := models.CampaignScreenMapItems{
@@ -95,11 +95,13 @@ func (e *baseEventMessageHandler) handleMapEvents(message EventMessage, pool Cam
 			// Translate Entity to
 			data := make(map[string]any)
 			for _, mapItem := range mapItems {
-				log.Printf("mapItem : '%v'", mapItem)
 				var mapItemModel = ecs_model_translation.MapItemEntityToCampaignMapItemElement(mapItem, mapItemsModel.MapId)
+
+				log.Printf("mapItemModel : '%v' user : '%s'", mapItemModel.Controllers, message.Source)
 
 				data["id"] = mapItemModel.Id
 				data["mapId"] = mapItemModel.MapId
+				data["hasControl"] = isLead || slices.Contains(mapItemModel.Controllers, message.Source)
 				data["entityName"] = mapItemModel.EntityName
 				data["backgroundImage"] = mapItemModel.Image.Url
 				data["healthPercentage"] = 70
@@ -116,7 +118,6 @@ func (e *baseEventMessageHandler) handleMapEvents(message EventMessage, pool Cam
 			transmitMessage.Body = string(rawJsonBytes)
 			pool.TransmitEventMessage(transmitMessage)
 		}
-
 	}
 
 	return nil
