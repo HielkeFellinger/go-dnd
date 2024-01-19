@@ -25,7 +25,10 @@ func (c *campaignClient) IsLead() bool {
 
 func (c *campaignClient) Read() {
 	defer func() {
-		c.Pool.Unregister <- c
+		// Check if pool has been initialised
+		if c.Pool != nil {
+			c.Pool.Unregister <- c
+		}
 		c.Pool = nil
 		c.Conn.Close()
 	}()
