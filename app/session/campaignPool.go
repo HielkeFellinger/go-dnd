@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hielkefellinger/go-dnd/app/game_engine"
 	"log"
+	"slices"
 )
 
 type baseCampaignPool struct {
@@ -31,6 +32,21 @@ func (pool *baseCampaignPool) GetEngine() game_engine.Engine {
 func (pool *baseCampaignPool) TransmitEventMessage(message game_engine.EventMessage) {
 	log.Printf("Pool internal: %+v\n", message.Id)
 	pool.transmitMessage(message)
+}
+
+func (pool *baseCampaignPool) GetAllClientIds(filterOut ...string) []string {
+	userIds := make([]string, 0)
+	for client := range pool.Clients {
+
+		// Filter out if applicable
+		if len(filterOut) > 0 && slices.Contains(filterOut, client.Id) {
+			continue
+		}
+
+		userIds = append(userIds, client.Id)
+	}
+
+	return userIds
 }
 
 func initCampaignPool(id uint, leadId string) *baseCampaignPool {
@@ -95,7 +111,7 @@ func (pool *baseCampaignPool) Run() {
 func (pool *baseCampaignPool) transmitMessage(message game_engine.EventMessage) {
 	for client := range pool.Clients {
 		// Skip EventMessage on clients who are not recipient
-		if message.Destinations != nil && len(message.Destinations) > 0 && !contains(message.Destinations, client.Id) {
+		if message.Destinations != nil && len(message.Destinations) > 0 && !slices.Contains(message.Destinations, client.Id) {
 			continue
 		}
 
@@ -106,13 +122,4 @@ func (pool *baseCampaignPool) transmitMessage(message game_engine.EventMessage) 
 		}
 	}
 	log.Printf("Message(s) Transmitted ID: '%s'", message.Id)
-}
-
-func contains(s []string, str string) bool {
-	for _, v := range s {
-		if v == str {
-			return true
-		}
-	}
-	return false
 }

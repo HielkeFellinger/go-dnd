@@ -25,6 +25,8 @@ const (
 	TypeAddMap          EventType = 534
 	TypeRemoveMap       EventType = 535
 
+	TypeUpdateMapEntity EventType = 543
+
 	// Set attention to a specific tab
 
 	TypeChatBroadcast EventType = 800

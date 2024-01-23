@@ -121,8 +121,8 @@ base_maps:
           entity: player
       - type: MapItemRelation
         params:
-          x: 10
-          y: 11
+          x: 9
+          y: 10
           entity: pirate
   - id: 1337257c-aac6-46a2-8803-61c581e4f2a5
     name: plane_1

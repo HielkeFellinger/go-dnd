@@ -128,6 +128,9 @@
             if (payLoad.type === 532) {
                 handleCampaignContentMapItemsEvents(payLoad)
             }
+            if (payLoad.type === 533) {
+                handleCampaignContentMapItemEvents(payLoad)
+            }
             return
         }
 
@@ -231,6 +234,11 @@
         }
     }
 
+    let handleCampaignContentMapItemEvents = (data) => {
+        let body = JSON.parse(data.body)
+        log.warn(body)
+    }
+
     let handleChatEvents = (data) => {
         let chatMessage = '';
         if (data.source === currentUser) {
@@ -306,17 +314,34 @@
     }
 
     let drag = (ev) => {
-        console.warn(ev.target.id)
-        console.warn(ev.target.parentNode.id)
-        console.warn(ev)
         ev.dataTransfer.setData("cell-element", ev.target.id);
     }
 
     let drop = (ev) => {
         ev.preventDefault();
         let data = ev.dataTransfer.getData("cell-element");
-        console.warn(data)
+
+        // Get the map item
+        let mapItem = mapItemHtmlIdToMapItem[data]
+        console.warn(mapItem)
         console.warn(ev.target.id)
+
+        // Parse cell to X and Y
+        let cellId = ev.target.id
+        let y = cellId.substring(cellId.indexOf('-y') + 2, cellId.indexOf('-x'))
+        let x = cellId.substring(cellId.indexOf('-x') + 2, cellId.indexOf('-content'))
+        console.warn(y, x)
+
+        // Update MapItem (position)
+        mapItem.Position.Y = y
+        mapItem.Position.X = x
+
+        // Remove Html before sending
+        mapItem.Html = ''
+
+        // Send Updated MapItem
+        sendEvent(wrapMessage(JSON.stringify(mapItem), 800))
+
         ev.target.appendChild(document.getElementById(data));
     }
 

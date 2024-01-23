@@ -28,7 +28,14 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 	}
 
 	if message.Type == TypeLoadFullGame || (message.Type >= TypeLoadMap && message.Type <= TypeRemoveMap) {
-		err := e.handleMapEvents(message, pool)
+		err := e.handleMapLoadEvents(message, pool)
+		if err != nil {
+			return err
+		}
+	}
+
+	if message.Type == TypeUpdateMapEntity {
+		err := e.handleMapUpdateEvents(message, pool)
 		if err != nil {
 			return err
 		}

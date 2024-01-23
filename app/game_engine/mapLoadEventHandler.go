@@ -11,7 +11,7 @@ import (
 	"strconv"
 )
 
-func (e *baseEventMessageHandler) handleMapEvents(message EventMessage, pool CampaignPool) error {
+func (e *baseEventMessageHandler) handleMapLoadEvents(message EventMessage, pool CampaignPool) error {
 	log.Printf("- Map. Event: '%s'", message.Id)
 	if message.Type == TypeLoadMap || message.Type == TypeLoadFullGame {
 		var transmitMessage = NewEventMessage()
@@ -21,7 +21,7 @@ func (e *baseEventMessageHandler) handleMapEvents(message EventMessage, pool Cam
 		// Check if is GM:
 		isLead := message.Source == pool.GetLeadId()
 
-		// Load Focus Map Related Details
+		// @todo Load Focus Map Related Details
 		// - Gray out non-present players;
 
 		var campaignScreenContent = models.NewCampaignScreenContent()
@@ -85,29 +85,17 @@ func (e *baseEventMessageHandler) handleMapEvents(message EventMessage, pool Cam
 				continue
 			}
 
-			// load sub elements
+			// load models
 			mapItems := mapEntity.GetAllComponentsOfType(ecs.MapItemRelationComponentType)
-
 			mapItemsModel := models.CampaignScreenMapItems{
 				MapId:    componentMap.Id,
 				Elements: make(map[string]models.CampaignScreenMapItemElement, len(mapItems)),
 			}
 
-			// Translate Entity to
-			data := make(map[string]any)
+			// Translate all items
 			for _, mapItem := range mapItems {
 				var mapItemModel = ecs_model_translation.MapItemEntityToCampaignMapItemElement(mapItem, mapItemsModel.MapId)
-
-				log.Printf("mapItemModel : '%v' user : '%s'", mapItemModel.Controllers, message.Source)
-
-				data["id"] = mapItemModel.Id
-				data["mapId"] = mapItemModel.MapId
-				data["hasControl"] = isLead || slices.Contains(mapItemModel.Controllers, message.Source)
-				data["entityName"] = mapItemModel.EntityName
-				data["backgroundImage"] = mapItemModel.Image.Url
-				data["healthPercentage"] = 70
-
-				mapItemModel.Html = e.handleLoadHtmlBody("campaignContentMapCell.html", "campaignContentMapCell", data)
+				mapItemModel = e.buildMapItem(mapItemModel, isLead || slices.Contains(mapItemModel.Controllers, message.Source))
 				mapItemsModel.Elements[mapItemModel.Id] = mapItemModel
 			}
 
@@ -126,72 +114,75 @@ func (e *baseEventMessageHandler) handleMapEvents(message EventMessage, pool Cam
 			return nil
 		}
 
+		// Validate Filter
 		var uuidMapItemFilter uuid.UUID
 		if savedUuid, err := uuid.Parse(message.Body); err == nil {
 			uuidMapItemFilter = savedUuid
 		} else {
-			// Filter is invalid
 			return nil
 		}
 
 		var transmitMessage = NewEventMessage()
-		transmitMessage.Type = TypeLoadMapEntities
-		if len(message.Source) > 0 {
-			transmitMessage.Destinations = append(transmitMessage.Destinations, message.Source)
-		}
-
-		// Check if is GM:
-		isLead := message.Source == pool.GetLeadId()
+		transmitMessage.Type = TypeLoadMapEntity
 
 		mapEntities := pool.GetEngine().GetWorld().GetMapEntities()
 		for _, mapEntity := range mapEntities {
 
-			// Only get the map with te relevant entity
+			// Only get the map with the relevant entity
 			if mapEntity.HasComponentByUuid(uuidMapItemFilter) {
 				continue
 			}
-
 			componentMap := ecs_model_translation.MapEntityToCampaignMapModel(mapEntity)
-
-			// load sub elements
 			mapItem := mapEntity.GetComponentByUuid(uuidMapItemFilter)
 
-			mapItemsModel := models.CampaignScreenMapItems{
-				MapId:    componentMap.Id,
-				Elements: make(map[string]models.CampaignScreenMapItemElement, len(mapItems)),
+			// Translate Entity to controlling
+			var mapItemModel = ecs_model_translation.MapItemEntityToCampaignMapItemElement(mapItem, componentMap.Id)
+
+			// Get list of controlling (default the GM + controlling player if map is enabled)
+			controllingPlayers := make([]string, 1)
+			controllingPlayers[0] = pool.GetLeadId()
+			if componentMap.Enabled {
+				controllingPlayers = append(controllingPlayers, mapItemModel.Controllers...)
 			}
 
-			// Once for root; once for non-root
-
-			// Translate Entity to
-			data := make(map[string]any)
-			for _, mapItem := range mapItems {
-				var mapItemModel = ecs_model_translation.MapItemEntityToCampaignMapItemElement(mapItem, mapItemsModel.MapId)
-
-				log.Printf("mapItemModel : '%v' user : '%s'", mapItemModel.Controllers, message.Source)
-
-				data["id"] = mapItemModel.Id
-				data["mapId"] = mapItemModel.MapId
-				data["hasControl"] = isLead || slices.Contains(mapItemModel.Controllers, message.Source)
-				data["entityName"] = mapItemModel.EntityName
-				data["backgroundImage"] = mapItemModel.Image.Url
-				data["healthPercentage"] = 70
-
-				mapItemModel.Html = e.handleLoadHtmlBody("campaignContentMapCell.html", "campaignContentMapCell", data)
-				mapItemsModel.Elements[mapItemModel.Id] = mapItemModel
-			}
-
-			rawJsonBytes, err := json.Marshal(mapItemsModel)
-			if err != nil {
-				log.Printf("Error parsing Loading Map Item content `%s`", err.Error())
-			}
-
-			transmitMessage.Body = string(rawJsonBytes)
+			// Controlling users
+			mapItemModel = e.buildMapItem(mapItemModel, true)
+			transmitMessage.Body = string(e.parseObjectToJson(mapItemModel))
+			transmitMessage.Destinations = controllingPlayers
 			pool.TransmitEventMessage(transmitMessage)
+
+			// Non-controlling users (only if available)
+			if componentMap.Enabled {
+				mapItemModel = e.buildMapItem(mapItemModel, false)
+				transmitMessage.Body = string(e.parseObjectToJson(mapItemModel))
+				transmitMessage.Destinations = pool.GetAllClientIds(controllingPlayers...)
+				pool.TransmitEventMessage(transmitMessage)
+			}
 		}
 	}
 
 	return nil
+}
+
+func (e *baseEventMessageHandler) parseObjectToJson(object any) []byte {
+	rawJsonBytes, err := json.Marshal(object)
+	if err != nil {
+		log.Printf("Error parsing content to Json `%s`", err.Error())
+	}
+	return rawJsonBytes
+}
+
+func (e *baseEventMessageHandler) buildMapItem(mapItemModel models.CampaignScreenMapItemElement, hasControl bool) models.CampaignScreenMapItemElement {
+	data := make(map[string]any)
+	data["id"] = mapItemModel.Id
+	data["mapId"] = mapItemModel.MapId
+	data["hasControl"] = hasControl
+	data["entityName"] = mapItemModel.EntityName
+	data["backgroundImage"] = mapItemModel.Image.Url
+	data["healthPercentage"] = 70
+
+	mapItemModel.Html = e.handleLoadHtmlBody("campaignContentMapCell.html", "campaignContentMapCell", data)
+	return mapItemModel
 }
 
 func buildMapData(model models.CampaignMap, isLead bool) map[string]any {

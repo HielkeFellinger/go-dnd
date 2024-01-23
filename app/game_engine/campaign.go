@@ -5,6 +5,7 @@ type CampaignPool interface {
 	GetLeadId() string
 	GetEngine() Engine
 	TransmitEventMessage(message EventMessage)
+	GetAllClientIds(filterOut ...string) []string
 }
 
 type CampaignClient interface {
