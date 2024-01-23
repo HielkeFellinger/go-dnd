@@ -2,6 +2,7 @@ package game_engine
 
 import (
 	"encoding/json"
+	"github.com/google/uuid"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
 	"github.com/hielkefellinger/go-dnd/app/ecs_model_translation"
 	"github.com/hielkefellinger/go-dnd/app/models"
@@ -66,10 +67,10 @@ func (e *baseEventMessageHandler) handleMapEvents(message EventMessage, pool Cam
 		transmitMessage.Type = TypeLoadMapEntities
 		transmitMessage.Destinations = append(transmitMessage.Destinations, message.Source)
 
+		// Check if is GM:
 		isLead := message.Source == pool.GetLeadId()
 
 		mapEntities := pool.GetEngine().GetWorld().GetMapEntities()
-
 		for _, mapEntity := range mapEntities {
 
 			componentMap := ecs_model_translation.MapEntityToCampaignMapModel(mapEntity)
@@ -91,6 +92,76 @@ func (e *baseEventMessageHandler) handleMapEvents(message EventMessage, pool Cam
 				MapId:    componentMap.Id,
 				Elements: make(map[string]models.CampaignScreenMapItemElement, len(mapItems)),
 			}
+
+			// Translate Entity to
+			data := make(map[string]any)
+			for _, mapItem := range mapItems {
+				var mapItemModel = ecs_model_translation.MapItemEntityToCampaignMapItemElement(mapItem, mapItemsModel.MapId)
+
+				log.Printf("mapItemModel : '%v' user : '%s'", mapItemModel.Controllers, message.Source)
+
+				data["id"] = mapItemModel.Id
+				data["mapId"] = mapItemModel.MapId
+				data["hasControl"] = isLead || slices.Contains(mapItemModel.Controllers, message.Source)
+				data["entityName"] = mapItemModel.EntityName
+				data["backgroundImage"] = mapItemModel.Image.Url
+				data["healthPercentage"] = 70
+
+				mapItemModel.Html = e.handleLoadHtmlBody("campaignContentMapCell.html", "campaignContentMapCell", data)
+				mapItemsModel.Elements[mapItemModel.Id] = mapItemModel
+			}
+
+			rawJsonBytes, err := json.Marshal(mapItemsModel)
+			if err != nil {
+				log.Printf("Error parsing Loading Map Item content `%s`", err.Error())
+			}
+
+			transmitMessage.Body = string(rawJsonBytes)
+			pool.TransmitEventMessage(transmitMessage)
+		}
+	}
+	if message.Type == TypeLoadMapEntity {
+		// No filter in body equals no map entity to load
+		if len(message.Body) == 0 {
+			return nil
+		}
+
+		var uuidMapItemFilter uuid.UUID
+		if savedUuid, err := uuid.Parse(message.Body); err == nil {
+			uuidMapItemFilter = savedUuid
+		} else {
+			// Filter is invalid
+			return nil
+		}
+
+		var transmitMessage = NewEventMessage()
+		transmitMessage.Type = TypeLoadMapEntities
+		if len(message.Source) > 0 {
+			transmitMessage.Destinations = append(transmitMessage.Destinations, message.Source)
+		}
+
+		// Check if is GM:
+		isLead := message.Source == pool.GetLeadId()
+
+		mapEntities := pool.GetEngine().GetWorld().GetMapEntities()
+		for _, mapEntity := range mapEntities {
+
+			// Only get the map with te relevant entity
+			if mapEntity.HasComponentByUuid(uuidMapItemFilter) {
+				continue
+			}
+
+			componentMap := ecs_model_translation.MapEntityToCampaignMapModel(mapEntity)
+
+			// load sub elements
+			mapItem := mapEntity.GetComponentByUuid(uuidMapItemFilter)
+
+			mapItemsModel := models.CampaignScreenMapItems{
+				MapId:    componentMap.Id,
+				Elements: make(map[string]models.CampaignScreenMapItemElement, len(mapItems)),
+			}
+
+			// Once for root; once for non-root
 
 			// Translate Entity to
 			data := make(map[string]any)
