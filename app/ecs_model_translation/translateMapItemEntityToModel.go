@@ -4,6 +4,7 @@ import (
 	"github.com/hielkefellinger/go-dnd/app/ecs"
 	"github.com/hielkefellinger/go-dnd/app/ecs_components"
 	"github.com/hielkefellinger/go-dnd/app/models"
+	"strconv"
 )
 
 func MapItemEntityToCampaignMapItemElement(rawMapItemComponent ecs.Component, mapId string) models.CampaignScreenMapItemElement {
@@ -47,8 +48,8 @@ func MapItemEntityToCampaignMapItemElement(rawMapItemComponent ecs.Component, ma
 
 	if mapItemComponent.Position != nil {
 		model.Position = models.CampaignScreenMapPosition{
-			X: mapItemComponent.Position.X,
-			Y: mapItemComponent.Position.Y,
+			X: strconv.Itoa(int(mapItemComponent.Position.X)),
+			Y: strconv.Itoa(int(mapItemComponent.Position.Y)),
 		}
 	}
 

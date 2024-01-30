@@ -14,154 +14,172 @@ import (
 func (e *baseEventMessageHandler) handleMapLoadEvents(message EventMessage, pool CampaignPool) error {
 	log.Printf("- Map. Event: '%s'", message.Id)
 	if message.Type == TypeLoadMap || message.Type == TypeLoadFullGame {
-		var transmitMessage = NewEventMessage()
-		transmitMessage.Type = TypeLoadMap
-		transmitMessage.Destinations = append(transmitMessage.Destinations, message.Source)
+		e.typeLoadMap(message, pool)
+	}
+	if message.Type == TypeLoadMapEntities || message.Type == TypeLoadFullGame {
+		e.typeLoadMapEntities(message, pool)
+	}
+	if message.Type == TypeLoadMapEntity {
+		return e.typeLoadMapEntity(message, pool)
+	}
 
-		// Check if is GM:
-		isLead := message.Source == pool.GetLeadId()
+	return nil
+}
 
-		// @todo Load Focus Map Related Details
-		// - Gray out non-present players;
+func (e *baseEventMessageHandler) typeLoadMapEntity(message EventMessage, pool CampaignPool) error {
+	// No filter in body equals no map entity to load
+	if len(message.Body) == 0 {
+		return nil
+	}
 
-		var campaignScreenContent = models.NewCampaignScreenContent()
-		mapEntities := pool.GetEngine().GetWorld().GetMapEntities()
+	// Validate Filter
+	var uuidMapItemFilter uuid.UUID
+	if savedUuid, err := uuid.Parse(message.Body); err == nil {
+		uuidMapItemFilter = savedUuid
+	} else {
+		return nil
+	}
 
-		for _, mapEntity := range mapEntities {
-			// Translate
-			componentMap := ecs_model_translation.MapEntityToCampaignMapModel(mapEntity)
+	var transmitMessage = NewEventMessage()
+	transmitMessage.Type = TypeLoadMapEntity
 
-			// Only show enabled maps for player
-			if !componentMap.Enabled && !isLead {
-				continue
-			}
+	mapEntities := pool.GetEngine().GetWorld().GetMapEntities()
+	for _, mapEntity := range mapEntities {
 
-			// Only show filtered form body
-			if len(message.Body) > 0 && componentMap.Id != message.Body {
-				continue
-			}
-
-			var data = buildMapData(componentMap, isLead)
-			var content = models.CampaignContentItem{}
-			var tab = models.CampaignTabItem{}
-
-			tab.Id = componentMap.Id
-			content.Id = componentMap.Id
-			tab.Html = e.handleLoadHtmlBody("campaignSelector.html", "campaignSelector", data)
-			content.Html = e.handleLoadHtmlBody("campaignContentMap.html", "campaignContentMap", data)
-
-			campaignScreenContent.Tabs = append(campaignScreenContent.Tabs, tab)
-			campaignScreenContent.Content = append(campaignScreenContent.Content, content)
+		// Only get the map with the relevant entity
+		if !mapEntity.HasComponentByUuid(uuidMapItemFilter) {
+			continue
 		}
 
-		rawJsonBytes, err := json.Marshal(campaignScreenContent)
+		componentMap := ecs_model_translation.MapEntityToCampaignMapModel(mapEntity)
+		mapItem := mapEntity.GetComponentByUuid(uuidMapItemFilter)
+
+		// Translate Entity to controlling
+		var mapItemModel = ecs_model_translation.MapItemEntityToCampaignMapItemElement(mapItem, componentMap.Id)
+
+		// Get list of controlling (default the GM + controlling player if map is enabled)
+		controllingPlayers := make([]string, 1)
+		controllingPlayers[0] = pool.GetLeadId()
+		if componentMap.Enabled {
+			controllingPlayers = append(controllingPlayers, mapItemModel.Controllers...)
+		}
+
+		// Controlling users
+		mapItemModel = e.buildMapItem(mapItemModel, true)
+		transmitMessage.Body = string(e.parseObjectToJson(mapItemModel))
+		transmitMessage.Destinations = controllingPlayers
+		pool.TransmitEventMessage(transmitMessage)
+		log.Printf("Controlling players: %v", controllingPlayers)
+
+		// Non-controlling users (only if available)
+		nonControllingPlayers := pool.GetAllClientIds(controllingPlayers...)
+		if componentMap.Enabled && len(nonControllingPlayers) > 0 {
+			mapItemModel = e.buildMapItem(mapItemModel, false)
+			transmitMessage.Body = string(e.parseObjectToJson(mapItemModel))
+			transmitMessage.Destinations = nonControllingPlayers
+
+			log.Printf("Non-controlling players: %v", transmitMessage.Destinations)
+			pool.TransmitEventMessage(transmitMessage)
+		}
+	}
+	return nil
+}
+
+func (e *baseEventMessageHandler) typeLoadMapEntities(message EventMessage, pool CampaignPool) {
+	var transmitMessage = NewEventMessage()
+	transmitMessage.Type = TypeLoadMapEntities
+	transmitMessage.Destinations = append(transmitMessage.Destinations, message.Source)
+
+	// Check if is GM:
+	isLead := message.Source == pool.GetLeadId()
+
+	mapEntities := pool.GetEngine().GetWorld().GetMapEntities()
+	for _, mapEntity := range mapEntities {
+
+		componentMap := ecs_model_translation.MapEntityToCampaignMapModel(mapEntity)
+
+		// Only show enabled maps for player
+		if !componentMap.Enabled && !isLead {
+			continue
+		}
+
+		// Only show filtered form body
+		if len(message.Body) > 0 && componentMap.Id != message.Body {
+			continue
+		}
+
+		// load models
+		mapItems := mapEntity.GetAllComponentsOfType(ecs.MapItemRelationComponentType)
+		mapItemsModel := models.CampaignScreenMapItems{
+			MapId:    componentMap.Id,
+			Elements: make(map[string]models.CampaignScreenMapItemElement, len(mapItems)),
+		}
+
+		// Translate all items
+		for _, mapItem := range mapItems {
+			var mapItemModel = ecs_model_translation.MapItemEntityToCampaignMapItemElement(mapItem, mapItemsModel.MapId)
+			mapItemModel = e.buildMapItem(mapItemModel, isLead || slices.Contains(mapItemModel.Controllers, message.Source))
+			mapItemsModel.Elements[mapItemModel.Id] = mapItemModel
+		}
+
+		rawJsonBytes, err := json.Marshal(mapItemsModel)
 		if err != nil {
-			log.Printf("Error parsing Loading Map content `%s`", err.Error())
+			log.Printf("Error parsing Loading Map Item content `%s`", err.Error())
 		}
 
 		transmitMessage.Body = string(rawJsonBytes)
 		pool.TransmitEventMessage(transmitMessage)
 	}
-	if message.Type == TypeLoadMapEntities || message.Type == TypeLoadFullGame {
-		var transmitMessage = NewEventMessage()
-		transmitMessage.Type = TypeLoadMapEntities
-		transmitMessage.Destinations = append(transmitMessage.Destinations, message.Source)
+}
 
-		// Check if is GM:
-		isLead := message.Source == pool.GetLeadId()
+func (e *baseEventMessageHandler) typeLoadMap(message EventMessage, pool CampaignPool) {
+	var transmitMessage = NewEventMessage()
+	transmitMessage.Type = TypeLoadMap
+	transmitMessage.Destinations = append(transmitMessage.Destinations, message.Source)
 
-		mapEntities := pool.GetEngine().GetWorld().GetMapEntities()
-		for _, mapEntity := range mapEntities {
+	// Check if is GM:
+	isLead := message.Source == pool.GetLeadId()
 
-			componentMap := ecs_model_translation.MapEntityToCampaignMapModel(mapEntity)
+	// @todo Load Focus Map Related Details
+	// - Gray out non-present players;
 
-			// Only show enabled maps for player
-			if !componentMap.Enabled && !isLead {
-				continue
-			}
+	var campaignScreenContent = models.NewCampaignScreenContent()
+	mapEntities := pool.GetEngine().GetWorld().GetMapEntities()
 
-			// Only show filtered form body
-			if len(message.Body) > 0 && componentMap.Id != message.Body {
-				continue
-			}
+	for _, mapEntity := range mapEntities {
+		// Translate
+		componentMap := ecs_model_translation.MapEntityToCampaignMapModel(mapEntity)
 
-			// load models
-			mapItems := mapEntity.GetAllComponentsOfType(ecs.MapItemRelationComponentType)
-			mapItemsModel := models.CampaignScreenMapItems{
-				MapId:    componentMap.Id,
-				Elements: make(map[string]models.CampaignScreenMapItemElement, len(mapItems)),
-			}
-
-			// Translate all items
-			for _, mapItem := range mapItems {
-				var mapItemModel = ecs_model_translation.MapItemEntityToCampaignMapItemElement(mapItem, mapItemsModel.MapId)
-				mapItemModel = e.buildMapItem(mapItemModel, isLead || slices.Contains(mapItemModel.Controllers, message.Source))
-				mapItemsModel.Elements[mapItemModel.Id] = mapItemModel
-			}
-
-			rawJsonBytes, err := json.Marshal(mapItemsModel)
-			if err != nil {
-				log.Printf("Error parsing Loading Map Item content `%s`", err.Error())
-			}
-
-			transmitMessage.Body = string(rawJsonBytes)
-			pool.TransmitEventMessage(transmitMessage)
-		}
-	}
-	if message.Type == TypeLoadMapEntity {
-		// No filter in body equals no map entity to load
-		if len(message.Body) == 0 {
-			return nil
+		// Only show enabled maps for player
+		if !componentMap.Enabled && !isLead {
+			continue
 		}
 
-		// Validate Filter
-		var uuidMapItemFilter uuid.UUID
-		if savedUuid, err := uuid.Parse(message.Body); err == nil {
-			uuidMapItemFilter = savedUuid
-		} else {
-			return nil
+		// Only show filtered form body
+		if len(message.Body) > 0 && componentMap.Id != message.Body {
+			continue
 		}
 
-		var transmitMessage = NewEventMessage()
-		transmitMessage.Type = TypeLoadMapEntity
+		var data = buildMapData(componentMap, isLead)
+		var content = models.CampaignContentItem{}
+		var tab = models.CampaignTabItem{}
 
-		mapEntities := pool.GetEngine().GetWorld().GetMapEntities()
-		for _, mapEntity := range mapEntities {
+		tab.Id = componentMap.Id
+		content.Id = componentMap.Id
+		tab.Html = e.handleLoadHtmlBody("campaignSelector.html", "campaignSelector", data)
+		content.Html = e.handleLoadHtmlBody("campaignContentMap.html", "campaignContentMap", data)
 
-			// Only get the map with the relevant entity
-			if mapEntity.HasComponentByUuid(uuidMapItemFilter) {
-				continue
-			}
-			componentMap := ecs_model_translation.MapEntityToCampaignMapModel(mapEntity)
-			mapItem := mapEntity.GetComponentByUuid(uuidMapItemFilter)
-
-			// Translate Entity to controlling
-			var mapItemModel = ecs_model_translation.MapItemEntityToCampaignMapItemElement(mapItem, componentMap.Id)
-
-			// Get list of controlling (default the GM + controlling player if map is enabled)
-			controllingPlayers := make([]string, 1)
-			controllingPlayers[0] = pool.GetLeadId()
-			if componentMap.Enabled {
-				controllingPlayers = append(controllingPlayers, mapItemModel.Controllers...)
-			}
-
-			// Controlling users
-			mapItemModel = e.buildMapItem(mapItemModel, true)
-			transmitMessage.Body = string(e.parseObjectToJson(mapItemModel))
-			transmitMessage.Destinations = controllingPlayers
-			pool.TransmitEventMessage(transmitMessage)
-
-			// Non-controlling users (only if available)
-			if componentMap.Enabled {
-				mapItemModel = e.buildMapItem(mapItemModel, false)
-				transmitMessage.Body = string(e.parseObjectToJson(mapItemModel))
-				transmitMessage.Destinations = pool.GetAllClientIds(controllingPlayers...)
-				pool.TransmitEventMessage(transmitMessage)
-			}
-		}
+		campaignScreenContent.Tabs = append(campaignScreenContent.Tabs, tab)
+		campaignScreenContent.Content = append(campaignScreenContent.Content, content)
 	}
 
-	return nil
+	rawJsonBytes, err := json.Marshal(campaignScreenContent)
+	if err != nil {
+		log.Printf("Error parsing Loading Map content `%s`", err.Error())
+	}
+
+	transmitMessage.Body = string(rawJsonBytes)
+	pool.TransmitEventMessage(transmitMessage)
 }
 
 func (e *baseEventMessageHandler) parseObjectToJson(object any) []byte {

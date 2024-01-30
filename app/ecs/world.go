@@ -9,6 +9,9 @@ type World interface {
 	AddEntities(e []Entity)
 	GetCharacterEntities() []Entity
 	GetMapEntities() []Entity
+	GetEntityByUuid(uuid uuid.UUID) Entity
+	GetMapEntityByUuid(uuid uuid.UUID) Entity
+	GetCharacterEntityByUuid(uuid uuid.UUID) Entity
 }
 
 type BaseWorld struct {
@@ -53,6 +56,18 @@ func (w *BaseWorld) GetCharacterEntities() []Entity {
 
 func (w *BaseWorld) GetMapEntities() []Entity {
 	return w.getEntityValuesOfMap(w.UuidToMapEntity)
+}
+
+func (w *BaseWorld) GetEntityByUuid(uuid uuid.UUID) Entity {
+	return w.UuidToEntity[uuid]
+}
+
+func (w *BaseWorld) GetMapEntityByUuid(uuid uuid.UUID) Entity {
+	return w.UuidToMapEntity[uuid]
+}
+
+func (w *BaseWorld) GetCharacterEntityByUuid(uuid uuid.UUID) Entity {
+	return w.UuidToCharacterEntity[uuid]
 }
 
 func (w *BaseWorld) getEntityValuesOfMap(dict map[uuid.UUID]Entity) []Entity {

@@ -6,17 +6,17 @@ type CampaignScreenMapItems struct {
 }
 
 type CampaignScreenMapItemElement struct {
-	Id          string
-	EntityName  string
-	EntityId    string
-	Controllers []string
-	MapId       string
-	Html        string
+	Id          string   `json:"Id"`
+	EntityName  string   `json:"EntityName"`
+	EntityId    string   `json:"EntityId"`
+	Controllers []string `json:"Controllers"`
+	MapId       string   `json:"MapId"`
+	Html        string   `json:"Html"`
 	Position    CampaignScreenMapPosition
 	Image       CampaignImage
 }
 
 type CampaignScreenMapPosition struct {
-	X uint
-	Y uint
+	X string `json:"X"`
+	Y string `json:"Y"`
 }

@@ -11,8 +11,8 @@ type CampaignMap struct {
 }
 
 type CampaignImage struct {
-	Name string
-	Url  string
+	Name string `json:"Name"`
+	Url  string `json:"Url"`
 }
 
 type CampaignMapCellContent struct {

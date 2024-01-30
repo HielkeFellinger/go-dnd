@@ -60,7 +60,7 @@ func (e *baseEventMessageHandler) handleCharacterEvents(message EventMessage, po
 
 		// Check if GM/DM if not filter non-player controlled characters
 
-		// Load Focus Map Related Details
+		// @todo Load Focus Map Related Details
 		// - Gray out non-present players;
 
 		var characters []models.Character

@@ -207,7 +207,7 @@
         if (mapItems.has(MapId)) {
             for (let [elemId, mapItem] of mapItems[MapId]) {
                 if (!MapElements.has(elemId)) {
-                    let mapItemHtmlId = MapId + "-" + mapItem.Id +"-cell-element"
+                    let mapItemHtmlId = MapId + "-" + mapItem.Id + "-cell-element"
                     document.getElementById(mapItemHtmlId).remove()
                     mapItemIdToEntityId.delete(mapItem.Id)
                     mapItemHtmlIdToMapItem.delete(mapItemHtmlId)
@@ -223,7 +223,7 @@
 
             // Get the Cell
             let cell = document.getElementById(MapId + "-cell-y" + mapItem.Position.Y + "-x" + mapItem.Position.X + '-content')
-            let mapItemHtmlId = MapId + "-" + mapItem.Id +"-cell-element"
+            let mapItemHtmlId = MapId + "-" + mapItem.Id + "-cell-element"
 
             if (cell != null) {
                 cell.innerHTML = mapItem.Html
@@ -235,8 +235,25 @@
     }
 
     let handleCampaignContentMapItemEvents = (data) => {
-        let body = JSON.parse(data.body)
-        log.warn(body)
+        let mapItem = JSON.parse(data.body)
+        let MapId = mapItem.MapId
+
+        // Get the Cell
+        let cell = document.getElementById(MapId + "-cell-y" + mapItem.Position.Y + "-x" + mapItem.Position.X + '-content')
+        let mapItemHtmlId = MapId + "-" + mapItem.Id + "-cell-element"
+
+
+        // Delete old
+        if (document.getElementById(mapItemHtmlId)) {
+            document.getElementById(mapItemHtmlId).remove()
+        }
+
+        if (cell != null) {
+            cell.innerHTML = mapItem.Html
+            mapItems[MapId][mapItem.Id] = mapItem
+            mapItemIdToEntityId[mapItem.Id] = mapItem.EntityId
+            mapItemHtmlIdToMapItem[mapItemHtmlId] = mapItem
+        }
     }
 
     let handleChatEvents = (data) => {
@@ -323,14 +340,11 @@
 
         // Get the map item
         let mapItem = mapItemHtmlIdToMapItem[data]
-        console.warn(mapItem)
-        console.warn(ev.target.id)
 
         // Parse cell to X and Y
         let cellId = ev.target.id
         let y = cellId.substring(cellId.indexOf('-y') + 2, cellId.indexOf('-x'))
         let x = cellId.substring(cellId.indexOf('-x') + 2, cellId.indexOf('-content'))
-        console.warn(y, x)
 
         // Update MapItem (position)
         mapItem.Position.Y = y
@@ -340,7 +354,7 @@
         mapItem.Html = ''
 
         // Send Updated MapItem
-        sendEvent(wrapMessage(JSON.stringify(mapItem), 800))
+        sendEvent(wrapMessage(JSON.stringify(mapItem), 543))
 
         ev.target.appendChild(document.getElementById(data));
     }
