@@ -57,8 +57,8 @@ base_items:
           description: A Sharp Sword
 
 base_characters:
-  - id: inventory
-    name: inventory
+  - id: inventory_0
+    name: inventory_0
     components:
       - type: Slots
         params:
@@ -67,7 +67,41 @@ base_characters:
         params:
           count: 1
           entity: knife
-  - id: player
+  - id: inventory_1
+    name: inventory_1
+    components:
+      - type: Slots
+        params:
+          count: 200
+      - type: HasRelation
+        params:
+          count: 1
+          entity: knife
+      - type: HasRelation
+        params:
+          count: 1
+          entity: sword
+  - id: inventory_2
+    name: inventory_2
+    components:
+      - type: Slots
+        params:
+          count: 200
+      - type: HasRelation
+        params:
+          count: 1
+          entity: sword
+  - id: inventory_3
+    name: inventory_3
+    components:
+      - type: Slots
+        params:
+          count: 200
+      - type: HasRelation
+        params:
+          count: 1
+          entity: sword
+  - id: piet
     name: piet
     components:
       - type: Character
@@ -77,10 +111,38 @@ base_characters:
       - type: HasRelation
         params:
           count: 1
-          entity: inventory
+          entity: inventory_0
       - type: Player
         params:
           name: user
+  - id: jheronimus
+    name: jheronimus
+    components:
+      - type: Character
+        params:
+          name: Jheronimus
+          description: test
+      - type: HasRelation
+        params:
+          count: 1
+          entity: inventory_1
+      - type: Player
+        params:
+          name:
+  - id: judith
+    name: judith
+    components:
+      - type: Character
+        params:
+          name: Judith
+          description: test
+      - type: HasRelation
+        params:
+          count: 1
+          entity: inventory_2
+      - type: Player
+        params:
+          name:
   - id: pirate
     name: pirate
     components:
@@ -88,6 +150,10 @@ base_characters:
         params:
           name: Pirate
           description: Arrrrrgh
+      - type: HasRelation
+        params:
+          count: 1
+          entity: inventory_3
 
 base_factions:
   - id: united_earth
@@ -118,7 +184,7 @@ base_maps:
         params:
           x: 7
           y: 8
-          entity: player
+          entity: piet
       - type: MapItemRelation
         params:
           x: 9

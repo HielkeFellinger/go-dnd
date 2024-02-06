@@ -13,7 +13,7 @@ type Entity interface {
 	GetDescription() string
 	HasComponentType(ct uint64) bool
 	HasComponentByUuid(uuid uuid.UUID) bool
-	GetComponentByUuid(uuid uuid.UUID) Component
+	GetComponentByUuid(uuid uuid.UUID) (Component, bool)
 	AddComponent(c Component) error
 	LoadFromRawEntity(raw RawEntity) error
 	GetAllComponentsOfType(ct uint64) []Component
@@ -73,9 +73,9 @@ func (e *BaseEntity) HasComponentByUuid(uuid uuid.UUID) bool {
 	return ok
 }
 
-func (e *BaseEntity) GetComponentByUuid(uuid uuid.UUID) Component {
-	component, _ := e.uuidToComponent[uuid]
-	return component
+func (e *BaseEntity) GetComponentByUuid(uuid uuid.UUID) (Component, bool) {
+	component, ok := e.uuidToComponent[uuid]
+	return component, ok
 }
 
 func (e *BaseEntity) AddComponent(c Component) error {
@@ -158,7 +158,14 @@ func (e *BaseEntity) checkIfRelationalComponentIsAllowedToBeAdded(c Component) e
 }
 
 func (e *BaseEntity) GetAllComponentsOfType(ct uint64) []Component {
-	return e.componentTypeToComponentArrMap[ct]
+	if e.HasComponentType(ct) {
+		components := e.componentTypeToComponentArrMap[ct]
+		if components != nil && len(components) > 0 {
+			return components
+		}
+	}
+
+	return make([]Component, 0)
 }
 
 func (e *BaseEntity) isComponentTypeAllowedToBeAdded(c Component) bool {

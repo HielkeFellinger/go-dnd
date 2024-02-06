@@ -2,6 +2,7 @@ package game_engine
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/google/uuid"
 	"github.com/hielkefellinger/go-dnd/app/ecs_components"
 	"github.com/hielkefellinger/go-dnd/app/models"
@@ -10,7 +11,7 @@ import (
 )
 
 func (e *baseEventMessageHandler) handleMapUpdateEvents(message EventMessage, pool CampaignPool) error {
-	log.Printf("- Map Update. Event: '%s'", message.Id)
+	log.Printf("- Map Update Event Type: '%d' Message: '%s'", message.Type, message.Id)
 
 	if message.Type == TypeUpdateMapEntity {
 
@@ -21,7 +22,6 @@ func (e *baseEventMessageHandler) handleMapUpdateEvents(message EventMessage, po
 		var messageMapItem models.CampaignScreenMapItemElement
 		err := json.Unmarshal([]byte(clearedBody), &messageMapItem)
 		if err != nil {
-			log.Printf("Message failed with error: %+v\n", err.Error())
 			return err
 		}
 
@@ -35,10 +35,16 @@ func (e *baseEventMessageHandler) handleMapUpdateEvents(message EventMessage, po
 		var mapItemUuid uuid.UUID
 		if parsedUuid, err := uuid.Parse(messageMapItem.Id); err == nil {
 			mapItemUuid = parsedUuid
+		} else {
+			return err
 		}
 
 		mapEntity := pool.GetEngine().GetWorld().GetMapEntityByUuid(mapUuid)
-		mapItemComponent := mapEntity.GetComponentByUuid(mapItemUuid).(*ecs_components.MapItemRelationComponent)
+		rawMapItemComponent, ok := mapEntity.GetComponentByUuid(mapItemUuid)
+		if !ok || rawMapItemComponent == nil {
+			return errors.New("failure loading MapItemComponent")
+		}
+		mapItemComponent := rawMapItemComponent.(*ecs_components.MapItemRelationComponent)
 
 		messagePosition := ecs_components.NewPositionComponent().(*ecs_components.PositionComponent)
 		err = messagePosition.XFromString(messageMapItem.Position.X)
@@ -61,6 +67,7 @@ func (e *baseEventMessageHandler) handleMapUpdateEvents(message EventMessage, po
 			var updateMessage = NewEventMessage()
 			updateMessage.Type = TypeLoadMapEntity
 			updateMessage.Body = mapItemComponent.Id.String()
+			updateMessage.Source = "system"
 
 			err = e.typeLoadMapEntity(updateMessage, pool)
 			if err != nil {
@@ -69,9 +76,6 @@ func (e *baseEventMessageHandler) handleMapUpdateEvents(message EventMessage, po
 		}
 
 		// - @todo Change visibility
-
-		// Trigger sending of the entity data
-
 	}
 
 	return nil

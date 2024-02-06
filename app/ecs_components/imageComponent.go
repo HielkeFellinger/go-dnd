@@ -17,6 +17,14 @@ func NewImageComponent() ecs.Component {
 	}
 }
 
+func NewMissingImageComponent() *ImageComponent {
+	return &ImageComponent{
+		BaseComponent: ecs.BaseComponent{Id: uuid.New()},
+		Name:          "MISSING IMAGE",
+		Url:           "/images/unknown_item.png",
+	}
+}
+
 func (c *ImageComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
 	loadedValues := 0
 	if value, ok := raw.Params["name"]; ok {

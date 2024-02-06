@@ -19,6 +19,8 @@ func MapEntityToCampaignMapModel(rawMapEntity ecs.Entity) models.CampaignMap {
 	var imageDetails = rawMapEntity.GetAllComponentsOfType(ecs.ImageComponentType)
 	if imageDetails != nil && len(imageDetails) == 1 {
 		image = imageDetails[0].(*ecs_components.ImageComponent)
+	} else {
+		image = ecs_components.NewMissingImageComponent()
 	}
 
 	// Get Area
@@ -28,16 +30,24 @@ func MapEntityToCampaignMapModel(rawMapEntity ecs.Entity) models.CampaignMap {
 		area = areaDetails[0].(*ecs_components.AreaComponent)
 	}
 
-	return models.CampaignMap{
+	model := models.CampaignMap{
 		Id:          rawMapEntity.GetId().String(),
 		Name:        rawMapEntity.GetName(),
 		Description: rawMapEntity.GetDescription(),
-		Enabled:     mapEntity.Active,
-		X:           area.Width,
-		Y:           area.Length,
 		Image: models.CampaignImage{
 			Name: image.Name,
 			Url:  image.Url,
 		},
 	}
+
+	if mapEntity != nil {
+		model.Enabled = mapEntity.Active
+	}
+
+	if area != nil {
+		model.X = area.Width
+		model.Y = area.Length
+	}
+
+	return model
 }

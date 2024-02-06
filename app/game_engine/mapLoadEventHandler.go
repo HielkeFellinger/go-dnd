@@ -2,6 +2,7 @@ package game_engine
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/google/uuid"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
 	"github.com/hielkefellinger/go-dnd/app/ecs_model_translation"
@@ -12,7 +13,7 @@ import (
 )
 
 func (e *baseEventMessageHandler) handleMapLoadEvents(message EventMessage, pool CampaignPool) error {
-	log.Printf("- Map. Event: '%s'", message.Id)
+	log.Printf("- Map. Event Type: '%d' Message: '%s'", message.Type, message.Id)
 	if message.Type == TypeLoadMap || message.Type == TypeLoadFullGame {
 		e.typeLoadMap(message, pool)
 	}
@@ -42,6 +43,7 @@ func (e *baseEventMessageHandler) typeLoadMapEntity(message EventMessage, pool C
 
 	var transmitMessage = NewEventMessage()
 	transmitMessage.Type = TypeLoadMapEntity
+	transmitMessage.Source = message.Source
 
 	mapEntities := pool.GetEngine().GetWorld().GetMapEntities()
 	for _, mapEntity := range mapEntities {
@@ -52,7 +54,10 @@ func (e *baseEventMessageHandler) typeLoadMapEntity(message EventMessage, pool C
 		}
 
 		componentMap := ecs_model_translation.MapEntityToCampaignMapModel(mapEntity)
-		mapItem := mapEntity.GetComponentByUuid(uuidMapItemFilter)
+		mapItem, ok := mapEntity.GetComponentByUuid(uuidMapItemFilter)
+		if !ok || mapItem == nil {
+			return errors.New("failure loading MapItem")
+		}
 
 		// Translate Entity to controlling
 		var mapItemModel = ecs_model_translation.MapItemEntityToCampaignMapItemElement(mapItem, componentMap.Id)
@@ -65,11 +70,11 @@ func (e *baseEventMessageHandler) typeLoadMapEntity(message EventMessage, pool C
 		}
 
 		// Controlling users
+		log.Printf("    Controlling players: %v", controllingPlayers)
 		mapItemModel = e.buildMapItem(mapItemModel, true)
 		transmitMessage.Body = string(e.parseObjectToJson(mapItemModel))
 		transmitMessage.Destinations = controllingPlayers
 		pool.TransmitEventMessage(transmitMessage)
-		log.Printf("Controlling players: %v", controllingPlayers)
 
 		// Non-controlling users (only if available)
 		nonControllingPlayers := pool.GetAllClientIds(controllingPlayers...)
@@ -78,7 +83,7 @@ func (e *baseEventMessageHandler) typeLoadMapEntity(message EventMessage, pool C
 			transmitMessage.Body = string(e.parseObjectToJson(mapItemModel))
 			transmitMessage.Destinations = nonControllingPlayers
 
-			log.Printf("Non-controlling players: %v", transmitMessage.Destinations)
+			log.Printf("    Non-controlling players: %v", transmitMessage.Destinations)
 			pool.TransmitEventMessage(transmitMessage)
 		}
 	}
@@ -88,6 +93,7 @@ func (e *baseEventMessageHandler) typeLoadMapEntity(message EventMessage, pool C
 func (e *baseEventMessageHandler) typeLoadMapEntities(message EventMessage, pool CampaignPool) {
 	var transmitMessage = NewEventMessage()
 	transmitMessage.Type = TypeLoadMapEntities
+	transmitMessage.Source = message.Source
 	transmitMessage.Destinations = append(transmitMessage.Destinations, message.Source)
 
 	// Check if is GM:
@@ -102,7 +108,6 @@ func (e *baseEventMessageHandler) typeLoadMapEntities(message EventMessage, pool
 		if !componentMap.Enabled && !isLead {
 			continue
 		}
-
 		// Only show filtered form body
 		if len(message.Body) > 0 && componentMap.Id != message.Body {
 			continue
@@ -135,6 +140,7 @@ func (e *baseEventMessageHandler) typeLoadMapEntities(message EventMessage, pool
 func (e *baseEventMessageHandler) typeLoadMap(message EventMessage, pool CampaignPool) {
 	var transmitMessage = NewEventMessage()
 	transmitMessage.Type = TypeLoadMap
+	transmitMessage.Source = message.Source
 	transmitMessage.Destinations = append(transmitMessage.Destinations, message.Source)
 
 	// Check if is GM:
@@ -160,7 +166,7 @@ func (e *baseEventMessageHandler) typeLoadMap(message EventMessage, pool Campaig
 			continue
 		}
 
-		var data = buildMapData(componentMap, isLead)
+		var data = e.buildMapData(componentMap, isLead)
 		var content = models.CampaignContentItem{}
 		var tab = models.CampaignTabItem{}
 
@@ -203,7 +209,7 @@ func (e *baseEventMessageHandler) buildMapItem(mapItemModel models.CampaignScree
 	return mapItemModel
 }
 
-func buildMapData(model models.CampaignMap, isLead bool) map[string]any {
+func (e *baseEventMessageHandler) buildMapData(model models.CampaignMap, isLead bool) map[string]any {
 	data := make(map[string]any)
 	data["id"] = model.Id
 	data["name"] = model.Name

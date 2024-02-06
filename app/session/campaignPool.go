@@ -30,7 +30,7 @@ func (pool *baseCampaignPool) GetEngine() game_engine.Engine {
 }
 
 func (pool *baseCampaignPool) TransmitEventMessage(message game_engine.EventMessage) {
-	log.Printf("Pool internal: %+v\n", message.Id)
+	log.Printf("Pool transmission Message: '%+v' Source: '%s' & Destination: '%v'", message.Id, message.Source, message.Destinations)
 	pool.transmitMessage(message)
 }
 
@@ -42,10 +42,8 @@ func (pool *baseCampaignPool) GetAllClientIds(filterOut ...string) []string {
 		if len(filterOut) > 0 && slices.Contains(filterOut, client.Id) {
 			continue
 		}
-
 		userIds = append(userIds, client.Id)
 	}
-
 	return userIds
 }
 
@@ -69,10 +67,11 @@ func (pool *baseCampaignPool) Run() {
 
 			var transmitMessage = game_engine.NewEventMessage()
 			transmitMessage.Type = game_engine.TypeUserJoin
-			transmitMessage.Source = "Server"
+			transmitMessage.Source = "server"
 			transmitMessage.Body = fmt.Sprintf("User '%s' Joins the content", client.Id)
 			pool.transmitMessage(transmitMessage)
 
+			pool.updateCharacterRibbon(client.Id)
 			break
 		case client := <-pool.Unregister:
 			// Test if user is Lead, if so close the pool
@@ -80,7 +79,7 @@ func (pool *baseCampaignPool) Run() {
 				// Send closing EventMessage
 				var transmitMessage = game_engine.NewEventMessage()
 				transmitMessage.Type = game_engine.TypeGameClose
-				transmitMessage.Source = "Server"
+				transmitMessage.Source = "server"
 				transmitMessage.Body = "Closing Game!"
 				pool.transmitMessage(transmitMessage)
 
@@ -90,10 +89,13 @@ func (pool *baseCampaignPool) Run() {
 				}
 				runningCampaignSessionsContainer.Unregister <- pool
 				return
+			} else {
+				pool.Clients[client] = false
+				delete(pool.Clients, client)
 			}
 
-			delete(pool.Clients, client)
 			log.Printf("Size of Connection Pool `%d`: %d", pool.Id, len(pool.Clients))
+			pool.updateCharacterRibbon(client.Id)
 
 			break
 		case eventMessage := <-pool.Receive:
@@ -101,16 +103,28 @@ func (pool *baseCampaignPool) Run() {
 
 			err := pool.Engine.GetEventMessageHandler().HandleEventMessage(eventMessage, pool)
 			if err != nil {
-				// @todo Handle error
+				log.Printf("Message failed with error: %+v\n", err.Error())
 			}
 			break
 		}
 	}
 }
 
+// Update Character Ribbon of other players
+func (pool *baseCampaignPool) updateCharacterRibbon(clientId string) {
+	var reloadCharacterMessage = game_engine.NewEventMessage()
+	reloadCharacterMessage.Type = game_engine.TypeLoadCharacters
+	reloadCharacterMessage.Source = "server"
+	reloadCharacterMessage.Destinations = pool.GetAllClientIds(clientId)
+	err := pool.Engine.GetEventMessageHandler().HandleEventMessage(reloadCharacterMessage, pool)
+	if err != nil {
+		log.Printf("Message failed with error: %+v\n", err.Error())
+	}
+}
+
 func (pool *baseCampaignPool) transmitMessage(message game_engine.EventMessage) {
 	for client := range pool.Clients {
-		// Skip EventMessage on clients who are not recipient
+		// Skip EventMessage on clients who are not recipient; empty Destinations is message to all
 		if message.Destinations != nil && len(message.Destinations) > 0 && !slices.Contains(message.Destinations, client.Id) {
 			continue
 		}
@@ -118,7 +132,7 @@ func (pool *baseCampaignPool) transmitMessage(message game_engine.EventMessage) 
 		// Send JSON to clients
 		err := client.Conn.WriteJSON(message)
 		if err != nil {
-			// @todo Log failure
+			log.Printf("Error while sneding Message ID: '%s'. Error: '%s'", message.Id, err.Error())
 		}
 	}
 	log.Printf("Message(s) Transmitted ID: '%s'", message.Id)
