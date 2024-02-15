@@ -57,8 +57,8 @@ base_items:
           description: A Sharp Sword
 
 base_characters:
-  - id: inventory_0
-    name: inventory_0
+  - id: inventory_piet
+    name: inventory_piet
     components:
       - type: Slots
         params:
@@ -67,8 +67,8 @@ base_characters:
         params:
           count: 1
           entity: knife
-  - id: inventory_1
-    name: inventory_1
+  - id: inventory_jheronimus
+    name: inventory_jheronimus
     components:
       - type: Slots
         params:
@@ -81,8 +81,8 @@ base_characters:
         params:
           count: 1
           entity: sword
-  - id: inventory_2
-    name: inventory_2
+  - id: inventory_judith
+    name: inventory_judith
     components:
       - type: Slots
         params:
@@ -91,8 +91,8 @@ base_characters:
         params:
           count: 1
           entity: sword
-  - id: inventory_3
-    name: inventory_3
+  - id: inventory_pirate
+    name: inventory_pirate
     components:
       - type: Slots
         params:
@@ -111,7 +111,7 @@ base_characters:
       - type: HasRelation
         params:
           count: 1
-          entity: inventory_0
+          entity: inventory_piet
       - type: Player
         params:
           name: user
@@ -125,7 +125,7 @@ base_characters:
       - type: HasRelation
         params:
           count: 1
-          entity: inventory_1
+          entity: inventory_jheronimus
       - type: Player
         params:
           name:
@@ -139,7 +139,7 @@ base_characters:
       - type: HasRelation
         params:
           count: 1
-          entity: inventory_2
+          entity: inventory_judith
       - type: Player
         params:
           name:
@@ -153,7 +153,7 @@ base_characters:
       - type: HasRelation
         params:
           count: 1
-          entity: inventory_3
+          entity: inventory_pirate
 
 base_factions:
   - id: united_earth

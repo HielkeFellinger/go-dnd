@@ -14,7 +14,22 @@ func (e *baseEventMessageHandler) handleCharacterEvents(message EventMessage, po
 	if message.Type == TypeLoadCharacters || message.Type == TypeLoadFullGame {
 		e.loadCharacters(message, pool)
 	}
+	if message.Type == TypeLoadCharactersDetails {
+
+	}
+
 	return nil
+}
+
+func (e *baseEventMessageHandler) loadCharactersDetails(message EventMessage, pool CampaignPool) {
+	var transmitMessage = NewEventMessage()
+	transmitMessage.Type = TypeLoadCharacters
+	transmitMessage.Source = message.Source
+
+	// Get the UUID form message
+
+	// Test if user is allowed to access character details.
+
 }
 
 func (e *baseEventMessageHandler) loadCharacters(message EventMessage, pool CampaignPool) {

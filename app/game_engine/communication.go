@@ -15,9 +15,10 @@ const (
 
 	TypeLoadFullGame EventType = 500
 
-	TypeLoadCharacters  EventType = 501
-	TypeAddCharacter    EventType = 502
-	TypeRemoveCharacter EventType = 503
+	TypeLoadCharacters        EventType = 501
+	TypeAddCharacter          EventType = 502
+	TypeRemoveCharacter       EventType = 503
+	TypeLoadCharactersDetails EventType = 504
 
 	TypeLoadMap         EventType = 531
 	TypeLoadMapEntities EventType = 532
