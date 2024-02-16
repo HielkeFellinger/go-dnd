@@ -4,7 +4,7 @@
 {{ template "header.html" .}}
 
 <div class="content">
-    <div class="row g-4 campaign-screen">
+    <div class="row g-4">
         <!--If there's an error, display the error-->
         {{ if .ErrorTitle}}
         <p class="bg-danger">
@@ -12,7 +12,7 @@
         </p>
         {{end}}
 
-        <div class="border chat-screen">
+        <div id="ui-left-bar" class="border chat-screen">
             <h4> Chat </h4>
             <div id="chat-content" class="chat-content">
 
@@ -26,8 +26,8 @@
             <br>
         </div>
 
-        <div class="col border" style="min-width: 1100px;">
-            <div id="char-content" style="margin-top: 0.5em; margin-bottom: 1em; min-height: 4em; max-height: 4em">
+        <div id="ui-center-bar" class="col border" style="min-width: 1100px;">
+            <div id="char-ribbon-row" class="char-ribbon-row">
                 <h4> Characters </h4>
             </div>
             <div id="campaign-screen" class="campaign-screen">
@@ -65,14 +65,16 @@
             </div>
         </div>
 
-        <div class="border" style="width: 450px">
-            <button class="btn" id="toggle-right-bar-visibility"><b>>></b></button>
-            <div id="char-details-holder" class="">
+        <div id="ui-right-bar" class="border" style="width: 450px">
+            <button class="btn" id="toggle-right-bar-visibility" onclick="toggleVisibilityRightBar()" style="position: relative; left: -3em;"><b>>></b></button>
+            <div id="right-bar-inner-content" style="position: relative; top: -2.4em">
+                <div id="char-details-holder" class="">
 
-            </div>
-            <h4> Events </h4>
-            <div id="event-content" class="">
+                </div>
+                <h4> Events </h4>
+                <div id="event-content" class="">
 
+                </div>
             </div>
         </div>
     </div>
@@ -172,7 +174,7 @@
     }
 
     let handleCharacterEvents = (data) => {
-        document.getElementById("char-content").innerHTML = data.body;
+        document.getElementById("char-ribbon-row").innerHTML = data.body;
     }
 
     let handleCampaignContentMapEvents = (data) => {
@@ -196,6 +198,23 @@
             }
             // campaign-tabs
             document.getElementById("campaign-tabs").innerHTML += tabs[index].Html
+        }
+    }
+
+    let rightBarVisible = true
+    let toggleVisibilityRightBar = () => {
+        rightBarVisible = !rightBarVisible
+        let element = document.getElementById('toggle-right-bar-visibility')
+
+        if (rightBarVisible) {
+            element.innerHTML = '>>'
+            document.getElementById('ui-right-bar').style.visibility = "visible";
+            document.getElementById('ui-right-bar').style.width = "450px";
+        } else {
+            element.innerHTML = '<<'
+            document.getElementById('ui-right-bar').style.visibility = "hidden";
+            document.getElementById('ui-right-bar').style.width = "0";
+            element.style.visibility = "visible";
         }
     }
 

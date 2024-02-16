@@ -1,14 +1,14 @@
-{{define "chars"}}
+{{ define "chars" }}
 {{ range .chars }}
-<div class="border" style="max-width: 4em; min-width: 4em; max-height: 4em; min-height: 4em; background-size: contain; background-image: url('{{.Image.Url}}'); float: left; margin-left: 0.25em; margin-right: 1em; position: relative">
+<div class="border char-ribbon-content" style="background-image: url('{{.Image.Url}}');">
     {{ if .Online }}
-    <div style="position: absolute; top: 0.1em; right: -0.6em; min-width: 2em; max-width: 2em; font-size: small; background: none;">
-        <span style="background: green; border-radius: 0.5em; min-width: 1em; max-width: 1em;">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    <div class="online-div">
+        <span class="online-span">&nbsp;&nbsp;&nbsp;&nbsp;</span>
     </div>
     {{ end }}
-    <div class="border" style="text-align: center; position: absolute; bottom: -0.75em; left: -0.5em; min-width: 125%; max-width: 125%; font-size: small">
-        <span style="min-width: 100%; max-width: 100%">{{ .Name }}</span>
+    <div class="border char-name-box">
+        <span class="char-name-box-content">{{ .Name }}</span>
     </div>
 </div>
 {{ end }}
-{{end}}
+{{ end }}

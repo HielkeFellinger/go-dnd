@@ -81,3 +81,56 @@ body {
     display: none;
     flex: 0 2 auto;
 }
+
+/* Character Ribbon */
+
+.char-ribbon-row {
+    margin-top: 0.5em;
+    margin-bottom: 1em;
+    min-height: 4em;
+    max-height: 4em
+}
+
+.char-ribbon-row .char-ribbon-content {
+    max-width: 4em;
+    min-width: 4em;
+    max-height: 4em;
+    min-height: 4em;
+    background-size: contain;
+    float: left;
+    margin-left: 0.25em;
+    margin-right: 1em;
+    position: relative
+}
+
+.char-ribbon-row .char-ribbon-content .char-name-box {
+    text-align: center;
+    position: absolute;
+    bottom: -0.75em;
+    left: -0.5em;
+    min-width: 125%;
+    max-width: 125%;
+    font-size: small
+}
+
+.char-ribbon-row .char-ribbon-content .char-name-box .char-name-box-content {
+    min-width: 100%;
+    max-width: 100%
+}
+
+.online-div {
+    position: absolute;
+    top: 0.1em;
+    right: -0.6em;
+    min-width: 2em;
+    max-width: 2em;
+    font-size: small;
+    background: none;
+}
+
+.online-span {
+    background: green; border-radius: 0.5em; min-width: 1em; max-width: 1em;
+}
+
+
+
