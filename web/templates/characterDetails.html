@@ -1,17 +1,37 @@
-{{define "characterDetails"}}
+{{ define "characterDetails" }}
 
 <div>
 
+    <h5>{{ .character.Id }}</h5>
+    <h2>{{ .character.Name }}</h2>
+    <h3>{{ .character.Description }}</h3>
+
     <!-- Health  -->
-
-
-    <!-- Just Dump inventory  -->
-    <div>
-
+    <div >
+        <div class="form-group">
+            <label>Current Damage</label>
+            <input type="number" value="{{ .character.Health.Damage }}" />
+        </div>
+        <div class="form-group">
+            <label>Temp HP</label>
+            <input type="number" value="{{ .character.Health.TemporaryHitPoints }}">
+        </div>
+        <div class="form-group">
+            <label>Max HP</label>
+            <input type="number" value="{{ .character.Health.MaximumHitPoints }}">
+        </div>
     </div>
 
+    <!-- Stats -->
+    <div>
+        ...
+    </div>
+
+    <!-- Just Dump inventory  -->
+    {{ range .character.Inventories }}
+        {{ template "inventory" . }}
+    {{ end }}
 
 </div>
 
-
-{{end}}
+{{ end }}

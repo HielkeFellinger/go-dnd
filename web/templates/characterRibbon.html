@@ -1,6 +1,6 @@
 {{ define "chars" }}
 {{ range .chars }}
-<div class="border char-ribbon-content" style="background-image: url('{{.Image.Url}}');">
+<div class="border char-ribbon-content" style="background-image: url('{{.Image.Url}}');" onclick="loadCharDetails('{{.Id}}')">
     {{ if .Online }}
     <div class="online-div">
         <span class="online-span">&nbsp;&nbsp;&nbsp;&nbsp;</span>

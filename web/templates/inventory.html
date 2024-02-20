@@ -1,0 +1,27 @@
+{{ define "inventory" }}
+
+<div>
+    <table>
+        <caption>{{ .Id }}</caption>
+        <tr>
+            <th> Name </th>
+            <th> Description </th>
+            <th> Damage </th>
+            <th> Restore </th>
+            <th> Range </th>
+            <th style="visibility: hidden"> ID </th>
+        </tr>
+        {{ range .Items }}
+        <tr>
+            <td> {{ .Name }} </td>
+            <td> {{ .Description }} </td>
+            <td> {{ .Damage }} </td>
+            <td> {{ .Restore }} </td>
+            <td> {{ if .Range.Min }} Min: {{ .Range.Min }} {{ end }} {{ if .Range.Max }} Max: {{ .Range.Max }} {{ end }}</td>
+            <td style="visibility: hidden"> {{ .Id }} </td>
+        </tr>
+        {{ end }}
+    </table>
+</div>
+
+{{ end }}

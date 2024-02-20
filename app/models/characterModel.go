@@ -5,6 +5,7 @@ import "gorm.io/gorm"
 type Character struct {
 	gorm.Model
 	Name    string
+	Id      string        `gorm:"-"`
 	Image   CampaignImage `gorm:"-"`
 	Visible bool          `gorm:"-"`
 	Online  bool          `gorm:"-"`

@@ -58,6 +58,12 @@ func loadGame(gameFile string) ecs.World {
 		log.Fatalln(err.Error())
 	}
 
+	log.Println("Parsing raw/base Game Inventories (Entities)")
+	err, inventories := parseRawEntity(game.Inventories, idToUuidDict, uuidToEntityDict)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
 	log.Println("Parsing raw/base Game Items (Entity Components)")
 	parseRawComponentsOfEntity(game, game.Items, uuidToEntityDict, idToUuidDict)
 	log.Println("Parsing raw/base Game Characters (Entity Components)")
@@ -66,6 +72,8 @@ func loadGame(gameFile string) ecs.World {
 	parseRawComponentsOfEntity(game, game.Factions, uuidToEntityDict, idToUuidDict)
 	log.Println("Parsing raw/base Game Maps (Entity Components)")
 	parseRawComponentsOfEntity(game, game.Maps, uuidToEntityDict, idToUuidDict)
+	log.Println("Parsing raw/base Game Inventory (Entity Components)")
+	parseRawComponentsOfEntity(game, game.Inventories, uuidToEntityDict, idToUuidDict)
 
 	// Add the fully updated Entities to the world
 	log.Println("Done loading raw/base Game. Now filling world")
@@ -74,6 +82,7 @@ func loadGame(gameFile string) ecs.World {
 	world.AddEntities(chars)
 	world.AddEntities(factions)
 	world.AddEntities(maps)
+	world.AddEntities(inventories)
 	log.Println("Done filling world")
 	return &world
 }

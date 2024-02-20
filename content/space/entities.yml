@@ -57,50 +57,6 @@ base_items:
           description: A Sharp Sword
 
 base_characters:
-  - id: inventory_piet
-    name: inventory_piet
-    components:
-      - type: Slots
-        params:
-          count: 200
-      - type: HasRelation
-        params:
-          count: 1
-          entity: knife
-  - id: inventory_jheronimus
-    name: inventory_jheronimus
-    components:
-      - type: Slots
-        params:
-          count: 200
-      - type: HasRelation
-        params:
-          count: 1
-          entity: knife
-      - type: HasRelation
-        params:
-          count: 1
-          entity: sword
-  - id: inventory_judith
-    name: inventory_judith
-    components:
-      - type: Slots
-        params:
-          count: 200
-      - type: HasRelation
-        params:
-          count: 1
-          entity: sword
-  - id: inventory_pirate
-    name: inventory_pirate
-    components:
-      - type: Slots
-        params:
-          count: 200
-      - type: HasRelation
-        params:
-          count: 1
-          entity: sword
   - id: piet
     name: piet
     components:
@@ -143,6 +99,11 @@ base_characters:
       - type: Player
         params:
           name:
+      - type: Health
+        params:
+          damage: 1
+          temporary: 2
+          maximum: 3
   - id: pirate
     name: pirate
     components:
@@ -205,3 +166,48 @@ base_maps:
           name: background
           url: "/images/space/map_33x27.png"
 
+base_inventories:
+  - id: inventory_piet
+    name: inventory_piet
+    components:
+      - type: Slots
+        params:
+          count: 200
+      - type: HasRelation
+        params:
+          count: 1
+          entity: knife
+  - id: inventory_jheronimus
+    name: inventory_jheronimus
+    components:
+      - type: Slots
+        params:
+          count: 200
+      - type: HasRelation
+        params:
+          count: 1
+          entity: knife
+      - type: HasRelation
+        params:
+          count: 1
+          entity: sword
+  - id: inventory_judith
+    name: inventory_judith
+    components:
+      - type: Slots
+        params:
+          count: 200
+      - type: HasRelation
+        params:
+          count: 1
+          entity: sword
+  - id: inventory_pirate
+    name: inventory_pirate
+    components:
+      - type: Slots
+        params:
+          count: 200
+      - type: HasRelation
+        params:
+          count: 1
+          entity: sword

@@ -174,7 +174,15 @@
     }
 
     let handleCharacterEvents = (data) => {
-        document.getElementById("char-ribbon-row").innerHTML = data.body;
+        if (data.type === 501) {
+            document.getElementById("char-ribbon-row").innerHTML = data.body;
+        } else if (data.type === 504) {
+            document.getElementById("char-details-holder").innerHTML = data.body
+        }
+    }
+
+    let loadCharDetails = (id) => {
+        sendEvent(wrapMessage(id, 504))
     }
 
     let handleCampaignContentMapEvents = (data) => {

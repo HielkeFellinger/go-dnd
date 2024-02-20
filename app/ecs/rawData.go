@@ -7,6 +7,7 @@ type RawGameFile struct {
 	Maps            []RawEntity    `yaml:"base_maps"`
 	Factions        []RawEntity    `yaml:"base_factions"`
 	Chars           []RawEntity    `yaml:"base_characters"`
+	Inventories     []RawEntity    `yaml:"base_inventories"`
 }
 
 type RawComponent struct {

@@ -1,35 +1,65 @@
 package game_engine
 
 import (
+	"errors"
+	"github.com/google/uuid"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
 	"github.com/hielkefellinger/go-dnd/app/ecs_components"
+	"github.com/hielkefellinger/go-dnd/app/ecs_model_translation"
 	"github.com/hielkefellinger/go-dnd/app/models"
 	"log"
 	"slices"
 	"sort"
 )
 
-func (e *baseEventMessageHandler) handleCharacterEvents(message EventMessage, pool CampaignPool) error {
+func (e *baseEventMessageHandler) handleLoadCharacterEvents(message EventMessage, pool CampaignPool) error {
 	log.Printf("- Char. Event Type: '%d' Message: '%s'", message.Type, message.Id)
 	if message.Type == TypeLoadCharacters || message.Type == TypeLoadFullGame {
 		e.loadCharacters(message, pool)
 	}
 	if message.Type == TypeLoadCharactersDetails {
-
+		return e.loadCharactersDetails(message, pool)
 	}
 
 	return nil
 }
 
-func (e *baseEventMessageHandler) loadCharactersDetails(message EventMessage, pool CampaignPool) {
+func (e *baseEventMessageHandler) loadCharactersDetails(message EventMessage, pool CampaignPool) error {
 	var transmitMessage = NewEventMessage()
-	transmitMessage.Type = TypeLoadCharacters
+	transmitMessage.Type = TypeLoadCharactersDetails
 	transmitMessage.Source = message.Source
 
-	// Get the UUID form message
+	// Validate UUID Filter form message
+	var uuidCharFilter uuid.UUID
+	if savedUuid, err := uuid.Parse(message.Body); err == nil {
+		uuidCharFilter = savedUuid
+	} else {
+		return err
+	}
 
-	// Test if user is allowed to access character details.
+	// Retrieve
+	var char ecs.Entity
+	char, ok := pool.GetEngine().GetWorld().GetCharacterEntityByUuid(uuidCharFilter)
+	if !ok || char == nil {
+		return errors.New("filter UUID has no match")
+	}
 
+	// Parse and check if the character could be parsed
+	campaignCharacter := ecs_model_translation.CharacterEntityToCampaignCharacterModel(char)
+
+	if len(campaignCharacter.Id) > 0 {
+		data := make(map[string]any)
+		data["character"] = campaignCharacter
+
+		// @todo:  Filter controlling and GM
+
+		transmitMessage.Body = e.handleLoadHtmlBodyMultipleTemplateFiles(
+			[]string{"characterDetails.html", "inventory.html"},
+			"characterDetails", data)
+		pool.TransmitEventMessage(transmitMessage)
+	}
+
+	return nil
 }
 
 func (e *baseEventMessageHandler) loadCharacters(message EventMessage, pool CampaignPool) {
@@ -72,6 +102,7 @@ func (e *baseEventMessageHandler) loadCharacters(message EventMessage, pool Camp
 		}
 
 		characters = append(characters, models.Character{
+			Id:     charEntity.GetId().String(),
 			Name:   charEntity.GetName(),
 			Online: playerOnline,
 			Image: models.CampaignImage{

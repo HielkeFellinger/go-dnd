@@ -9,9 +9,9 @@ type World interface {
 	AddEntities(e []Entity)
 	GetCharacterEntities() []Entity
 	GetMapEntities() []Entity
-	GetEntityByUuid(uuid uuid.UUID) Entity
-	GetMapEntityByUuid(uuid uuid.UUID) Entity
-	GetCharacterEntityByUuid(uuid uuid.UUID) Entity
+	GetEntityByUuid(uuid uuid.UUID) (Entity, bool)
+	GetMapEntityByUuid(uuid uuid.UUID) (Entity, bool)
+	GetCharacterEntityByUuid(uuid uuid.UUID) (Entity, bool)
 }
 
 type BaseWorld struct {
@@ -33,6 +33,9 @@ func NewBaseWorld() BaseWorld {
 
 func (w *BaseWorld) AddEntity(e Entity) {
 	w.UuidToEntity[e.GetId()] = e
+
+	// @todo Add mutual exclusive component check?
+	// @todo Add filter check?
 
 	if e.HasComponentType(CharacterComponentType) {
 		w.UuidToCharacterEntity[e.GetId()] = e
@@ -58,16 +61,19 @@ func (w *BaseWorld) GetMapEntities() []Entity {
 	return w.getEntityValuesOfMap(w.UuidToMapEntity)
 }
 
-func (w *BaseWorld) GetEntityByUuid(uuid uuid.UUID) Entity {
-	return w.UuidToEntity[uuid]
+func (w *BaseWorld) GetEntityByUuid(uuid uuid.UUID) (Entity, bool) {
+	entity, ok := w.UuidToEntity[uuid]
+	return entity, ok
 }
 
-func (w *BaseWorld) GetMapEntityByUuid(uuid uuid.UUID) Entity {
-	return w.UuidToMapEntity[uuid]
+func (w *BaseWorld) GetMapEntityByUuid(uuid uuid.UUID) (Entity, bool) {
+	entity, ok := w.UuidToMapEntity[uuid]
+	return entity, ok
 }
 
-func (w *BaseWorld) GetCharacterEntityByUuid(uuid uuid.UUID) Entity {
-	return w.UuidToCharacterEntity[uuid]
+func (w *BaseWorld) GetCharacterEntityByUuid(uuid uuid.UUID) (Entity, bool) {
+	entity, ok := w.UuidToCharacterEntity[uuid]
+	return entity, ok
 }
 
 func (w *BaseWorld) getEntityValuesOfMap(dict map[uuid.UUID]Entity) []Entity {

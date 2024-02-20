@@ -26,7 +26,8 @@ const (
 	TypeAddMap          EventType = 534
 	TypeRemoveMap       EventType = 535
 
-	TypeUpdateMapEntity EventType = 543
+	TypeUpdateMapEntity     EventType = 543
+	TypeUpdateMapVisibility EventType = 544
 
 	// Set attention to a specific tab
 

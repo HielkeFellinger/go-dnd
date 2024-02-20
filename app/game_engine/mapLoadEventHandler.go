@@ -38,7 +38,7 @@ func (e *baseEventMessageHandler) typeLoadMapEntity(message EventMessage, pool C
 	if savedUuid, err := uuid.Parse(message.Body); err == nil {
 		uuidMapItemFilter = savedUuid
 	} else {
-		return nil
+		return err
 	}
 
 	var transmitMessage = NewEventMessage()
@@ -77,6 +77,8 @@ func (e *baseEventMessageHandler) typeLoadMapEntity(message EventMessage, pool C
 		pool.TransmitEventMessage(transmitMessage)
 
 		// Non-controlling users (only if available)
+		// - @todo Check visibility
+
 		nonControllingPlayers := pool.GetAllClientIds(controllingPlayers...)
 		if componentMap.Enabled && len(nonControllingPlayers) > 0 {
 			mapItemModel = e.buildMapItem(mapItemModel, false)
@@ -121,6 +123,7 @@ func (e *baseEventMessageHandler) typeLoadMapEntities(message EventMessage, pool
 		}
 
 		// Translate all items
+		// - @todo check visibility
 		for _, mapItem := range mapItems {
 			var mapItemModel = ecs_model_translation.MapItemEntityToCampaignMapItemElement(mapItem, mapItemsModel.MapId)
 			mapItemModel = e.buildMapItem(mapItemModel, isLead || slices.Contains(mapItemModel.Controllers, message.Source))
