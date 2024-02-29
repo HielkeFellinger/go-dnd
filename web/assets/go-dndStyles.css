@@ -82,6 +82,22 @@ body {
     flex: 0 2 auto;
 }
 
+div .nav-link {
+    background-color: buttonface;
+    color: #495057;
+    font-weight: 400;
+    cursor: default;
+}
+
+.nav-item .nav-link .btn-close {
+    background: red;
+    color: white;
+    border: none;
+    min-width: 1.75em;
+    max-height: 1.5em;
+    cursor: pointer
+}
+
 /* Character Ribbon */
 
 .char-ribbon-row {

@@ -5,6 +5,8 @@
         {{.Description}} {{.Active}} {{.UserIsLead}}<br>
         {{ if or .Active .UserIsLead }}
         <a href="/campaign/session/{{.ID}}">Go to!</a>
-        {{end}}
+        {{ else }}
+        <i>( Offline )</i>
+        {{ end }}
     </div>
 </div>

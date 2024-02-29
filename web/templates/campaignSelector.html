@@ -1,5 +1,13 @@
 {{define "campaignSelector"}}
 <li class="nav-item" id="{{.id}}List">
-    <button id="{{.id}}Link" class="nav-link" onclick="openTab('{{.id}}')">{{.name}}</button>
+    <div id="{{.id}}Link" class="nav-link btn-nav-link" onclick="openTab('{{.id}}')">
+        {{ if .type }}
+            ({{ .type }})
+        {{ end }}
+        {{.name}}
+        {{ if not .active }}
+        <button id="{{.id}}Close" class="btn-close" style="" onclick="closeTab('{{.id}}')"><b>x</b></button>
+        {{ end }}
+    </div>
 </li>
 {{end}}

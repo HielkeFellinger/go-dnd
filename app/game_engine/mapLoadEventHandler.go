@@ -65,7 +65,7 @@ func (e *baseEventMessageHandler) typeLoadMapEntity(message EventMessage, pool C
 		// Get list of controlling (default the GM + controlling player if map is enabled)
 		controllingPlayers := make([]string, 1)
 		controllingPlayers[0] = pool.GetLeadId()
-		if componentMap.Enabled {
+		if componentMap.Active {
 			controllingPlayers = append(controllingPlayers, mapItemModel.Controllers...)
 		}
 
@@ -80,7 +80,7 @@ func (e *baseEventMessageHandler) typeLoadMapEntity(message EventMessage, pool C
 		// - @todo Check visibility
 
 		nonControllingPlayers := pool.GetAllClientIds(controllingPlayers...)
-		if componentMap.Enabled && len(nonControllingPlayers) > 0 {
+		if componentMap.Active && len(nonControllingPlayers) > 0 {
 			mapItemModel = e.buildMapItem(mapItemModel, false)
 			transmitMessage.Body = string(e.parseObjectToJson(mapItemModel))
 			transmitMessage.Destinations = nonControllingPlayers
@@ -107,7 +107,7 @@ func (e *baseEventMessageHandler) typeLoadMapEntities(message EventMessage, pool
 		componentMap := ecs_model_translation.MapEntityToCampaignMapModel(mapEntity)
 
 		// Only show enabled maps for player
-		if !componentMap.Enabled && !isLead {
+		if !componentMap.Active && !isLead {
 			continue
 		}
 		// Only show filtered form body
@@ -160,7 +160,7 @@ func (e *baseEventMessageHandler) typeLoadMap(message EventMessage, pool Campaig
 		componentMap := ecs_model_translation.MapEntityToCampaignMapModel(mapEntity)
 
 		// Only show enabled maps for player
-		if !componentMap.Enabled && !isLead {
+		if !componentMap.Active && !isLead {
 			continue
 		}
 
@@ -203,6 +203,7 @@ func (e *baseEventMessageHandler) buildMapItem(mapItemModel models.CampaignScree
 	data := make(map[string]any)
 	data["id"] = mapItemModel.Id
 	data["mapId"] = mapItemModel.MapId
+	data["hidden"] = mapItemModel.Hidden
 	data["hasControl"] = hasControl
 	data["entityName"] = mapItemModel.EntityName
 	data["backgroundImage"] = mapItemModel.Image.Url
@@ -214,9 +215,11 @@ func (e *baseEventMessageHandler) buildMapItem(mapItemModel models.CampaignScree
 
 func (e *baseEventMessageHandler) buildMapData(model models.CampaignMap, isLead bool) map[string]any {
 	data := make(map[string]any)
+	data["type"] = "Map"
 	data["id"] = model.Id
 	data["name"] = model.Name
 	data["lead"] = isLead
+	data["active"] = model.Active
 	xVal := make([]string, model.X)
 	yVal := make([]string, model.Y)
 	for i := range xVal {

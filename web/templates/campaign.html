@@ -34,10 +34,16 @@
                 <ul id="campaign-tabs" class="nav nav-tabs">
                     {{ if .campaign.UserIsLead }}
                     <li class="nav-item" id="manageMapsList">
-                        <button id="manageMapsLink" class="nav-link" onclick="openTab('manageMaps')" style="color: goldenrod">Manage Maps</button>
+                        <button id="manageMapsLink" class="nav-link" onclick="openTab('manageMaps');loadMaps()" style="color: goldenrod">Manage Maps</button>
                     </li>
                     <li class="nav-item" id="manageCharactersList">
-                        <button id="manageCharactersLink" class="nav-link" onclick="openTab('manageCharacters')" style="color: goldenrod">Manage Characters</button>
+                        <button id="manageCharactersLink" class="nav-link" onclick="openTab('manageCharacters');loadCharacters()" style="color: goldenrod">Manage Characters</button>
+                    </li>
+                    <li class="nav-item" id="manageInventoryList">
+                        <button id="manageInventoryLink" class="nav-link" onclick="openTab('manageInventory');loadInventories()" style="color: goldenrod">Manage Inventory</button>
+                    </li>
+                    <li class="nav-item" id="manageItemsList">
+                        <button id="manageItemsLink" class="nav-link" onclick="openTab('manageItems');loadItems()" style="color: goldenrod">Manage Items</button>
                     </li>
                     {{ end }}
                     <li class="nav-item" id="currentList">
@@ -55,6 +61,14 @@
                     <div id="manageCharacters" class="tab-content" style="display: none">
                         <h3>Add Character!</h3>
                         <p>Character</p>
+                    </div>
+                    <div id="manageInventory" class="tab-content" style="display: none">
+                        <h3>Add Inventories!</h3>
+                        <p>Inventory</p>
+                    </div>
+                    <div id="manageItems" class="tab-content" style="display: none">
+                        <h3>Add Items!</h3>
+                        <p>Items</p>
                     </div>
                     {{end}}
 
@@ -177,6 +191,9 @@
         if (data.type === 501) {
             document.getElementById("char-ribbon-row").innerHTML = data.body;
         } else if (data.type === 504) {
+            if (!rightBarVisible) {
+                toggleVisibilityRightBar()
+            }
             document.getElementById("char-details-holder").innerHTML = data.body
         }
     }
@@ -318,8 +335,26 @@
         }
 
         // Show the current tab, and add an "active" class to the button that opened the tab
-        document.getElementById(targetId).style.display = "block";
-        document.getElementById(targetId + 'Link').className += " active";
+        if (document.getElementById(targetId)) {
+            document.getElementById(targetId).style.display = "block";
+        }
+        if (document.getElementById(targetId + 'Link')) {
+            document.getElementById(targetId + 'Link').className += " active";
+        }
+    }
+
+    let closeTab = (targetId) => {
+        if (document.getElementById(targetId + 'Link') &&
+            document.getElementById(targetId + 'Link').className.indexOf("active") !== -1) {
+            openTab('current')
+        }
+
+        if (document.getElementById(targetId)) {
+            document.getElementById(targetId).remove()
+        }
+        if (document.getElementById(targetId + 'Link')) {
+            document.getElementById(targetId + 'Link').remove()
+        }
     }
 
     let cellSizeInHalfEms = 8
@@ -389,6 +424,26 @@
 
         ev.target.appendChild(document.getElementById(data));
     }
+
+    // {{ if .campaign.UserIsLead }}
+
+    let loadMaps = () => {
+        // noop
+    }
+
+    let loadCharacters = () => {
+        // noop
+    }
+
+    let loadInventories = () => {
+        // noop
+    }
+
+    let loadItems = () => {
+        // noop
+    }
+
+    // {{ end }}
 
     // Innit Websocket only after loading all JS
     if (window["WebSocket"]) {

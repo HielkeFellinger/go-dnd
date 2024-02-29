@@ -41,7 +41,7 @@ func MapEntityToCampaignMapModel(rawMapEntity ecs.Entity) models.CampaignMap {
 	}
 
 	if mapEntity != nil {
-		model.Enabled = mapEntity.Active
+		model.Active = mapEntity.Active
 	}
 
 	if area != nil {

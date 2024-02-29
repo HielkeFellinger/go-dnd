@@ -6,7 +6,7 @@ type CampaignMap struct {
 	Description string
 	X           uint
 	Y           uint
-	Enabled     bool
+	Active      bool
 	Image       CampaignImage
 }
 

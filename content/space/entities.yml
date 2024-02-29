@@ -64,6 +64,11 @@ base_characters:
         params:
           name: Piet
           description: test
+      - type: Health
+        params:
+          damage: 1
+          temporary: 5
+          maximum: 31
       - type: HasRelation
         params:
           count: 1
@@ -82,6 +87,11 @@ base_characters:
         params:
           count: 1
           entity: inventory_jheronimus
+      - type: Health
+        params:
+          damage: 1
+          temporary: 5
+          maximum: 21
       - type: Player
         params:
           name:
@@ -101,9 +111,9 @@ base_characters:
           name:
       - type: Health
         params:
-          damage: 1
-          temporary: 2
-          maximum: 3
+          damage: 12
+          temporary: 7
+          maximum: 41
   - id: pirate
     name: pirate
     components:
@@ -111,6 +121,11 @@ base_characters:
         params:
           name: Pirate
           description: Arrrrrgh
+      - type: Health
+        params:
+          damage: 0
+          temporary: 5
+          maximum: 10
       - type: HasRelation
         params:
           count: 1
