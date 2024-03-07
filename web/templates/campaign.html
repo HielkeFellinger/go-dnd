@@ -3,8 +3,8 @@
 <!--Embed the header.html template at this location-->
 {{ template "header.html" .}}
 
-<div class="content">
-    <div class="row g-4">
+<div class="content" style="max-width: 100%">
+    <div class="row g-4" style="overflow: hidden;">
         <!--If there's an error, display the error-->
         {{ if .ErrorTitle}}
         <p class="bg-danger">
@@ -79,15 +79,17 @@
             </div>
         </div>
 
-        <div id="ui-right-bar" class="border" style="width: 450px">
-            <button class="btn" id="toggle-right-bar-visibility" onclick="toggleVisibilityRightBar()" style="position: relative; left: -3em;"><b>>></b></button>
-            <div id="right-bar-inner-content" style="position: relative; top: -2.4em">
-                <div id="char-details-holder" class="">
+        <div id="ui-right-bar" class="border" style="width: calc(3em + 553px);">
+            <div>
+                <button class="btn" id="toggle-right-bar-visibility" onclick="toggleVisibilityRightBar()" style="position: relative; left: 0;"><b>>></b></button>
+                <div id="right-bar-inner-content" style="position: relative; left: 3em; top: -2.4em; width: 553px">
+                    <div id="char-details-holder" class="">
 
-                </div>
-                <h4> Events </h4>
-                <div id="event-content" class="">
+                    </div>
+                    <h4> Events </h4>
+                    <div id="event-content" class="">
 
+                    </div>
                 </div>
             </div>
         </div>
@@ -233,12 +235,14 @@
 
         if (rightBarVisible) {
             element.innerHTML = '>>'
-            document.getElementById('ui-right-bar').style.visibility = "visible";
-            document.getElementById('ui-right-bar').style.width = "450px";
+            document.getElementById('right-bar-inner-content').style.display = "inherit";
+            document.getElementById('right-bar-inner-content').style.width = "553px";
+            document.getElementById('ui-right-bar').style.width = "calc(553px + 3em)";
         } else {
             element.innerHTML = '<<'
-            document.getElementById('ui-right-bar').style.visibility = "hidden";
-            document.getElementById('ui-right-bar').style.width = "0";
+            document.getElementById('right-bar-inner-content').style.display = "none";
+            document.getElementById('right-bar-inner-content').style.width = "0";
+            document.getElementById('ui-right-bar').style.width = "3em";
             element.style.visibility = "visible";
         }
     }
