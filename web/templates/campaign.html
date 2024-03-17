@@ -21,7 +21,7 @@
             <div class="form-group">
                 <label for="message">Message</label>
                 <input type="text" id="message" name="message">
-                <button onclick="sendChatMessage()" class="btn btn-primary">Send</button>
+                <button id="messageButton" onclick="sendChatMessage()" class="btn btn-primary">Send</button>
             </div>
             <br>
         </div>
@@ -98,7 +98,16 @@
 
 <script type="application/javascript">
 
-    <!--  Starting Websocket  -->
+    // <!-- Registering Message Listener -->
+    document.getElementById("message")
+        .addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                document.getElementById("messageButton").click();
+            }
+        });
+
+    // <!--  Starting Websocket  -->
     console.log("connecting to campaign: '{{.campaign.Title}}'")
 
     var socket;

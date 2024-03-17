@@ -207,6 +207,13 @@ func (e *baseEventMessageHandler) buildMapItem(mapItemModel models.CampaignScree
 	data["hasControl"] = hasControl
 	data["entityName"] = mapItemModel.EntityName
 	data["backgroundImage"] = mapItemModel.Image.Url
+
+	if mapItemModel.HasHealth() {
+		data["healthBar"] = true
+		data["healthTotal"] = mapItemModel.Health.Total
+		data["healthCurrent"] = mapItemModel.Health.Current
+	}
+
 	data["healthPercentage"] = 70
 
 	mapItemModel.Html = e.handleLoadHtmlBody("campaignContentMapCell.html", "campaignContentMapCell", data)

@@ -4,8 +4,8 @@
     <span>{{.entityName}}</span>
     <!--  Hide / Hidden icon  -->
     <!--  Health bar  -->
-    {{ if .healthPercentage }}
-    <progress id="{{.mapId}}-{{.id}}-health" value="{{.healthPercentage}}" max="100" style="max-width: 100%; min-width: 100%"></progress>
+    {{ if .healthBar }}
+    <progress id="{{.mapId}}-{{.id}}-health" value="{{.healthCurrent}}" max="{{.healthTotal}}" style="max-width: 100%; min-width: 100%"></progress>
     {{ end }}
 </div>
 {{end}}

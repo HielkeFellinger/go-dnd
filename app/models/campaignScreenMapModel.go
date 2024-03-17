@@ -15,9 +15,19 @@ type CampaignScreenMapItemElement struct {
 	Html        string   `json:"Html"`
 	Position    CampaignScreenMapPosition
 	Image       CampaignImage
+	Health      CampaignScreenMapItemHealth
+}
+
+func (mi *CampaignScreenMapItemElement) HasHealth() bool {
+	return mi.Health.Total != 0
 }
 
 type CampaignScreenMapPosition struct {
 	X string `json:"X"`
 	Y string `json:"Y"`
+}
+
+type CampaignScreenMapItemHealth struct {
+	Total   uint
+	Current uint
 }

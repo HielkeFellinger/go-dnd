@@ -53,6 +53,16 @@ func MapItemEntityToCampaignMapItemElement(rawMapItemComponent ecs.Component, ma
 		},
 	}
 
+	// Get (Possible Health Info
+	var healthDetails = mapItemComponent.Entity.GetAllComponentsOfType(ecs.HealthComponentType)
+	if healthDetails != nil && len(healthDetails) > 0 {
+		healthComponent := healthDetails[0].(*ecs_components.HealthComponent)
+		model.Health = models.CampaignScreenMapItemHealth{
+			Total:   healthComponent.Temporary + healthComponent.Maximum,
+			Current: healthComponent.Temporary + healthComponent.Maximum - healthComponent.Damage,
+		}
+	}
+
 	if mapItemComponent.Position != nil {
 		model.Position = models.CampaignScreenMapPosition{
 			X: strconv.Itoa(int(mapItemComponent.Position.X)),
