@@ -26,6 +26,17 @@ func CharacterEntityToCampaignCharacterModel(rawCharacterEntity ecs.Entity) mode
 			character.Description = characterComponent.Description
 		}
 
+		// Get Possible Image
+		imagePlaceholder := ecs_components.NewMissingImageComponent()
+		characterImages := rawCharacterEntity.GetAllComponentsOfType(ecs.ImageComponentType)
+		if len(characterImages) >= 1 {
+			imagePlaceholder = characterImages[0].(*ecs_components.ImageComponent)
+		}
+		character.Image = models.CampaignImage{
+			Name: imagePlaceholder.Name,
+			Url:  imagePlaceholder.Url,
+		}
+
 		// Check for Health
 		healthComponents := rawCharacterEntity.GetAllComponentsOfType(ecs.HealthComponentType)
 		if len(healthComponents) >= 1 {

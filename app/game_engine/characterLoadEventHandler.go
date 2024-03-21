@@ -51,11 +51,11 @@ func (e *baseEventMessageHandler) loadCharactersDetails(message EventMessage, po
 		data := make(map[string]any)
 		data["character"] = campaignCharacter
 
-		// @todo:  Filter controlling and GM
-
 		transmitMessage.Body = e.handleLoadHtmlBodyMultipleTemplateFiles(
 			[]string{"characterDetails.html", "inventory.html"},
 			"characterDetails", data)
+
+		// @todo:  Filter controlling and GM
 		pool.TransmitEventMessage(transmitMessage)
 	}
 

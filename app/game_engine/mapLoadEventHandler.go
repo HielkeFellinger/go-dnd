@@ -27,6 +27,14 @@ func (e *baseEventMessageHandler) handleMapLoadEvents(message EventMessage, pool
 	return nil
 }
 
+func (e *baseEventMessageHandler) updateMapEntityDetails(message EventMessage, pool CampaignPool) {
+
+	// Update Player on map
+
+	// Test Update Visibility
+
+}
+
 func (e *baseEventMessageHandler) typeLoadMapEntity(message EventMessage, pool CampaignPool) error {
 	// No filter in body equals no map entity to load
 	if len(message.Body) == 0 {

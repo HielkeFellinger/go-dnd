@@ -3,22 +3,29 @@
 <div>
 
     <h5>{{ .character.Id }}</h5>
-    <h2>{{ .character.Name }}</h2>
-    <h3>{{ .character.Description }}</h3>
+    <div style="display: flex; flex-flow: row nowrap; align-content: center; width: 100%;">
+        <div style="flex: 1 1 0; background-image: url('{{ .character.Image.Url }}'); width: 100%; background-size: 75%; background-repeat: no-repeat">
+
+        </div>
+        <div style="flex: 4 4 0;">
+            <h2>{{ .character.Name }}</h2>
+            <h3>{{ .character.Description }}</h3>
+        </div>
+    </div>
 
     <!-- Health  -->
-    <div >
-        <div class="form-group">
+    <div style="display: flex; flex-flow: row nowrap; align-content: center; width: 100%;">
+        <div style="flex: 1 1 0;">
             <label>Current Damage</label>
-            <input type="number" value="{{ .character.Health.Damage }}" />
+            <input type="number" style="font-size: 2em; max-width: 4em" value="{{ .character.Health.Damage }}" />
         </div>
-        <div class="form-group">
+        <div style="flex: 1 1 0;">
             <label>Temp HP</label>
-            <input type="number" value="{{ .character.Health.TemporaryHitPoints }}">
+            <input type="number" style="font-size: 2em; max-width: 4em" value="{{ .character.Health.TemporaryHitPoints }}">
         </div>
-        <div class="form-group">
+        <div style="flex: 1 1 0;">
             <label>Max HP</label>
-            <input type="number" value="{{ .character.Health.MaximumHitPoints }}">
+            <input type="number" style="font-size: 2em; max-width: 4em" value="{{ .character.Health.MaximumHitPoints }}">
         </div>
     </div>
 
@@ -29,7 +36,9 @@
 
     <!-- Just Dump inventory  -->
     {{ range .character.Inventories }}
+    <div style="display: flex; flex-flow: row nowrap; align-content: center; width: 100%;">
         {{ template "inventory" . }}
+    </div>
     {{ end }}
 
 </div>

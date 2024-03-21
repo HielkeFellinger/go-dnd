@@ -82,7 +82,7 @@
         <div id="ui-right-bar" class="border" style="width: calc(3em + 553px);">
             <div>
                 <button class="btn" id="toggle-right-bar-visibility" onclick="toggleVisibilityRightBar()" style="position: relative; left: 0;"><b>>></b></button>
-                <div id="right-bar-inner-content" style="position: relative; left: 3em; top: -2.4em; width: 553px">
+                <div id="right-bar-inner-content" style="position: relative; left: 3em; top: -2.4em; width: 543px">
                     <div id="char-details-holder" class="">
 
                     </div>
@@ -199,6 +199,7 @@
     }
 
     let handleCharacterEvents = (data) => {
+        console.warn(data)
         if (data.type === 501) {
             document.getElementById("char-ribbon-row").innerHTML = data.body;
         } else if (data.type === 504) {
@@ -245,7 +246,7 @@
         if (rightBarVisible) {
             element.innerHTML = '>>'
             document.getElementById('right-bar-inner-content').style.display = "inherit";
-            document.getElementById('right-bar-inner-content').style.width = "553px";
+            document.getElementById('right-bar-inner-content').style.width = "543px";
             document.getElementById('ui-right-bar').style.width = "calc(553px + 3em)";
         } else {
             element.innerHTML = '<<'
