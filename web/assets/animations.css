@@ -1,0 +1,36 @@
+#diceSVG {
+    animation: rollDice 2s linear infinite;
+}
+#rolling_dice {
+    animation: bounceDice 2s linear infinite;
+}
+
+@keyframes rollDice {
+    0% {
+        transform: rotate(0deg);
+    }
+    25% {
+        transform: rotate(90deg);
+    }
+    50% {
+        transform: rotate(180deg);
+    }
+    75% {
+        transform: rotate(270deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes bounceDice {
+    0% {
+        transform: translateY(15%);
+    }
+    50%{
+        transform: translateY(-15%);
+    }
+    100% {
+        transform: translateY(15%);
+    }
+}

@@ -18,7 +18,7 @@
         <form class="form" action="/campaign/new" method="POST">
             <div class="form-group">
                 <label for="title">Title</label>
-                <input type="text" name="title" class="form-control" id="title" placeholder="Title">
+                <input type="text" name="title" class="form-control" id="title" placeholder="Title" required>
             </div>
             <div class="form-group">
                 <label for="description">Description</label>
@@ -26,16 +26,41 @@
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" name="password" class="form-control" id="password" placeholder="Password">
+                <input type="password" name="password" class="form-control" id="password" placeholder="Password" required>
             </div>
             <div class="form-group">
                 <label for="passwordCheck">Password (Check)</label>
-                <input type="password" name="passwordCheck" class="form-control" id="passwordCheck" placeholder="Password (Again)">
+                <input type="password" name="passwordCheck" class="form-control" id="passwordCheck" placeholder="Password (Again)" required>
             </div>
-            <button type="submit" class="btn btn-primary">Create</button>
+            <div style="min-height: 4em; width: 12em; display: flex; flex-flow: row;" >
+                <div style="flex: 1 1 0;">
+                    <button id="submit" type="submit" class="btn btn-primary" onclick="loadSpinner()">Login</button>
+                </div>
+                <div id="spinner" style="flex: 1 1 0; display: none">
+                    {{ template "diceSpinnerSvg.html" .}}
+                </div>
+            </div>
         </form>
     </div>
 </div>
+
+<script>
+    document.getElementById("password")
+        .addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                document.getElementById("submit").click();
+            }
+        });
+
+    let loadSpinner = () => {
+        if (document.getElementById("title").value.trim() !== '' &&
+            document.getElementById("password").value.trim() !== '' &&
+            document.getElementById("passwordCheck").value.trim() !== '') {
+            document.getElementById("spinner").style.display = "block";
+        }
+    }
+</script>
 
 <!--Embed the footer.html template at this location-->
 {{ template "footer.html" . }}

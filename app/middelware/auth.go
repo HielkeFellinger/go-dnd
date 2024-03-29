@@ -10,11 +10,14 @@ import (
 	"time"
 )
 
+const loginPageLocation = "/u/login"
+
 func RequireAuthAndCampaign(c *gin.Context) {
 	// Validate User
 	user, err := retrieveUserFromCookie(c)
 	if err != nil || user.ID == 0 {
-		c.AbortWithStatus(http.StatusUnauthorized)
+		c.Redirect(302, loginPageLocation)
+		c.AbortWithStatus(401)
 	}
 
 	// Validate Campaign @todo; see if user is linked to campaign or "admin"
@@ -34,7 +37,8 @@ func RequireAuthAndCampaign(c *gin.Context) {
 func RequireAuth(c *gin.Context) {
 	user, err := retrieveUserFromCookie(c)
 	if err != nil || user.ID == 0 {
-		c.AbortWithStatus(http.StatusUnauthorized)
+		c.Redirect(302, loginPageLocation)
+		c.AbortWithStatus(401)
 	}
 
 	c.Set("user", user)
@@ -74,7 +78,8 @@ func retrieveUserFromCookie(c *gin.Context) (models.User, error) {
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 			// Check the expiration.
 			if float64(time.Now().Unix()) > claims["ExpiresAt"].(float64) {
-				c.AbortWithStatus(http.StatusUnauthorized)
+				c.Redirect(302, loginPageLocation)
+				c.AbortWithStatus(401)
 			}
 
 			// Get user, if exists

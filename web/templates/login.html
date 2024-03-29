@@ -5,6 +5,12 @@
 
 <h1> Login</h1>
 
+<style>
+
+
+
+</style>
+
 <div class="panel panel-default col-sm-6">
     <div class="panel-body">
         <!--If there's an error, display the error-->
@@ -18,19 +24,41 @@
         <form class="form" action="/u/login" method="POST">
             <div class="form-group">
                 <label for="username">Username</label>
-                <input type="text" id="username" name="username">
+                <input type="text" id="username" name="username" required>
             </div>
-
-
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password">
+                <input type="password" id="password" name="password" required>
             </div>
-            <button type="submit" class="btn btn-primary">Login</button>
+            <div style="min-height: 4em; width: 12em; display: flex; flex-flow: row;" >
+                <div style="flex: 1 1 0;">
+                    <button id="submit" type="submit" class="btn btn-primary" onclick="loadSpinner()">Login</button>
+                </div>
+                <div id="spinner" style="flex: 1 1 0; display: none">
+                    {{ template "diceSpinnerSvg.html" .}}
+                </div>
+            </div>
         </form>
         <a href="/u/register">Register a new user?</a>
     </div>
 </div>
+
+<script>
+    document.getElementById("password")
+        .addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                document.getElementById("submit").click();
+            }
+        });
+
+    let loadSpinner = () => {
+        if (document.getElementById("username").value.trim() !== '' &&
+            document.getElementById("password").value.trim() !== '') {
+            document.getElementById("spinner").style.display = "block";
+        }
+    }
+</script>
 
 <!--Embed the footer.html template at this location-->
 {{ template "footer.html" .}}

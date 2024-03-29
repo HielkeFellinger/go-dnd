@@ -388,14 +388,17 @@
 
     let applyMapZoom = () => {
         // Getting the stylesheet
-        const stylesheet = document.styleSheets[2];
         let elementRules;
 
         // looping through all its rules and getting your rule
-        for (const element of stylesheet.cssRules) {
-            console.log(element.selectorText)
-            if (element.selectorText === '.campaign-map .grid .cell') {
-                elementRules = element;
+        for (const stylesheet of document.styleSheets) {
+            if (stylesheet.href.indexOf('/assets/') > -1) {
+                for (const element of stylesheet.cssRules) {
+                    console.log(element.selectorText)
+                    if (element.selectorText === '.campaign-map .grid .cell') {
+                        elementRules = element;
+                    }
+                }
             }
         }
 
@@ -440,7 +443,6 @@
     }
 
     // {{ if .campaign.UserIsLead }}
-
     let loadMaps = () => {
         // noop
     }
@@ -456,7 +458,6 @@
     let loadItems = () => {
         // noop
     }
-
     // {{ end }}
 
     // Innit Websocket only after loading all JS
