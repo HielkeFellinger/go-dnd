@@ -64,3 +64,16 @@ func (service *CampaignService) RetrieveCampaignsLinkedToUser(user User) ([]Camp
 
 	return campaigns, result.Error
 }
+
+func (service *CampaignService) RetrieveCampaignsByIds(ids []uint) ([]Campaign, error) {
+	// Insure a return
+	if len(ids) == 0 {
+		return make([]Campaign, 0), nil
+	}
+
+	var campaigns []Campaign
+	result := DB.Where("id IN ?", ids).
+		Find(&campaigns)
+
+	return campaigns, result.Error
+}

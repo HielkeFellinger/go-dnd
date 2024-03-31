@@ -30,13 +30,22 @@ func CampaignSelectPage(c *gin.Context) {
 		c.HTML(http.StatusUnauthorized, CampaignSelectHtmlFile, templateMap)
 	}
 
-	// Test if active
+	// Test if active sessions linked to user are active
+	userCampaignIds := make([]uint, len(userCampaigns))
 	for key, campaign := range userCampaigns {
+		userCampaignIds[key] = campaign.ID
 		userCampaigns[key].Active = session.IsCampaignRunning(campaign.ID)
 		userCampaigns[key].UserIsLead = campaign.LeadID == rawUser.(models.User).ID
 	}
-
 	templateMap["userCampaigns"] = userCampaigns
+
+	// Get active non-user aligned campaigns
+	allActiveNonUserCampaignIds := session.GetRunningCampaignIds(userCampaignIds)
+	otherActiveCampaigns, err := service.RetrieveCampaignsByIds(allActiveNonUserCampaignIds)
+	for key := range otherActiveCampaigns {
+		otherActiveCampaigns[key].Active = true
+	}
+	templateMap["otherCampaigns"] = otherActiveCampaigns
 
 	c.HTML(http.StatusOK, CampaignSelectHtmlFile, templateMap)
 }

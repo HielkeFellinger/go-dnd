@@ -17,19 +17,9 @@
         </div>
         <div>
             <h2>All Other Campaigns</h2>
-            <div class="container">
-                <div class="row">
-                    <div class="col-sm">
-                        One of three columns
-                    </div>
-                    <div class="col-sm">
-                        One of three columns
-                    </div>
-                    <div class="col-sm">
-                        One of three columns
-                    </div>
-                </div>
-            </div>
+            {{ range .otherCampaigns }}
+                {{template "selectCampaignBox.html" .}}
+            {{ end }}
         </div>
     </div>
 </div>

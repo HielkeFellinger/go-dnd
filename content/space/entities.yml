@@ -33,6 +33,9 @@ type_translation:
 filerModes:
   unknown: 0
 
+campaign_info:
+  - name: YATRPG
+  - description: Test Campaign Template
 
 base_items:
   - id: knife

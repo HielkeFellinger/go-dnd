@@ -4,6 +4,7 @@ import (
 	"github.com/hielkefellinger/go-dnd/app/game_engine"
 	"github.com/hielkefellinger/go-dnd/app/models"
 	"log"
+	"slices"
 )
 
 var runningCampaignSessionsContainer = initCampaignSessionsContainer()
@@ -75,6 +76,16 @@ func (c *campaignSessionsContainer) getCampaignPoolById(id uint) *baseCampaignPo
 	return nil
 }
 
+func (c *campaignSessionsContainer) getRunningCampaignIds(exclude []uint) []uint {
+	ids := make([]uint, 0)
+	for pool, available := range c.Pools {
+		if pool != nil && available && (exclude == nil || !slices.Contains(exclude, pool.Id)) {
+			ids = append(ids, pool.Id)
+		}
+	}
+	return ids
+}
+
 func (c *campaignSessionsContainer) IsCampaignRunning(id uint) bool {
 	return c.getCampaignPoolById(id) != nil
 }
@@ -83,4 +94,8 @@ func (c *campaignSessionsContainer) IsCampaignRunning(id uint) bool {
 
 func IsCampaignRunning(id uint) bool {
 	return runningCampaignSessionsContainer.IsCampaignRunning(id)
+}
+
+func GetRunningCampaignIds(exclude []uint) []uint {
+	return runningCampaignSessionsContainer.getRunningCampaignIds(exclude)
 }
