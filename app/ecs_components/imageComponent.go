@@ -7,8 +7,9 @@ import (
 
 type ImageComponent struct {
 	ecs.BaseComponent
-	Name string `yaml:"name"`
-	Url  string `yaml:"url"`
+	Name   string `yaml:"name"`
+	Url    string `yaml:"url"`
+	Base64 string `yaml:"base64"`
 }
 
 func NewImageComponent() ecs.Component {
@@ -32,6 +33,10 @@ func (c *ImageComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
 		loadedValues++
 	}
 	if value, ok := raw.Params["url"]; ok {
+		c.Url = value
+		loadedValues++
+	}
+	if value, ok := raw.Params["base64"]; ok {
 		c.Url = value
 		loadedValues++
 	}
