@@ -18,6 +18,7 @@ type Entity interface {
 	LoadFromRawEntity(raw RawEntity) error
 	GetAllComponentsOfType(ct uint64) []Component
 	hasCircularRef(uuid uuid.UUID) bool
+	HasRelationWithEntityByUuid(uuid uuid.UUID) bool
 }
 
 type BaseEntity struct {
@@ -104,6 +105,11 @@ func (e *BaseEntity) AddComponent(c Component) error {
 	}
 
 	return nil
+}
+
+func (e *BaseEntity) HasRelationWithEntityByUuid(uuid uuid.UUID) bool {
+	_, ok := e.uuidToRelEntity[uuid]
+	return ok
 }
 
 // Recursive Check if an Uuid is present is children @todo Optimize; is this REALLY needed?

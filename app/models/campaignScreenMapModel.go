@@ -29,5 +29,5 @@ type CampaignScreenMapPosition struct {
 
 type CampaignScreenMapItemHealth struct {
 	Total   uint
-	Current uint
+	Current int
 }

@@ -13,7 +13,7 @@ import (
 )
 
 func (e *baseEventMessageHandler) handleLoadCharacterEvents(message EventMessage, pool CampaignPool) error {
-	log.Printf("- Char. Event Type: '%d' Message: '%s'", message.Type, message.Id)
+	log.Printf("- Char. Load Event Type: '%d' Message: '%s'", message.Type, message.Id)
 	if message.Type == TypeLoadCharacters || message.Type == TypeLoadFullGame {
 		e.loadCharacters(message, pool)
 	}
@@ -29,6 +29,8 @@ func (e *baseEventMessageHandler) loadCharactersDetails(message EventMessage, po
 	transmitMessage.Type = TypeLoadCharactersDetails
 	transmitMessage.Source = message.Source
 
+	isLead := message.Source == pool.GetLeadId()
+
 	// Validate UUID Filter form message
 	var uuidCharFilter uuid.UUID
 	if savedUuid, err := uuid.Parse(message.Body); err == nil {
@@ -37,28 +39,41 @@ func (e *baseEventMessageHandler) loadCharactersDetails(message EventMessage, po
 		return err
 	}
 
-	// Retrieve
-	var char ecs.Entity
-	char, ok := pool.GetEngine().GetWorld().GetCharacterEntityByUuid(uuidCharFilter)
-	if !ok || char == nil {
+	// Test if Character exists
+	var charEntity ecs.Entity
+	charEntity, ok := pool.GetEngine().GetWorld().GetCharacterEntityByUuid(uuidCharFilter)
+	if !ok || charEntity == nil {
 		return errors.New("filter UUID has no match")
 	}
 
 	// Parse and check if the character could be parsed
-	campaignCharacter := ecs_model_translation.CharacterEntityToCampaignCharacterModel(char)
+	campaignCharacter := ecs_model_translation.CharacterEntityToCampaignCharacterModel(charEntity)
 
-	if len(campaignCharacter.Id) > 0 {
+	// Send only to people allowed to view this character
+	if message.Source == ServerUser {
+		transmitMessage.Destinations = append(transmitMessage.Destinations, pool.GetLeadId())
+		transmitMessage.Destinations = append(transmitMessage.Destinations, campaignCharacter.Controllers...)
+	} else if isLead || slices.Contains(campaignCharacter.Controllers, message.Source) {
+		transmitMessage.Destinations = append(transmitMessage.Destinations, message.Source)
+	}
+
+	if len(transmitMessage.Destinations) > 0 && len(campaignCharacter.Id) > 0 {
 		data := make(map[string]any)
 		data["character"] = campaignCharacter
 
-		transmitMessage.Body = e.handleLoadHtmlBodyMultipleTemplateFiles(
-			[]string{"characterDetails.html", "inventory.html"},
-			"characterDetails", data)
+		messageIdBody := EventMessageIdBody{
+			Id: uuidCharFilter.String(),
+			Html: e.handleLoadHtmlBodyMultipleTemplateFiles(
+				[]string{"characterDetails.html", "inventory.html"},
+				"characterDetails", data),
+		}
 
-		// @todo:  Filter controlling and GM
-		pool.TransmitEventMessage(transmitMessage)
+		transmitMessage.Body = messageIdBody.ToBodyString()
+	} else {
+		transmitMessage.Destinations = append(transmitMessage.Destinations, message.Source)
 	}
 
+	pool.TransmitEventMessage(transmitMessage)
 	return nil
 }
 
@@ -79,7 +94,6 @@ func (e *baseEventMessageHandler) loadCharacters(message EventMessage, pool Camp
 
 	var characters models.Characters
 	for _, charEntity := range charEntities {
-
 		// Only show Player Characters
 		if !charEntity.HasComponentType(ecs.PlayerComponentType) {
 			continue

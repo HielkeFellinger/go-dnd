@@ -67,7 +67,7 @@ func (pool *baseCampaignPool) Run() {
 
 			var transmitMessage = game_engine.NewEventMessage()
 			transmitMessage.Type = game_engine.TypeUserJoin
-			transmitMessage.Source = "server"
+			transmitMessage.Source = game_engine.ServerUser
 			transmitMessage.Body = fmt.Sprintf("User '%s' Joins the content", client.Id)
 			pool.transmitMessage(transmitMessage)
 
@@ -79,7 +79,7 @@ func (pool *baseCampaignPool) Run() {
 				// Send closing EventMessage
 				var transmitMessage = game_engine.NewEventMessage()
 				transmitMessage.Type = game_engine.TypeGameClose
-				transmitMessage.Source = "server"
+				transmitMessage.Source = game_engine.ServerUser
 				transmitMessage.Body = "Closing Game!"
 				pool.transmitMessage(transmitMessage)
 

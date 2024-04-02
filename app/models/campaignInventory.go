@@ -7,6 +7,7 @@ type CampaignInventory struct {
 
 type CampaignInventoryItem struct {
 	Id          string
+	Count       uint
 	Name        string
 	Description string
 	Damage      string

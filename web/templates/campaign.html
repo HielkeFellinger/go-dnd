@@ -203,15 +203,33 @@
         if (data.type === 501) {
             document.getElementById("char-ribbon-row").innerHTML = data.body;
         } else if (data.type === 504) {
-            if (!rightBarVisible) {
-                toggleVisibilityRightBar()
+            // If empty body user is not allowed to see details, reset to old state
+            if (!data.body.trim()) {
+                selectedCharDetailsId = loadedCharDetailsId
+            } else {
+                let body = JSON.parse(data.body)
+                if (selectedCharDetailsId === body.Id) {
+                    loadedCharDetailsId = body.Id
+                    if (!rightBarVisible) {
+                        toggleVisibilityRightBar()
+                    }
+                    document.getElementById("char-details-holder").innerHTML = body.Html
+                }
             }
-            document.getElementById("char-details-holder").innerHTML = data.body
         }
     }
 
+    let selectedCharDetailsId = ""
+    let loadedCharDetailsId = ""
     let loadCharDetails = (id) => {
+        selectedCharDetailsId = id
         sendEvent(wrapMessage(id, 504))
+    }
+    let loadCharDetailsByMapItem = (mapItemId) => {
+        if (mapItemIdToEntityId[mapItemId]) {
+            selectedCharDetailsId = mapItemIdToEntityId[mapItemId]
+            sendEvent(wrapMessage(mapItemIdToEntityId[mapItemId], 504))
+        }
     }
 
     let handleCampaignContentMapEvents = (data) => {
@@ -440,6 +458,16 @@
         sendEvent(wrapMessage(JSON.stringify(mapItem), 543))
 
         ev.target.appendChild(document.getElementById(data));
+    }
+
+    let updateCharacterHealth = (id) => {
+        let charHealth = {}
+        charHealth.id = id
+        charHealth.damage = document.getElementById("healthDamage").value
+        charHealth.temp = document.getElementById("healthTmp").value
+        charHealth.max = document.getElementById("healthMax").value
+
+        sendEvent(wrapMessage(JSON.stringify(charHealth), 511))
     }
 
     // {{ if .campaign.UserIsLead }}

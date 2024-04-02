@@ -29,7 +29,8 @@ func InventoryEntityToCampaignInventoryModel(rawInventoryEntity ecs.Entity) mode
 			if hasRelation.Entity != nil && hasRelation.Entity.HasComponentType(ecs.ItemComponentType) {
 
 				inventoryItem := &models.CampaignInventoryItem{
-					Id: hasRelation.Entity.GetId().String(),
+					Id:    hasRelation.Entity.GetId().String(),
+					Count: hasRelation.Count,
 				}
 
 				// Check Item Details

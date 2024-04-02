@@ -31,6 +31,13 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 		}
 	}
 
+	if message.Type == TypeUpdateCharacterHealth {
+		err := e.handleUpdateCharacterEvents(message, pool)
+		if err != nil {
+			return err
+		}
+	}
+
 	if message.Type == TypeUpdateMapEntity || message.Type == TypeUpdateMapVisibility {
 		err := e.handleMapUpdateEvents(message, pool)
 		if err != nil {
@@ -51,8 +58,6 @@ func (e *baseEventMessageHandler) handleLoadHtmlBodyMultipleTemplateFiles(fileNa
 	for _, fileName := range fileNames {
 		files = append(files, fmt.Sprintf("web/templates/%s", fileName))
 	}
-
-	log.Printf("Kaas: %v", files)
 
 	var buf bytes.Buffer
 	tmpl := template.Must(template.ParseFiles(files...))

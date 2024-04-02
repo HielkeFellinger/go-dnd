@@ -1,9 +1,12 @@
 package game_engine
 
 import (
+	"encoding/json"
 	"github.com/google/uuid"
 	"time"
 )
+
+const ServerUser string = "server"
 
 type EventType int
 
@@ -19,6 +22,8 @@ const (
 	TypeAddCharacter          EventType = 502
 	TypeRemoveCharacter       EventType = 503
 	TypeLoadCharactersDetails EventType = 504
+
+	TypeUpdateCharacterHealth EventType = 511
 
 	TypeLoadMap         EventType = 531
 	TypeLoadMapEntities EventType = 532
@@ -44,6 +49,20 @@ type EventMessage struct {
 	Type         EventType `json:"type"`
 	Body         string    `json:"body"`
 	DateTime     string    `json:"dateTime"`
+}
+
+type EventMessageIdBody struct {
+	Id   string `json:"Id"`
+	Html string `json:"Html"`
+}
+
+func (midBody *EventMessageIdBody) ToBodyString() string {
+	rawJsonBytes, err := json.Marshal(midBody)
+	if err == nil {
+		return string(rawJsonBytes)
+	}
+
+	return ""
 }
 
 func NewEventMessage() EventMessage {

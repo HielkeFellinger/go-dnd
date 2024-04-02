@@ -59,7 +59,7 @@ func MapItemEntityToCampaignMapItemElement(rawMapItemComponent ecs.Component, ma
 		healthComponent := healthDetails[0].(*ecs_components.HealthComponent)
 		model.Health = models.CampaignScreenMapItemHealth{
 			Total:   healthComponent.Temporary + healthComponent.Maximum,
-			Current: healthComponent.Temporary + healthComponent.Maximum - healthComponent.Damage,
+			Current: int(healthComponent.Temporary) + int(healthComponent.Maximum) - int(healthComponent.Damage),
 		}
 	}
 

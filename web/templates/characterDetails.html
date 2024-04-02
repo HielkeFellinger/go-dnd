@@ -16,16 +16,16 @@
     <!-- Health  -->
     <div style="display: flex; flex-flow: row nowrap; align-content: center; width: 100%;">
         <div style="flex: 1 1 0;">
-            <label>Current Damage</label>
-            <input type="number" style="font-size: 2em; max-width: 4em" value="{{ .character.Health.Damage }}" />
+            <label for="healthDamage">Current Damage</label>
+            <input id="healthDamage" type="number" style="font-size: 2em; max-width: 4em" value="{{ .character.Health.Damage }}" onchange="updateCharacterHealth('{{ .character.Id }}')" />
         </div>
         <div style="flex: 1 1 0;">
-            <label>Temp HP</label>
-            <input type="number" style="font-size: 2em; max-width: 4em" value="{{ .character.Health.TemporaryHitPoints }}">
+            <label for="healthTmp">Temp HP</label>
+            <input id="healthTmp" type="number" style="font-size: 2em; max-width: 4em" value="{{ .character.Health.TemporaryHitPoints }}" onchange="updateCharacterHealth('{{ .character.Id }}')" />
         </div>
         <div style="flex: 1 1 0;">
-            <label>Max HP</label>
-            <input type="number" style="font-size: 2em; max-width: 4em" value="{{ .character.Health.MaximumHitPoints }}">
+            <label for="healthMax">Max HP</label>
+            <input id="healthMax" type="number" style="font-size: 2em; max-width: 4em" value="{{ .character.Health.MaximumHitPoints }}" onchange="updateCharacterHealth('{{ .character.Id }}')" />
         </div>
     </div>
 

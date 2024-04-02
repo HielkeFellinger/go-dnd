@@ -222,8 +222,6 @@ func (e *baseEventMessageHandler) buildMapItem(mapItemModel models.CampaignScree
 		data["healthCurrent"] = mapItemModel.Health.Current
 	}
 
-	data["healthPercentage"] = 70
-
 	mapItemModel.Html = e.handleLoadHtmlBody("campaignContentMapCell.html", "campaignContentMapCell", data)
 	return mapItemModel
 }

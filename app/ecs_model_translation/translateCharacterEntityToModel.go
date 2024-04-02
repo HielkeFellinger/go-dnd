@@ -8,9 +8,7 @@ import (
 )
 
 func CharacterEntityToCampaignCharacterModel(rawCharacterEntity ecs.Entity) models.CampaignCharacter {
-	character := models.CampaignCharacter{
-		Inventories: make([]models.CampaignInventory, 0),
-	}
+	character := models.GetNewCampaignCharacter()
 
 	// Test If it is a character
 	if rawCharacterEntity.HasComponentType(ecs.CharacterComponentType) {
@@ -48,6 +46,12 @@ func CharacterEntityToCampaignCharacterModel(rawCharacterEntity ecs.Entity) mode
 			}
 		}
 
+		// Check Ownership
+		for _, rawPlayerComponent := range rawCharacterEntity.GetAllComponentsOfType(ecs.PlayerComponentType) {
+			playerComponent := rawPlayerComponent.(*ecs_components.PlayerComponent)
+			character.Controllers = append(character.Controllers, playerComponent.Name)
+		}
+
 		// Check for hasRelation to InventoryEntity
 		hasRelationComponents := rawCharacterEntity.GetAllComponentsOfType(ecs.HasRelationComponentType)
 		for _, rawHasRelationComponent := range hasRelationComponents {
@@ -60,6 +64,8 @@ func CharacterEntityToCampaignCharacterModel(rawCharacterEntity ecs.Entity) mode
 
 			// @todo stats?
 		}
+
+		// @todo spells & slots?
 	}
 
 	return character
