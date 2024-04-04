@@ -38,6 +38,16 @@ campaign_info:
   - description: Test Campaign Template
 
 base_items:
+  - id: dagger
+    name: Dagger
+    components:
+      - type: Damage
+        params:
+          amount: 1d4+2
+      - type: Item
+        params:
+          name: Dagger
+          description: A Small sharpened Knife
   - id: knife
     name: Knife
     components:
@@ -133,6 +143,25 @@ base_characters:
         params:
           count: 1
           entity: inventory_pirate
+  - id: ninja
+    name: ninja
+    components:
+      - type: Character
+        params:
+          name: Ninja
+          description: <sneak>
+      - type: Health
+        params:
+          damage: 0
+          temporary: 0
+          maximum: 15
+      - type: HasRelation
+        params:
+          count: 1
+          entity: inventory_ninja
+      - type: Visibility
+        params:
+          hidden: true
 
 base_factions:
   - id: united_earth
@@ -169,6 +198,11 @@ base_maps:
           x: 9
           y: 10
           entity: pirate
+      - type: MapItemRelation
+        params:
+          x: 6
+          y: 12
+          entity: ninja
   - id: 1337257c-aac6-46a2-8803-61c581e4f2a5
     name: plane_1
     components:
@@ -229,3 +263,13 @@ base_inventories:
         params:
           count: 1
           entity: sword
+  - id: inventory_ninja
+    name: inventory_ninja
+    components:
+      - type: Slots
+        params:
+          count: 200
+      - type: HasRelation
+        params:
+          count: 1
+          entity: dagger

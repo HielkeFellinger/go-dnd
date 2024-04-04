@@ -152,15 +152,15 @@
         }
 
         // Parse Map Events
-        if (payLoad.type >= 530 && payLoad.type < 540) {
+        if (payLoad.type >= 530 && payLoad.type < 549) {
             if (payLoad.type === 531) {
                 handleCampaignContentMapEvents(payLoad)
-            }
-            if (payLoad.type === 532) {
+            } else if (payLoad.type === 532) {
                 handleCampaignContentMapItemsEvents(payLoad)
-            }
-            if (payLoad.type === 533) {
+            } else if (payLoad.type === 533) {
                 handleCampaignContentMapItemEvents(payLoad)
+            } else if (payLoad.type === 544) {
+                handleCampaignContentMapVisibility(payLoad)
             }
             return
         }
@@ -314,6 +314,20 @@
         }
     }
 
+    let handleCampaignContentMapVisibility = (data) => {
+        let body = JSON.parse(data.body)
+        let id = body.id
+        let active = body.active
+
+        // Clean-up or request the new active map
+        if (!active) {
+            closeTab(id)
+        } else {
+            sendEvent(wrapMessage(id, 531))
+            sendEvent(wrapMessage(id, 532))
+        }
+    }
+
     let handleCampaignContentMapItemEvents = (data) => {
         let mapItem = JSON.parse(data.body)
         let MapId = mapItem.MapId
@@ -334,6 +348,15 @@
             mapItemIdToEntityId[mapItem.Id] = mapItem.EntityId
             mapItemHtmlIdToMapItem[mapItemHtmlId] = mapItem
         }
+    }
+
+    let updateMapVisibility = (id) => {
+        // Send to back
+        let mapVisibility = {}
+        mapVisibility.id = id
+        mapVisibility.active = document.getElementById("is" + id + "Active").checked
+
+        sendEvent(wrapMessage(JSON.stringify(mapVisibility), 544))
     }
 
     let handleChatEvents = (data) => {

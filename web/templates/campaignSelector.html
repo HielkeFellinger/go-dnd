@@ -5,7 +5,7 @@
             ({{ .type }})
         {{ end }}
         {{.name}}
-        {{ if not .active }}
+        {{ if or (not .active) .lead }}
         <button id="{{.id}}Close" class="btn-close" style="" onclick="closeTab('{{.id}}')"><b>x</b></button>
         {{ end }}
     </div>

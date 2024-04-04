@@ -5,6 +5,11 @@ type CampaignScreenMapItems struct {
 	Elements map[string]CampaignScreenMapItemElement
 }
 
+type SetActivity struct {
+	Id     string `json:"id"`
+	Active bool   `json:"active"`
+}
+
 type CampaignScreenMapItemElement struct {
 	Id          string   `json:"Id"`
 	EntityName  string   `json:"EntityName"`

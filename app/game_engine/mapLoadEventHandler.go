@@ -27,14 +27,6 @@ func (e *baseEventMessageHandler) handleMapLoadEvents(message EventMessage, pool
 	return nil
 }
 
-func (e *baseEventMessageHandler) updateMapEntityDetails(message EventMessage, pool CampaignPool) {
-
-	// Update Player on map
-
-	// Test Update Visibility
-
-}
-
 func (e *baseEventMessageHandler) typeLoadMapEntity(message EventMessage, pool CampaignPool) error {
 	// No filter in body equals no map entity to load
 	if len(message.Body) == 0 {
@@ -53,9 +45,10 @@ func (e *baseEventMessageHandler) typeLoadMapEntity(message EventMessage, pool C
 	transmitMessage.Type = TypeLoadMapEntity
 	transmitMessage.Source = message.Source
 
+	isLead := message.Source == pool.GetLeadId()
+
 	mapEntities := pool.GetEngine().GetWorld().GetMapEntities()
 	for _, mapEntity := range mapEntities {
-
 		// Only get the map with the relevant entity
 		if !mapEntity.HasComponentByUuid(uuidMapItemFilter) {
 			continue
@@ -84,8 +77,11 @@ func (e *baseEventMessageHandler) typeLoadMapEntity(message EventMessage, pool C
 		transmitMessage.Destinations = controllingPlayers
 		pool.TransmitEventMessage(transmitMessage)
 
-		// Non-controlling users (only if available)
-		// - @todo Check visibility
+		// - @todo team visibility
+		// Check hidden non owner
+		if mapItemModel.Hidden && !isLead && !slices.Contains(mapItemModel.Controllers, message.Source) {
+			continue
+		}
 
 		nonControllingPlayers := pool.GetAllClientIds(controllingPlayers...)
 		if componentMap.Active && len(nonControllingPlayers) > 0 {
@@ -111,15 +107,15 @@ func (e *baseEventMessageHandler) typeLoadMapEntities(message EventMessage, pool
 
 	mapEntities := pool.GetEngine().GetWorld().GetMapEntities()
 	for _, mapEntity := range mapEntities {
+		// Only show filtered form body
+		if len(message.Body) > 0 && mapEntity.GetId().String() != message.Body {
+			continue
+		}
 
 		componentMap := ecs_model_translation.MapEntityToCampaignMapModel(mapEntity)
 
 		// Only show enabled maps for player
 		if !componentMap.Active && !isLead {
-			continue
-		}
-		// Only show filtered form body
-		if len(message.Body) > 0 && componentMap.Id != message.Body {
 			continue
 		}
 
@@ -131,9 +127,15 @@ func (e *baseEventMessageHandler) typeLoadMapEntities(message EventMessage, pool
 		}
 
 		// Translate all items
-		// - @todo check visibility
 		for _, mapItem := range mapItems {
 			var mapItemModel = ecs_model_translation.MapItemEntityToCampaignMapItemElement(mapItem, mapItemsModel.MapId)
+
+			// - @todo team visibility
+			// Check hidden non owner
+			if mapItemModel.Hidden && !isLead && !slices.Contains(mapItemModel.Controllers, message.Source) {
+				continue
+			}
+
 			mapItemModel = e.buildMapItem(mapItemModel, isLead || slices.Contains(mapItemModel.Controllers, message.Source))
 			mapItemsModel.Elements[mapItemModel.Id] = mapItemModel
 		}
@@ -162,8 +164,13 @@ func (e *baseEventMessageHandler) typeLoadMap(message EventMessage, pool Campaig
 
 	var campaignScreenContent = models.NewCampaignScreenContent()
 	mapEntities := pool.GetEngine().GetWorld().GetMapEntities()
-
+	charEntities := pool.GetEngine().GetWorld().GetCharacterEntities()
 	for _, mapEntity := range mapEntities {
+		// Only handle if id is requested from body
+		if len(message.Body) > 0 && mapEntity.GetId().String() != message.Body {
+			continue
+		}
+
 		// Translate
 		componentMap := ecs_model_translation.MapEntityToCampaignMapModel(mapEntity)
 
@@ -172,15 +179,9 @@ func (e *baseEventMessageHandler) typeLoadMap(message EventMessage, pool Campaig
 			continue
 		}
 
-		// Only show filtered form body
-		if len(message.Body) > 0 && componentMap.Id != message.Body {
-			continue
-		}
-
-		var data = e.buildMapData(componentMap, isLead)
+		var data = e.buildMapData(componentMap, isLead, charEntities)
 		var content = models.CampaignContentItem{}
 		var tab = models.CampaignTabItem{}
-
 		tab.Id = componentMap.Id
 		content.Id = componentMap.Id
 		tab.Html = e.handleLoadHtmlBody("campaignSelector.html", "campaignSelector", data)
@@ -226,13 +227,16 @@ func (e *baseEventMessageHandler) buildMapItem(mapItemModel models.CampaignScree
 	return mapItemModel
 }
 
-func (e *baseEventMessageHandler) buildMapData(model models.CampaignMap, isLead bool) map[string]any {
+func (e *baseEventMessageHandler) buildMapData(model models.CampaignMap, isLead bool, characters []ecs.Entity) map[string]any {
 	data := make(map[string]any)
 	data["type"] = "Map"
 	data["id"] = model.Id
 	data["name"] = model.Name
 	data["lead"] = isLead
 	data["active"] = model.Active
+	data["backgroundImage"] = model.Image.Url
+	data["characters"] = characters
+
 	xVal := make([]string, model.X)
 	yVal := make([]string, model.Y)
 	for i := range xVal {
@@ -241,10 +245,7 @@ func (e *baseEventMessageHandler) buildMapData(model models.CampaignMap, isLead 
 	for i := range yVal {
 		yVal[i] = strconv.Itoa(i)
 	}
-
 	data["x"] = xVal
 	data["y"] = yVal
-	data["backgroundImage"] = model.Image.Url
-
 	return data
 }

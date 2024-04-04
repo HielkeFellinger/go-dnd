@@ -41,11 +41,19 @@ func MapItemEntityToCampaignMapItemElement(rawMapItemComponent ecs.Component, ma
 		}
 	}
 
+	// Get (possible) Visibility
+	hidden := false
+	var visibilityDetails = mapItemComponent.Entity.GetAllComponentsOfType(ecs.VisibilityComponentType)
+	if visibilityDetails != nil && len(visibilityDetails) == 1 {
+		hidden = visibilityDetails[0].(*ecs_components.VisibilityComponent).Hidden
+	}
+
 	model := models.CampaignScreenMapItemElement{
 		Id:          mapItemComponent.GetId().String(),
 		EntityName:  mapItemComponent.Entity.GetName(),
 		EntityId:    mapItemComponent.Entity.GetId().String(),
 		MapId:       mapId,
+		Hidden:      hidden,
 		Controllers: controllingPlayers,
 		Image: models.CampaignImage{
 			Name: image.Name,

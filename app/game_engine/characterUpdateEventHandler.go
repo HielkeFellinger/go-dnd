@@ -15,13 +15,13 @@ import (
 func (e *baseEventMessageHandler) handleUpdateCharacterEvents(message EventMessage, pool CampaignPool) error {
 	log.Printf("- Char. Update Event Type: '%d' Message: '%s'", message.Type, message.Id)
 	if message.Type == TypeUpdateCharacterHealth {
-		return e.updateCharacterHealth(message, pool)
+		return e.typeUpdateCharacterHealth(message, pool)
 	}
 
 	return nil
 }
 
-func (e *baseEventMessageHandler) updateCharacterHealth(message EventMessage, pool CampaignPool) error {
+func (e *baseEventMessageHandler) typeUpdateCharacterHealth(message EventMessage, pool CampaignPool) error {
 	// Undo escaping
 	clearedBody := html.UnescapeString(message.Body)
 

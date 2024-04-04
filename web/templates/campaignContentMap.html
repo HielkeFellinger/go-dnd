@@ -2,7 +2,20 @@
 <div id="{{.id}}" class="tab-content">
     {{ if .lead }}
     <div>
-        <input type="checkbox">
+        <label> Is Map public?
+            <input id="is{{.id}}Active" type="checkbox" {{ if .active }} checked {{end}} onchange="updateMapVisibility('{{.id}}')">
+        </label>
+        <button class="btn" onclick="">Refresh</button>
+        <br>
+        <label> Add Character
+            <select>
+                <option value="none">none</option>
+                {{ range $character := .characters}}
+                    <option value="{{$character.GetId}}">{{$character.GetName}}</option>
+                {{ end }}
+            </select>
+        </label>
+        <button class="btn" onclick="">Add</button>
     </div>
     <div>
         <h3> Bench </h3>

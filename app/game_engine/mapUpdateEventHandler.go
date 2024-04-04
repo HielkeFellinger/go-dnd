@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/google/uuid"
+	"github.com/hielkefellinger/go-dnd/app/ecs"
 	"github.com/hielkefellinger/go-dnd/app/ecs_components"
 	"github.com/hielkefellinger/go-dnd/app/models"
 	"golang.org/x/net/html"
@@ -14,19 +15,65 @@ func (e *baseEventMessageHandler) handleMapUpdateEvents(message EventMessage, po
 	log.Printf("- Map Update Event Type: '%d' Message: '%s'", message.Type, message.Id)
 
 	if message.Type == TypeUpdateMapEntity {
-		err := e.updateMapEntity(message, pool)
+		err := e.typeUpdateMapEntity(message, pool)
 		if err != nil {
-			return nil
+			return err
 		}
 	}
 	if message.Type == TypeUpdateMapVisibility {
-		return nil
+		err := e.typeUpdateMapVisibility(message, pool)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
-func (e *baseEventMessageHandler) updateMapEntity(message EventMessage, pool CampaignPool) error {
+func (e *baseEventMessageHandler) typeUpdateMapVisibility(message EventMessage, pool CampaignPool) error {
+	// Undo escaping
+	clearedBody := html.UnescapeString(message.Body)
+
+	var mapActivity models.SetActivity
+	err := json.Unmarshal([]byte(clearedBody), &mapActivity)
+	if err != nil {
+		return err
+	}
+
+	var mapUuid uuid.UUID
+	if parsedUuid, err := uuid.Parse(mapActivity.Id); err == nil {
+		mapUuid = parsedUuid
+	} else {
+		return err
+	}
+
+	mapEntity, match := pool.GetEngine().GetWorld().GetMapEntityByUuid(mapUuid)
+	if !match || mapEntity == nil {
+		return errors.New("failure of loading MAP by UUID")
+	}
+
+	// Update Entity
+	mapComponents := mapEntity.GetAllComponentsOfType(ecs.MapComponentType)
+	if len(mapComponents) >= 1 {
+		mapComponent := mapComponents[0].(*ecs_components.MapComponent)
+		mapComponent.Active = mapActivity.Active
+	}
+
+	// Update Clients
+	rawJsonBytes, err := json.Marshal(mapActivity)
+	if err != nil {
+		return err
+	}
+	var updateMessage = NewEventMessage()
+	updateMessage.Type = TypeUpdateMapVisibility
+	updateMessage.Body = string(rawJsonBytes)
+	updateMessage.Destinations = pool.GetAllClientIds(pool.GetLeadId())
+	pool.TransmitEventMessage(updateMessage)
+
+	return nil
+}
+
+func (e *baseEventMessageHandler) typeUpdateMapEntity(message EventMessage, pool CampaignPool) error {
 	// Undo escaping
 	clearedBody := html.UnescapeString(message.Body)
 
@@ -82,7 +129,7 @@ func (e *baseEventMessageHandler) updateMapEntity(message EventMessage, pool Cam
 		var updateMessage = NewEventMessage()
 		updateMessage.Type = TypeLoadMapEntity
 		updateMessage.Body = mapItemComponent.Id.String()
-		updateMessage.Source = "system"
+		updateMessage.Source = ServerUser
 
 		err = e.typeLoadMapEntity(updateMessage, pool)
 		if err != nil {
