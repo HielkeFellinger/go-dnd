@@ -10,6 +10,11 @@ type SetActivity struct {
 	Active bool   `json:"active"`
 }
 
+type AddMapItem struct {
+	EntityId string `json:"EntityId"`
+	MapId    string `json:"MapId"`
+}
+
 type CampaignScreenMapItemElement struct {
 	Id          string   `json:"Id"`
 	EntityName  string   `json:"EntityName"`

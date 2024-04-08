@@ -132,7 +132,7 @@ func (pool *baseCampaignPool) transmitMessage(message game_engine.EventMessage) 
 		// Send JSON to clients
 		err := client.Conn.WriteJSON(message)
 		if err != nil {
-			log.Printf("Error while sneding Message ID: '%s'. Error: '%s'", message.Id, err.Error())
+			log.Printf("Error while sending Message ID: '%s'. Error: '%s'", message.Id, err.Error())
 		}
 	}
 	log.Printf("Message(s) Transmitted ID: '%s'", message.Id)

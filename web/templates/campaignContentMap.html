@@ -8,14 +8,14 @@
         <button class="btn" onclick="">Refresh</button>
         <br>
         <label> Add Character
-            <select>
+            <select id="charToMap{{.id}}Select">
                 <option value="none">none</option>
                 {{ range $character := .characters}}
                     <option value="{{$character.GetId}}">{{$character.GetName}}</option>
                 {{ end }}
             </select>
         </label>
-        <button class="btn" onclick="">Add</button>
+        <button class="btn" onclick="addCharacterToMap('{{ .id }}')">Add</button>
     </div>
     <div>
         <h3> Bench </h3>

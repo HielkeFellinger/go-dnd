@@ -2,7 +2,6 @@ package game_engine
 
 import (
 	"errors"
-	"github.com/google/uuid"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
 	"github.com/hielkefellinger/go-dnd/app/ecs_components"
 	"github.com/hielkefellinger/go-dnd/app/ecs_model_translation"
@@ -32,10 +31,8 @@ func (e *baseEventMessageHandler) loadCharactersDetails(message EventMessage, po
 	isLead := message.Source == pool.GetLeadId()
 
 	// Validate UUID Filter form message
-	var uuidCharFilter uuid.UUID
-	if savedUuid, err := uuid.Parse(message.Body); err == nil {
-		uuidCharFilter = savedUuid
-	} else {
+	uuidCharFilter, err := parseStingToUuid(message.Body)
+	if err != nil {
 		return err
 	}
 

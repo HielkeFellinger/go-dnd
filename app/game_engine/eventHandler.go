@@ -38,7 +38,7 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 		}
 	}
 
-	if message.Type == TypeUpdateMapEntity || message.Type == TypeUpdateMapVisibility {
+	if message.Type >= TypeUpdateMapEntity || message.Type <= TypeUpdateMapVisibility {
 		err := e.handleMapUpdateEvents(message, pool)
 		if err != nil {
 			return err

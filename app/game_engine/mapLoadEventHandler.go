@@ -3,7 +3,6 @@ package game_engine
 import (
 	"encoding/json"
 	"errors"
-	"github.com/google/uuid"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
 	"github.com/hielkefellinger/go-dnd/app/ecs_model_translation"
 	"github.com/hielkefellinger/go-dnd/app/models"
@@ -34,10 +33,8 @@ func (e *baseEventMessageHandler) typeLoadMapEntity(message EventMessage, pool C
 	}
 
 	// Validate Filter
-	var uuidMapItemFilter uuid.UUID
-	if savedUuid, err := uuid.Parse(message.Body); err == nil {
-		uuidMapItemFilter = savedUuid
-	} else {
+	uuidMapItemFilter, err := parseStingToUuid(message.Body)
+	if err != nil {
 		return err
 	}
 

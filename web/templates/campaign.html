@@ -332,6 +332,8 @@
         let mapItem = JSON.parse(data.body)
         let MapId = mapItem.MapId
 
+        console.warn(mapItem)
+
         // Get the Cell
         let cell = document.getElementById(MapId + "-cell-y" + mapItem.Position.Y + "-x" + mapItem.Position.X + '-content')
         let mapItemHtmlId = MapId + "-" + mapItem.Id + "-cell-element"
@@ -357,6 +359,16 @@
         mapVisibility.active = document.getElementById("is" + id + "Active").checked
 
         sendEvent(wrapMessage(JSON.stringify(mapVisibility), 544))
+    }
+
+    let addCharacterToMap = (mapId) => {
+        let mapItemAdd = {}
+        mapItemAdd.EntityId = document.getElementById("charToMap" + mapId + "Select").value
+        mapItemAdd.MapId = mapId
+
+        if (mapItemAdd.EntityId !== 'none') {
+            sendEvent(wrapMessage(JSON.stringify(mapItemAdd), 545))
+        }
     }
 
     let handleChatEvents = (data) => {
