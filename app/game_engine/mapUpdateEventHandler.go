@@ -227,13 +227,53 @@ func (e *baseEventMessageHandler) typeUpdateMapEntity(message EventMessage, pool
 		updateMessage.Body = mapItemComponent.Id.String()
 		updateMessage.Source = ServerUser
 
-		err = e.typeLoadMapEntity(updateMessage, pool)
+		err := e.typeLoadMapEntity(updateMessage, pool)
 		if err != nil {
 			return err
 		}
 	}
 
-	// - @todo Change visibility
+	// Update visibility on Entity
+	if mapItemComponent.Entity != nil {
+		visibilities := mapItemComponent.Entity.GetAllComponentsOfType(ecs.VisibilityComponentType)
+		if len(visibilities) > 0 {
+			visibilityComponent := visibilities[0].(*ecs_components.VisibilityComponent)
+			visibilityComponent.Hidden = messageMapItem.Hidden
+		} else {
+			visibilityComponent := ecs_components.NewVisibilityComponent().(*ecs_components.VisibilityComponent)
+			visibilityComponent.Hidden = messageMapItem.Hidden
+			err := mapItemComponent.Entity.AddComponent(visibilityComponent)
+			if err != nil {
+				return err
+			}
+		}
+
+		// Update possible Map Entities
+		mapEntities := pool.GetEngine().GetWorld().GetMapEntities()
+		for _, mapEntity := range mapEntities {
+
+			// Only get the map with the relevant relation to entity
+			if !mapEntity.HasRelationWithEntityByUuid(mapItemComponent.Entity.GetId()) {
+				continue
+			}
+
+			for _, mapItem := range mapEntity.GetAllComponentsOfType(ecs.MapItemRelationComponentType) {
+				mapItemRelComponent := mapItem.(*ecs_components.MapItemRelationComponent)
+
+				if mapItemRelComponent.Entity.GetId() == mapItemComponent.Entity.GetId() {
+					var reloadMapItemMessage = NewEventMessage()
+					reloadMapItemMessage.Source = ServerUser
+					reloadMapItemMessage.Body = mapItemRelComponent.Id.String()
+					reloadMapItemErr := e.typeLoadMapEntity(reloadMapItemMessage, pool)
+					if reloadMapItemErr != nil {
+						return reloadMapItemErr
+					}
+				}
+
+				// @todo Remove old visible ghost of non-lead / non-controlling users
+			}
+		}
+	}
 
 	return nil
 }

@@ -310,14 +310,17 @@
                 mapItems[MapId][elemId] = mapItem
                 mapItemIdToEntityId[elemId] = mapItem.EntityId
                 mapItemHtmlIdToMapItem[mapItemHtmlId] = mapItem
+
+                // Add the event handlers
+                document.getElementById(mapItemHtmlId).oncontextmenu = showContextMenuOfMapItem
             }
         }
     }
 
     let handleCampaignContentMapVisibility = (data) => {
         let body = JSON.parse(data.body)
-        let id = body.id
-        let active = body.active
+        let id = body.Id
+        let active = body.Active
 
         // Clean-up or request the new active map
         if (!active) {
@@ -338,7 +341,6 @@
         let cell = document.getElementById(MapId + "-cell-y" + mapItem.Position.Y + "-x" + mapItem.Position.X + '-content')
         let mapItemHtmlId = MapId + "-" + mapItem.Id + "-cell-element"
 
-
         // Delete old
         if (document.getElementById(mapItemHtmlId)) {
             document.getElementById(mapItemHtmlId).remove()
@@ -349,14 +351,65 @@
             mapItems[MapId][mapItem.Id] = mapItem
             mapItemIdToEntityId[mapItem.Id] = mapItem.EntityId
             mapItemHtmlIdToMapItem[mapItemHtmlId] = mapItem
+
+            // Add the event handlers
+            document.getElementById(mapItemHtmlId).oncontextmenu = showContextMenuOfMapItem
         }
+    }
+
+    let showContextMenuOfMapItem = (event) => {
+        let parent = findParentWithSpecificClass(event.target, 'element')
+        if (parent) {
+            for (const child of parent.children) {
+                if (child.classList.contains('context-menu')) {
+                    child.style.display = 'block'
+                    child.style.top = event.clientY
+                    child.style.left = event.clientX
+                    break;
+                }
+            }
+        }
+        event.preventDefault();
+    }
+
+    let hideContextMenuOfMapItem = (event) => {
+        let parent = findParentWithSpecificClass(event.target, 'context-menu')
+        if (parent) {
+            parent.style.display = 'none'
+        }
+        event.preventDefault();
+        event.stopPropagation()
+    }
+
+    let toggleVisibilityFromContextMenu = (cellId) => {
+        // Get the map item
+        let mapItem = mapItemHtmlIdToMapItem[cellId]
+
+        // Update MapItem (visibility)
+        mapItem.Hidden = !mapItem.Hidden
+
+        // Remove Html before sending
+        mapItem.Html = ''
+
+        // Send Updated MapItem
+        sendEvent(wrapMessage(JSON.stringify(mapItem), 543))
+    }
+
+    let findParentWithSpecificClass = (target, className) => {
+        if (target) {
+            if (target.classList.contains(className)) {
+                return target
+            }
+            return findParentWithSpecificClass(target.parentElement, className);
+        }
+        return false;
     }
 
     let updateMapVisibility = (id) => {
         // Send to back
         let mapVisibility = {}
-        mapVisibility.id = id
-        mapVisibility.active = document.getElementById("is" + id + "Active").checked
+        mapVisibility.Id = id
+        mapVisibility.Active = document.getElementById("is" + id + "Active").checked
 
         sendEvent(wrapMessage(JSON.stringify(mapVisibility), 544))
     }

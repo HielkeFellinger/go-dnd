@@ -6,8 +6,8 @@ type CampaignScreenMapItems struct {
 }
 
 type SetActivity struct {
-	Id     string `json:"id"`
-	Active bool   `json:"active"`
+	Id     string `json:"Id"`
+	Active bool   `json:"Active"`
 }
 
 type AddMapItem struct {

@@ -12,5 +12,12 @@
     {{ if .healthBar }}
     <progress id="{{.mapId}}-{{.id}}-health" value="{{.healthCurrent}}" max="{{.healthTotal}}" style="max-width: 100%; min-width: 100%"></progress>
     {{ end }}
+
+    {{ if .hasControl }}
+    <div id="{{.mapId}}-{{.id}}-cell-element-menu" class="context-menu" onclick="hideContextMenuOfMapItem(event)">
+        <div class="context-menu-item" onclick="toggleVisibilityFromContextMenu('{{.mapId}}-{{.id}}-cell-element')">Toggle Visibility</div>
+        <div class="context-menu-item end" onclick="hideContextMenuOfMapItem(event)">Close</div>
+    </div>
+    {{ end }}
 </div>
 {{end}}

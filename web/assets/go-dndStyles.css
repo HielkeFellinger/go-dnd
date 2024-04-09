@@ -148,5 +148,22 @@ div .nav-link {
     background: green; border-radius: 0.5em; min-width: 1em; max-width: 1em;
 }
 
+.context-menu {
+    position: absolute;
+    z-index: 10000;
+    border-radius: 0.5em;
+    display: none;
+    height: fit-content;
+    min-width: 10em;
+}
 
+.context-menu .context-menu-item {
+    padding-left: 0.5em;
+    border-bottom: 1px solid #dee2e6;
+    cursor: pointer;
+    width: 100%;
+}
 
+.context-menu .context-menu-item .end{
+    border-bottom: none;
+}
