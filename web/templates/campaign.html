@@ -125,6 +125,18 @@
         }
         socket.onclose = function (evt) {
             console.log("Connected to Websocket: false");
+            // cleanup
+            for (let index in campaignMapTabIds) {
+                document.getElementById(campaignMapTabIds[index])?.remove()
+                document.getElementById(campaignMapTabIds[index] + "List")?.remove()
+            }
+            campaignMapTabIds = []
+            selectedCharDetailsId = ""
+            loadedCharDetailsId = ""
+            mapItems = new Map();
+            mapItemIdToEntityId = new Map();
+            mapItemHtmlIdToMapItem = new Map();
+
             // Attempting reconnect
             setTimeout(() => {
                 console.log("Attempting to re-establish connection");
@@ -161,6 +173,8 @@
                 handleCampaignContentMapItemEvents(payLoad)
             } else if (payLoad.type === 544) {
                 handleCampaignContentMapVisibility(payLoad)
+            } else if (payLoad.type === 546) {
+                handleMapItemRemoval(payLoad)
             }
             return
         }
@@ -175,7 +189,8 @@
     }
 
     let fullRefresh = () => {
-        updateCharacterList()
+        let body = ''
+        sendEvent(wrapMessage(body, 500))
     }
 
     let wrapMessage = (body, type) => {
@@ -189,7 +204,7 @@
 
     let updateCharacterList = () => {
         let body = ''
-        sendEvent(wrapMessage(body, 500))
+        sendEvent(wrapMessage(body, 501))
     }
 
     let sendChatMessage = () => {
@@ -199,7 +214,6 @@
     }
 
     let handleCharacterEvents = (data) => {
-        console.warn(data)
         if (data.type === 501) {
             document.getElementById("char-ribbon-row").innerHTML = data.body;
         } else if (data.type === 504) {
@@ -226,32 +240,32 @@
         sendEvent(wrapMessage(id, 504))
     }
     let loadCharDetailsByMapItem = (mapItemId) => {
-        if (mapItemIdToEntityId[mapItemId]) {
-            selectedCharDetailsId = mapItemIdToEntityId[mapItemId]
-            sendEvent(wrapMessage(mapItemIdToEntityId[mapItemId], 504))
+        if (mapItemIdToEntityId.has(mapItemId)) {
+            selectedCharDetailsId = mapItemIdToEntityId.get(mapItemId)
+            sendEvent(wrapMessage(selectedCharDetailsId, 504))
         }
     }
 
+    let campaignMapTabIds = [];
     let handleCampaignContentMapEvents = (data) => {
-        let body = JSON.parse(data.body)
-        let tabs = body.Tabs
-        let contentData = body.Content
+        let body = JSON.parse(data.body);
+        let tabs = body.Tabs;
+        let contentData = body.Content;
 
         for (let index in contentData) {
-            let doc = document.getElementById(contentData[index].Id)
-            if (doc) {
-                doc.remove()
+            let oldContent = document.getElementById(contentData[index].Id)
+            if (oldContent) {
+                oldContent.remove()
             }
             document.getElementById("campaign-content").innerHTML += contentData[index].Html
         }
 
         for (let index in tabs) {
-            let doc = document.getElementById(tabs[index].Id + "List")
-            if (doc) {
-                doc.remove()
-
+            let oldTab = document.getElementById(tabs[index].Id + "List")
+            if (oldTab) {
+                oldTab.remove()
             }
-            // campaign-tabs
+            if (!campaignMapTabIds.includes(tabs[index].Id)) campaignMapTabIds.push(tabs[index].Id)
             document.getElementById("campaign-tabs").innerHTML += tabs[index].Html
         }
     }
@@ -275,9 +289,9 @@
         }
     }
 
-    const mapItems = new Map();
-    const mapItemIdToEntityId = new Map();
-    const mapItemHtmlIdToMapItem = new Map();
+    let mapItems = new Map();
+    let mapItemIdToEntityId = new Map();
+    let mapItemHtmlIdToMapItem = new Map();
     let handleCampaignContentMapItemsEvents = (data) => {
         let body = JSON.parse(data.body)
         let MapId = body.MapId
@@ -285,16 +299,16 @@
 
         // Remove or create empty
         if (mapItems.has(MapId)) {
-            for (let [elemId, mapItem] of mapItems[MapId]) {
-                if (!MapElements.has(elemId)) {
+            for (let [elemId, mapItem] of mapItems.get(MapId)) {
+                if (MapElements && !Object.hasOwn(MapElements, elemId)) {
                     let mapItemHtmlId = MapId + "-" + mapItem.Id + "-cell-element"
-                    document.getElementById(mapItemHtmlId).remove()
+                    document.getElementById(mapItemHtmlId)?.remove()
                     mapItemIdToEntityId.delete(mapItem.Id)
                     mapItemHtmlIdToMapItem.delete(mapItemHtmlId)
                 }
             }
         } else {
-            mapItems[MapId] = new Map()
+            mapItems.set(MapId, new Map())
         }
 
         // Add/Modify
@@ -307,12 +321,25 @@
 
             if (cell != null) {
                 cell.innerHTML = mapItem.Html
-                mapItems[MapId][elemId] = mapItem
-                mapItemIdToEntityId[elemId] = mapItem.EntityId
-                mapItemHtmlIdToMapItem[mapItemHtmlId] = mapItem
+                mapItems.get(MapId).set(elemId, mapItem)
+                mapItemIdToEntityId.set(elemId, mapItem.EntityId)
+                mapItemHtmlIdToMapItem.set(mapItemHtmlId, mapItem)
 
                 // Add the event handlers
                 document.getElementById(mapItemHtmlId).oncontextmenu = showContextMenuOfMapItem
+            }
+        }
+    }
+
+    let handleMapItemRemoval = (data) => {
+        let mapItemId = data.body
+        for (let [mapId, mapItemsOnMap] of mapItems) {
+            if (mapItemsOnMap.has(mapItemId)) {
+                let mapItemHtmlId = mapId + "-" + mapItemId + "-cell-element"
+                document.getElementById(mapItemHtmlId).remove()
+                mapItemIdToEntityId.delete(mapItemId)
+                mapItemHtmlIdToMapItem.delete(mapItemHtmlId)
+                mapItemsOnMap.delete(mapItemId)
             }
         }
     }
@@ -335,36 +362,37 @@
         let mapItem = JSON.parse(data.body)
         let MapId = mapItem.MapId
 
-        console.warn(mapItem)
-
         // Get the Cell
         let cell = document.getElementById(MapId + "-cell-y" + mapItem.Position.Y + "-x" + mapItem.Position.X + '-content')
         let mapItemHtmlId = MapId + "-" + mapItem.Id + "-cell-element"
 
         // Delete old
         if (document.getElementById(mapItemHtmlId)) {
-            document.getElementById(mapItemHtmlId).remove()
+            document.getElementById(mapItemHtmlId).remove();
         }
 
         if (cell != null) {
-            cell.innerHTML = mapItem.Html
-            mapItems[MapId][mapItem.Id] = mapItem
-            mapItemIdToEntityId[mapItem.Id] = mapItem.EntityId
-            mapItemHtmlIdToMapItem[mapItemHtmlId] = mapItem
+            cell.innerHTML = mapItem.Html;
+            mapItems.get(MapId).set(mapItem.Id, mapItem);
+            mapItemIdToEntityId.set(mapItem.Id, mapItem.EntityId);
+            mapItemHtmlIdToMapItem.set(mapItemHtmlId, mapItem);
 
             // Add the event handlers
-            document.getElementById(mapItemHtmlId).oncontextmenu = showContextMenuOfMapItem
+            document.getElementById(mapItemHtmlId).oncontextmenu = showContextMenuOfMapItem;
         }
     }
 
     let showContextMenuOfMapItem = (event) => {
         let parent = findParentWithSpecificClass(event.target, 'element')
-        if (parent) {
+        let map = findParentWithSpecificClass(event.target, 'campaign-map')
+        if (parent && map ) {
             for (const child of parent.children) {
                 if (child.classList.contains('context-menu')) {
-                    child.style.display = 'block'
-                    child.style.top = event.clientY
-                    child.style.left = event.clientX
+                    child.style.display = 'block';
+                    // @todo fix offscreen possibility
+                    child.style.top = event.clientY+'px'; // -map.scrollTop
+                    child.style.left = 'auto';
+                    child.style.marginLeft = '-' + map.scrollLeft + 'px';
                     break;
                 }
             }
@@ -378,21 +406,24 @@
             parent.style.display = 'none'
         }
         event.preventDefault();
-        event.stopPropagation()
+        event.stopPropagation();
     }
 
     let toggleVisibilityFromContextMenu = (cellId) => {
         // Get the map item
-        let mapItem = mapItemHtmlIdToMapItem[cellId]
+        let mapItem = mapItemHtmlIdToMapItem.get(cellId);
+        if (!mapItem) {
+            return;
+        }
 
         // Update MapItem (visibility)
-        mapItem.Hidden = !mapItem.Hidden
+        mapItem.Hidden = !mapItem.Hidden;
 
         // Remove Html before sending
-        mapItem.Html = ''
+        mapItem.Html = '';
 
         // Send Updated MapItem
-        sendEvent(wrapMessage(JSON.stringify(mapItem), 543))
+        sendEvent(wrapMessage(JSON.stringify(mapItem), 543));
     }
 
     let findParentWithSpecificClass = (target, className) => {
@@ -469,12 +500,8 @@
             openTab('current')
         }
 
-        if (document.getElementById(targetId)) {
-            document.getElementById(targetId).remove()
-        }
-        if (document.getElementById(targetId + 'Link')) {
-            document.getElementById(targetId + 'Link').remove()
-        }
+        document.getElementById(targetId)?.remove()
+        document.getElementById(targetId + 'Link')?.remove()
     }
 
     let cellSizeInHalfEms = 8
@@ -500,7 +527,6 @@
         for (const stylesheet of document.styleSheets) {
             if (stylesheet.href.indexOf('/assets/') > -1) {
                 for (const element of stylesheet.cssRules) {
-                    console.log(element.selectorText)
                     if (element.selectorText === '.campaign-map .grid .cell') {
                         elementRules = element;
                     }
@@ -528,7 +554,10 @@
         let data = ev.dataTransfer.getData("cell-element");
 
         // Get the map item
-        let mapItem = mapItemHtmlIdToMapItem[data]
+        let mapItem = mapItemHtmlIdToMapItem.get(data)
+        if (!mapItem) {
+            return
+        }
 
         // Parse cell to X and Y
         let cellId = ev.target.id

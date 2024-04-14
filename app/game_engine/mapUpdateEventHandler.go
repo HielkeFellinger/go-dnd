@@ -33,7 +33,18 @@ func (e *baseEventMessageHandler) handleMapUpdateEvents(message EventMessage, po
 			return err
 		}
 	}
+	if message.Type == TypeRemoveMapItem {
+		err := e.typeRemoveMapItem(message, pool)
+		if err != nil {
+			return err
+		}
+	}
 
+	return nil
+}
+
+func (e *baseEventMessageHandler) typeRemoveMapItem(message EventMessage, pool CampaignPool) error {
+	// @todo fix adding remove option for lead
 	return nil
 }
 
@@ -235,13 +246,16 @@ func (e *baseEventMessageHandler) typeUpdateMapEntity(message EventMessage, pool
 
 	// Update visibility on Entity
 	if mapItemComponent.Entity != nil {
+		updatedVisibility := false
 		visibilities := mapItemComponent.Entity.GetAllComponentsOfType(ecs.VisibilityComponentType)
 		if len(visibilities) > 0 {
 			visibilityComponent := visibilities[0].(*ecs_components.VisibilityComponent)
+			updatedVisibility = visibilityComponent.Hidden != messageMapItem.Hidden
 			visibilityComponent.Hidden = messageMapItem.Hidden
 		} else {
 			visibilityComponent := ecs_components.NewVisibilityComponent().(*ecs_components.VisibilityComponent)
 			visibilityComponent.Hidden = messageMapItem.Hidden
+			updatedVisibility = true
 			err := mapItemComponent.Entity.AddComponent(visibilityComponent)
 			if err != nil {
 				return err
@@ -261,16 +275,34 @@ func (e *baseEventMessageHandler) typeUpdateMapEntity(message EventMessage, pool
 				mapItemRelComponent := mapItem.(*ecs_components.MapItemRelationComponent)
 
 				if mapItemRelComponent.Entity.GetId() == mapItemComponent.Entity.GetId() {
-					var reloadMapItemMessage = NewEventMessage()
+					reloadMapItemMessage := NewEventMessage()
 					reloadMapItemMessage.Source = ServerUser
 					reloadMapItemMessage.Body = mapItemRelComponent.Id.String()
 					reloadMapItemErr := e.typeLoadMapEntity(reloadMapItemMessage, pool)
 					if reloadMapItemErr != nil {
 						return reloadMapItemErr
 					}
-				}
 
-				// @todo Remove old visible ghost of non-lead / non-controlling users
+					// Remove old visible ghost mapItem of non-lead / non-controlling users
+					if messageMapItem.Hidden && updatedVisibility {
+						// Get list of controlling users to use as exclude filter
+						controllers := make([]string, 0)
+						controllers = append(controllers, pool.GetLeadId())
+						players := mapItemRelComponent.Entity.GetAllComponentsOfType(ecs.PlayerComponentType)
+						for _, player := range players {
+							controllers = append(controllers, player.(*ecs_components.PlayerComponent).Name)
+						}
+
+						removeMapItemMessage := NewEventMessage()
+						removeMapItemMessage.Source = ServerUser
+						removeMapItemMessage.Type = TypeRemoveMapItem
+						removeMapItemMessage.Destinations = pool.GetAllClientIds(controllers...)
+						removeMapItemMessage.Body = mapItemRelComponent.Id.String()
+						if len(removeMapItemMessage.Destinations) > 0 {
+							pool.TransmitEventMessage(removeMapItemMessage)
+						}
+					}
+				}
 			}
 		}
 	}
