@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/google/uuid"
+	"slices"
 )
 
 type Entity interface {
@@ -14,6 +15,7 @@ type Entity interface {
 	HasComponentType(ct uint64) bool
 	HasComponentByUuid(uuid uuid.UUID) bool
 	GetComponentByUuid(uuid uuid.UUID) (Component, bool)
+	RemoveComponentByUuid(uuid uuid.UUID) bool
 	AddComponent(c Component) error
 	LoadFromRawEntity(raw RawEntity) error
 	GetAllComponentsOfType(ct uint64) []Component
@@ -77,6 +79,36 @@ func (e *BaseEntity) HasComponentByUuid(uuid uuid.UUID) bool {
 func (e *BaseEntity) GetComponentByUuid(uuid uuid.UUID) (Component, bool) {
 	component, ok := e.uuidToComponent[uuid]
 	return component, ok
+}
+
+func (e *BaseEntity) RemoveComponentByUuid(uuid uuid.UUID) bool {
+	// Get the component if it exists
+	if component, ok := e.GetComponentByUuid(uuid); ok {
+		// Clean up maps/dictionaries
+		if items := e.GetAllComponentsOfType(component.ComponentType()); len(items) <= 1 {
+			delete(e.componentTypeToComponentArrMap, component.ComponentType())
+		} else {
+			array := e.componentTypeToComponentArrMap[component.ComponentType()]
+			if index := slices.Index(array, component); index > -1 {
+				e.componentTypeToComponentArrMap[component.ComponentType()] = slices.Delete(array, index, index+1)
+			}
+		}
+		delete(e.uuidToComponent, uuid)
+		if component.IsRelationalComponent() {
+			relComp := component.(RelationalComponent)
+			delete(e.uuidToRelEntity, uuid)
+			if index := slices.Index(e.RefEntities, relComp.GetEntity()); index > -1 {
+				e.RefEntities = slices.Delete(e.RefEntities, index, index+1)
+			}
+		}
+		// Remove Item
+		if index := slices.Index(e.Components, component); index > -1 {
+			e.Components = slices.Delete(e.Components, index, index+1)
+		}
+		return true
+	}
+
+	return false
 }
 
 func (e *BaseEntity) AddComponent(c Component) error {

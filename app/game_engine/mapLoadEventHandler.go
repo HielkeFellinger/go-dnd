@@ -60,19 +60,26 @@ func (e *baseEventMessageHandler) typeLoadMapEntity(message EventMessage, pool C
 		// Translate Entity to controlling
 		var mapItemModel = ecs_model_translation.MapItemEntityToCampaignMapItemElement(mapItem, componentMap.Id)
 
-		// Get list of controlling (default the GM + controlling player if map is enabled)
-		controllingPlayers := make([]string, 1)
-		controllingPlayers[0] = pool.GetLeadId()
+		// Lead Message
+		mapItemModel = e.buildMapItem(mapItemModel, true, true)
+		transmitMessage.Body = string(e.parseObjectToJson(mapItemModel))
+		transmitMessage.Destinations = make([]string, 1)
+		transmitMessage.Destinations[0] = pool.GetLeadId()
+		pool.TransmitEventMessage(transmitMessage)
+
+		// Get list of controlling players
+		controllingPlayers := make([]string, 0)
 		if componentMap.Active {
 			controllingPlayers = append(controllingPlayers, mapItemModel.Controllers...)
 		}
 
-		// Controlling users
-		log.Printf("    Controlling players: %v", controllingPlayers)
-		mapItemModel = e.buildMapItem(mapItemModel, true)
-		transmitMessage.Body = string(e.parseObjectToJson(mapItemModel))
-		transmitMessage.Destinations = controllingPlayers
-		pool.TransmitEventMessage(transmitMessage)
+		// Controlling users Message
+		if len(controllingPlayers) > 0 {
+			mapItemModel = e.buildMapItem(mapItemModel, false, true)
+			transmitMessage.Body = string(e.parseObjectToJson(mapItemModel))
+			transmitMessage.Destinations = controllingPlayers
+			pool.TransmitEventMessage(transmitMessage)
+		}
 
 		// - @todo team visibility
 		// Check hidden non owner
@@ -80,9 +87,10 @@ func (e *baseEventMessageHandler) typeLoadMapEntity(message EventMessage, pool C
 			continue
 		}
 
-		nonControllingPlayers := pool.GetAllClientIds(controllingPlayers...)
+		managingPlayersFilter := append(controllingPlayers, pool.GetLeadId())
+		nonControllingPlayers := pool.GetAllClientIds(managingPlayersFilter...)
 		if componentMap.Active && len(nonControllingPlayers) > 0 {
-			mapItemModel = e.buildMapItem(mapItemModel, false)
+			mapItemModel = e.buildMapItem(mapItemModel, false, false)
 			transmitMessage.Body = string(e.parseObjectToJson(mapItemModel))
 			transmitMessage.Destinations = nonControllingPlayers
 
@@ -118,6 +126,7 @@ func (e *baseEventMessageHandler) typeLoadMapEntities(message EventMessage, pool
 
 		// load models
 		mapItems := mapEntity.GetAllComponentsOfType(ecs.MapItemRelationComponentType)
+		log.Printf("The mapItems: %v", mapItems)
 		mapItemsModel := models.CampaignScreenMapItems{
 			MapId:    componentMap.Id,
 			Elements: make(map[string]models.CampaignScreenMapItemElement, len(mapItems)),
@@ -133,7 +142,7 @@ func (e *baseEventMessageHandler) typeLoadMapEntities(message EventMessage, pool
 				continue
 			}
 
-			mapItemModel = e.buildMapItem(mapItemModel, isLead || slices.Contains(mapItemModel.Controllers, message.Source))
+			mapItemModel = e.buildMapItem(mapItemModel, isLead, isLead || slices.Contains(mapItemModel.Controllers, message.Source))
 			mapItemsModel.Elements[mapItemModel.Id] = mapItemModel
 		}
 
@@ -205,11 +214,12 @@ func (e *baseEventMessageHandler) parseObjectToJson(object any) []byte {
 	return rawJsonBytes
 }
 
-func (e *baseEventMessageHandler) buildMapItem(mapItemModel models.CampaignScreenMapItemElement, hasControl bool) models.CampaignScreenMapItemElement {
+func (e *baseEventMessageHandler) buildMapItem(mapItemModel models.CampaignScreenMapItemElement, isLead bool, hasControl bool) models.CampaignScreenMapItemElement {
 	data := make(map[string]any)
 	data["id"] = mapItemModel.Id
 	data["mapId"] = mapItemModel.MapId
 	data["hidden"] = mapItemModel.Hidden
+	data["lead"] = isLead
 	data["hasControl"] = hasControl
 	data["entityName"] = mapItemModel.EntityName
 	data["backgroundImage"] = mapItemModel.Image.Url

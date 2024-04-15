@@ -44,7 +44,49 @@ func (e *baseEventMessageHandler) handleMapUpdateEvents(message EventMessage, po
 }
 
 func (e *baseEventMessageHandler) typeRemoveMapItem(message EventMessage, pool CampaignPool) error {
-	// @todo fix adding remove option for lead
+	// Undo escaping
+	clearedBody := html.UnescapeString(message.Body)
+
+	// Check if user is lead
+	if message.Source != pool.GetLeadId() {
+		return errors.New("removing items to map is not allowed as non-lead")
+	}
+
+	var removeMapItem RemoveMapItem
+	err := json.Unmarshal([]byte(clearedBody), &removeMapItem)
+	if err != nil {
+		return err
+	}
+	mapUuid, err := parseStingToUuid(removeMapItem.MapId)
+	if err != nil {
+		return err
+	}
+	mapItemUuid, err := parseStingToUuid(removeMapItem.MapItemId)
+	if err != nil {
+		return err
+	}
+
+	// Get the map and its MapItemRelationComponent and remove it
+	mapEntity, match := pool.GetEngine().GetWorld().GetMapEntityByUuid(mapUuid)
+	if !match || mapEntity == nil {
+		return errors.New("failure of loading MAP by UUID")
+	}
+
+	// Check on the component
+	if component, ok := mapEntity.GetComponentByUuid(mapItemUuid); ok {
+		if component.ComponentType() == ecs.MapItemRelationComponentType {
+			mapItemRelComponent := component.(*ecs_components.MapItemRelationComponent)
+			if ok := mapEntity.RemoveComponentByUuid(mapItemRelComponent.Id); ok {
+				removeMapItemMessage := NewEventMessage()
+				removeMapItemMessage.Source = ServerUser
+				removeMapItemMessage.Type = TypeRemoveMapItem
+				removeMapItemMessage.Destinations = make([]string, 0)
+				removeMapItemMessage.Body = mapItemRelComponent.Id.String()
+				pool.TransmitEventMessage(removeMapItemMessage)
+				return nil
+			}
+		}
+	}
 	return nil
 }
 
@@ -57,7 +99,7 @@ func (e *baseEventMessageHandler) typeAddMapItem(message EventMessage, pool Camp
 		return errors.New("adding items to map is not allowed as non-lead")
 	}
 
-	var newMapEntity models.AddMapItem
+	var newMapEntity AddMapItem
 	err := json.Unmarshal([]byte(clearedBody), &newMapEntity)
 	if err != nil {
 		return err
@@ -146,7 +188,7 @@ func (e *baseEventMessageHandler) typeUpdateMapVisibility(message EventMessage, 
 	// Undo escaping
 	clearedBody := html.UnescapeString(message.Body)
 
-	var mapActivity models.SetActivity
+	var mapActivity SetActivity
 	err := json.Unmarshal([]byte(clearedBody), &mapActivity)
 	if err != nil {
 		return err
@@ -306,6 +348,20 @@ func (e *baseEventMessageHandler) typeUpdateMapEntity(message EventMessage, pool
 			}
 		}
 	}
-
 	return nil
+}
+
+type SetActivity struct {
+	Id     string `json:"Id"`
+	Active bool   `json:"Active"`
+}
+
+type AddMapItem struct {
+	EntityId string `json:"EntityId"`
+	MapId    string `json:"MapId"`
+}
+
+type RemoveMapItem struct {
+	MapId     string `json:"MapId"`
+	MapItemId string `json:"Id"`
 }

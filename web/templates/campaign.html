@@ -426,6 +426,18 @@
         sendEvent(wrapMessage(JSON.stringify(mapItem), 543));
     }
 
+    let removeItemFromMap = (mapId, mapItemId) => {
+        if (mapItems.has(mapId) && mapItemHtmlIdToMapItem.has(mapItemId)) {
+            return;
+        }
+
+        let mapItem = {}
+        mapItem.MapId = mapId
+        mapItem.Id = mapItemId
+
+        sendEvent(wrapMessage(JSON.stringify(mapItem), 546))
+    }
+
     let findParentWithSpecificClass = (target, className) => {
         if (target) {
             if (target.classList.contains(className)) {

@@ -16,6 +16,9 @@
     {{ if .hasControl }}
     <div id="{{.mapId}}-{{.id}}-cell-element-menu" class="context-menu" onclick="hideContextMenuOfMapItem(event)">
         <div class="context-menu-item" onclick="toggleVisibilityFromContextMenu('{{.mapId}}-{{.id}}-cell-element')">Toggle Visibility</div>
+        {{ if .lead }}
+            <div class="context-menu-item" onclick="removeItemFromMap('{{.mapId}}', '{{.id}}')">Remove from map</div>
+        {{ end }}
         <div class="context-menu-item end" onclick="hideContextMenuOfMapItem(event)">Close</div>
     </div>
     {{ end }}

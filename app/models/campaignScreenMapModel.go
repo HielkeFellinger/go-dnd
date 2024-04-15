@@ -5,16 +5,6 @@ type CampaignScreenMapItems struct {
 	Elements map[string]CampaignScreenMapItemElement
 }
 
-type SetActivity struct {
-	Id     string `json:"Id"`
-	Active bool   `json:"Active"`
-}
-
-type AddMapItem struct {
-	EntityId string `json:"EntityId"`
-	MapId    string `json:"MapId"`
-}
-
 type CampaignScreenMapItemElement struct {
 	Id          string   `json:"Id"`
 	EntityName  string   `json:"EntityName"`
