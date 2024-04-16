@@ -36,6 +36,11 @@ const (
 	TypeAddMapItem          EventType = 545
 	TypeRemoveMapItem       EventType = 546
 
+	TypeManageMaps       EventType = 551
+	TypeManageCharacters EventType = 552
+	TypeManageInventory  EventType = 553
+	TypeManageItems      EventType = 554
+
 	// Set attention to a specific tab
 
 	TypeChatBroadcast EventType = 800
@@ -70,6 +75,7 @@ func (midBody *EventMessageIdBody) ToBodyString() string {
 func NewEventMessage() EventMessage {
 	m := EventMessage{Id: uuid.New()}
 	m.ReloadDateTime()
+	m.Destinations = make([]string, 0)
 	return m
 }
 

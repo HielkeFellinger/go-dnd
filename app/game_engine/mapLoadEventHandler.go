@@ -180,8 +180,8 @@ func (e *baseEventMessageHandler) typeLoadMap(message EventMessage, pool Campaig
 		// Translate
 		componentMap := ecs_model_translation.MapEntityToCampaignMapModel(mapEntity)
 
-		// Only show enabled maps for player
-		if !componentMap.Active && !isLead {
+		// Only show enabled maps for player (if not directly requested by lead)
+		if !componentMap.Active && (!isLead || (isLead && len(message.Body) == 0)) {
 			continue
 		}
 

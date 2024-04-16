@@ -1,0 +1,17 @@
+{{define "campaignManageMaps"}}
+    <div>
+        <h2>Map Overview</h2>
+        <div style="display: flex; flex-flow: row; align-content: center; width: 100%;">
+            {{ range .Maps }}
+                <div style="flex: 2 2 0;">
+                    {{ template "campaignManageMapSelectionBox" . }}
+                </div>
+            {{ end }}
+        </div>
+        <br>
+        <button>Add +</button>
+    </div>
+    <script>
+        // Add
+    </script>
+{{end}}

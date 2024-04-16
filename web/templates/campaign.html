@@ -55,20 +55,20 @@
                     <!-- Tab Content -->
                     {{ if .campaign.UserIsLead }}
                     <div id="manageMaps" class="tab-content" style="display: none">
-                        <h3>CRUD Map!</h3>
-                        <p>Map stuff</p>
+                        <h3>Manage Maps</h3>
+                        <div id="manageMapsContent"></div>
                     </div>
                     <div id="manageCharacters" class="tab-content" style="display: none">
-                        <h3>Add Character!</h3>
-                        <p>Character</p>
+                        <h3>Manage Character!</h3>
+                        <div id="manageCharactersContent"></div>
                     </div>
                     <div id="manageInventory" class="tab-content" style="display: none">
-                        <h3>Add Inventories!</h3>
-                        <p>Inventory</p>
+                        <h3>Manage Inventories!</h3>
+                        <div id="manageInventoryContent"></div>
                     </div>
                     <div id="manageItems" class="tab-content" style="display: none">
-                        <h3>Add Items!</h3>
-                        <p>Items</p>
+                        <h3>Manage Items!</h3>
+                        <div id="manageItemsContent"></div>
                     </div>
                     {{end}}
 
@@ -179,6 +179,12 @@
             return
         }
 
+        // Parse Manage Events
+        if (payLoad.type >= 550 && payLoad.type < 559) {
+            handleManagePage(payLoad)
+            return;
+        }
+
         // Parse Chat-messages
         if (payLoad.type >= 800 && payLoad.type < 900) {
             handleChatEvents(payLoad)
@@ -260,13 +266,19 @@
             document.getElementById("campaign-content").innerHTML += contentData[index].Html
         }
 
+        let lastId;
         for (let index in tabs) {
+            lastId = tabs[index].Id
             let oldTab = document.getElementById(tabs[index].Id + "List")
             if (oldTab) {
                 oldTab.remove()
             }
             if (!campaignMapTabIds.includes(tabs[index].Id)) campaignMapTabIds.push(tabs[index].Id)
             document.getElementById("campaign-tabs").innerHTML += tabs[index].Html
+        }
+        // Open a map (or the last if multiple maps are send)
+        if (lastId) {
+            openTab(lastId)
         }
     }
 
@@ -331,6 +343,22 @@
         }
     }
 
+    let handleManagePage = (data) => {
+        let html = JSON.parse(data.body)
+        if (data.type === 551 ) {
+            document.getElementById('manageMapsContent').innerHTML = html
+        }
+        if (data.type === 552) {
+            document.getElementById('manageCharactersContent').innerHTML = html
+        }
+        if (data.type === 553) {
+            document.getElementById('manageInventoryContent').innerHTML = html
+        }
+        if (data.type === 554) {
+            document.getElementById('manageItemsContent').innerHTML = html
+        }
+    }
+
     let handleMapItemRemoval = (data) => {
         let mapItemId = data.body
         for (let [mapId, mapItemsOnMap] of mapItems) {
@@ -355,6 +383,15 @@
         } else {
             sendEvent(wrapMessage(id, 531))
             sendEvent(wrapMessage(id, 532))
+        }
+    }
+
+    let requestMapLoadFromServer = (id) => {
+        if (!campaignMapTabIds.includes(id)) {
+            sendEvent(wrapMessage(id, 531))
+            sendEvent(wrapMessage(id, 532))
+        } else {
+            openTab(id)
         }
     }
 
@@ -500,10 +537,26 @@
         // Show the current tab, and add an "active" class to the button that opened the tab
         if (document.getElementById(targetId)) {
             document.getElementById(targetId).style.display = "block";
+            document.getElementById(targetId).style.display = "block";
         }
         if (document.getElementById(targetId + 'Link')) {
             document.getElementById(targetId + 'Link').className += " active";
         }
+
+        {{ if .campaign.UserIsLead }}
+        if (targetId === 'manageMaps') {
+            sendEvent(wrapMessage('', 551))
+        }
+        if (targetId === 'manageCharacters') {
+            sendEvent(wrapMessage('', 552))
+        }
+        if (targetId === 'manageInventory') {
+            sendEvent(wrapMessage('', 553))
+        }
+        if (targetId === 'manageItems') {
+            sendEvent(wrapMessage('', 554))
+        }
+        {{ end }}
     }
 
     let closeTab = (targetId) => {
@@ -514,6 +567,7 @@
 
         document.getElementById(targetId)?.remove()
         document.getElementById(targetId + 'Link')?.remove()
+        campaignMapTabIds = campaignMapTabIds.filter(id => id !== targetId)
     }
 
     let cellSizeInHalfEms = 8
