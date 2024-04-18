@@ -1,0 +1,12 @@
+{{define "campaignManageCharacterSelectionBox"}}
+    <div class="border" style="display: flex; flex-flow: row nowrap; align-content: center; width: 100%; min-height: 5em;">
+        <div style="flex: 1 1 0; background-image: url('{{ .Image.Url }}'); width: 100%; background-size: 75%; background-repeat: no-repeat"
+             onclick="loadCharDetails('{{.Id}}')">
+
+        </div>
+        <div style="flex: 3 3 0;">
+            <h4>{{ .Name }}</h4>
+            <h5>{{ .Description }} </h5>
+        </div>
+    </div>
+{{end}}

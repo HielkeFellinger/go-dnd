@@ -34,16 +34,16 @@
                 <ul id="campaign-tabs" class="nav nav-tabs">
                     {{ if .campaign.UserIsLead }}
                     <li class="nav-item" id="manageMapsList">
-                        <button id="manageMapsLink" class="nav-link" onclick="openTab('manageMaps');loadMaps()" style="color: goldenrod">Manage Maps</button>
+                        <button id="manageMapsLink" class="nav-link" onclick="openTab('manageMaps');" style="color: goldenrod">Manage Maps</button>
                     </li>
                     <li class="nav-item" id="manageCharactersList">
-                        <button id="manageCharactersLink" class="nav-link" onclick="openTab('manageCharacters');loadCharacters()" style="color: goldenrod">Manage Characters</button>
+                        <button id="manageCharactersLink" class="nav-link" onclick="openTab('manageCharacters');" style="color: goldenrod">Manage Characters</button>
                     </li>
                     <li class="nav-item" id="manageInventoryList">
-                        <button id="manageInventoryLink" class="nav-link" onclick="openTab('manageInventory');loadInventories()" style="color: goldenrod">Manage Inventory</button>
+                        <button id="manageInventoryLink" class="nav-link" onclick="openTab('manageInventory');" style="color: goldenrod">Manage Inventory</button>
                     </li>
                     <li class="nav-item" id="manageItemsList">
-                        <button id="manageItemsLink" class="nav-link" onclick="openTab('manageItems');loadItems()" style="color: goldenrod">Manage Items</button>
+                        <button id="manageItemsLink" class="nav-link" onclick="openTab('manageItems');" style="color: goldenrod">Manage Items</button>
                     </li>
                     {{ end }}
                     <li class="nav-item" id="currentList">
@@ -652,24 +652,6 @@
 
         sendEvent(wrapMessage(JSON.stringify(charHealth), 511))
     }
-
-    // {{ if .campaign.UserIsLead }}
-    let loadMaps = () => {
-        // noop
-    }
-
-    let loadCharacters = () => {
-        // noop
-    }
-
-    let loadInventories = () => {
-        // noop
-    }
-
-    let loadItems = () => {
-        // noop
-    }
-    // {{ end }}
 
     // Innit Websocket only after loading all JS
     if (window["WebSocket"]) {

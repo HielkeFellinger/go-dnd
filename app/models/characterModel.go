@@ -4,11 +4,12 @@ import "gorm.io/gorm"
 
 type Character struct {
 	gorm.Model
-	Name    string
-	Id      string        `gorm:"-"`
-	Image   CampaignImage `gorm:"-"`
-	Visible bool          `gorm:"-"`
-	Online  bool          `gorm:"-"`
+	Name        string
+	Description string        `gorm:"-"`
+	Id          string        `gorm:"-"`
+	Image       CampaignImage `gorm:"-"`
+	Visible     bool          `gorm:"-"`
+	Online      bool          `gorm:"-"`
 }
 
 type Characters []Character

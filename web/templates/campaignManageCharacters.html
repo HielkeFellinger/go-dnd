@@ -1,0 +1,17 @@
+{{define "campaignManageCharacters"}}
+    <div>
+        <h2>Character Overview</h2>
+        <div style="display: flex; flex-flow: row; flex-wrap: wrap; align-content: center; width: 100%;">
+            {{ range .chars }}
+                <div style="flex: 2 2 0;">
+                    {{ template "campaignManageCharacterSelectionBox" . }}
+                </div>
+            {{ end }}
+        </div>
+        <br>
+        <button class="btn">Add +</button>
+    </div>
+    <script>
+        // Add
+    </script>
+{{end}}
