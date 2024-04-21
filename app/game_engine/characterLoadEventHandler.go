@@ -128,6 +128,6 @@ func (e *baseEventMessageHandler) loadCharacters(message EventMessage, pool Camp
 	data := make(map[string]any)
 	data["chars"] = characters
 
-	transmitMessage.Body = e.handleLoadHtmlBody("characterRibbon.html", "chars", data)
+	transmitMessage.Body = e.handleLoadHtmlBody("characterRibbon.html", "characterRibbon", data)
 	pool.TransmitEventMessage(transmitMessage)
 }

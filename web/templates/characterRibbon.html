@@ -1,6 +1,6 @@
-{{ define "chars" }}
+{{ define "characterRibbon" }}
 {{ range .chars }}
-<div class="border char-ribbon-content" style="background-image: url('{{.Image.Url}}');" onclick="loadCharDetails('{{.Id}}')">
+<div class="border char-ribbon-content" style="background-image: url('{{.Image.Url}}'); cursor: pointer" onclick="loadCharDetails('{{.Id}}');">
     {{ if .Online }}
     <div class="online-div">
         <span class="online-span">&nbsp;&nbsp;&nbsp;&nbsp;</span>

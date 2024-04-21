@@ -151,19 +151,19 @@ div .nav-link {
 .context-menu {
     position: absolute;
     z-index: 10000;
-    border-radius: 0.5em;
     display: none;
     height: fit-content;
     min-width: 10em;
+    border: 2px solid #A9A9A9;
 }
 
 .context-menu .context-menu-item {
     padding-left: 0.5em;
-    border-bottom: 1px solid #dee2e6;
+    border-bottom: 2px solid #A9A9A9;
     cursor: pointer;
     width: 100%;
 }
 
-.context-menu .context-menu-item .end{
+.context-menu .context-menu-item.end{
     border-bottom: none;
 }

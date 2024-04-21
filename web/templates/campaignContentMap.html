@@ -17,22 +17,22 @@
         </label>
         <button class="btn" onclick="addCharacterToMap('{{ .id }}')">Add</button>
     </div>
-    <div>
-        <h3> Bench </h3>
-        <span>Bench Grid; add chars / interactive elements</span>
-    </div>
     {{ end }}
     <div>
         <h3> {{ .name }} {{.lead}} </h3>
         <button class="btn" onclick="makeMapsSmaller()"><b>-</b></button> <button class="btn" onclick="makeMapsBigger()"><b>+</b></button> <span>MAP NAV BAR + - ' {{.backgroundImage}} '</span>
     </div>
-    <div class="campaign-map">
+    <div class="campaign-map" onscroll="onMapScroll(this)">
         <div class="grid" style="background-image: url('{{.backgroundImage}}')">
             {{ range $yVal := .y}}
                 {{ range $xVal := $.x}}
-                    <div class="cell" id="{{$.id}}-cell-y{{$yVal}}-x{{$xVal}}">
+                    <div class="cell" id="{{$.id}}-cell-y{{$yVal}}-x{{$xVal}}" oncontextmenu="showContextMenuOfDefaultCell(event)">
                         <div class="content" id="{{$.id}}-cell-y{{$yVal}}-x{{$xVal}}-content" ondrop="drop(event)" ondragover="allowDrop(event)">
 
+                        </div>
+                        <div id="{{$.id}}-cell-y{{$yVal}}-x{{$xVal}}-default-context-menu" class="context-menu" onclick="hideCellContextMenu(event)">
+                            <div class="context-menu-item" onclick="sendSignal('{{$.id}}-cell-y{{$yVal}}-x{{$xVal}}-default-context-menu')">Send Signal</div>
+                            <div class="context-menu-item end" onclick="hideCellContextMenu(event)">Close</div>
                         </div>
                     </div>
                 {{ end }}

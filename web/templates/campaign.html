@@ -343,6 +343,16 @@
         }
     }
 
+    let onMapScroll = (campaignMap) => {
+        if (campaignMap) {
+            let menus = campaignMap.getElementsByClassName("context-menu active");
+            for (let i = 0; i < menus.length; i++) {
+                menus[i].style.marginTop = (0 - campaignMap.scrollTop) + 'px';
+                menus[i].style.marginLeft = (0 - campaignMap.scrollLeft - 375) + 'px';
+            }
+        }
+    }
+
     let handleManagePage = (data) => {
         let html = JSON.parse(data.body)
         if (data.type === 551 ) {
@@ -420,26 +430,61 @@
     }
 
     let showContextMenuOfMapItem = (event) => {
+        let cell = findParentWithSpecificClass(event.target, 'cell');
         let parent = findParentWithSpecificClass(event.target, 'element')
         let map = findParentWithSpecificClass(event.target, 'campaign-map')
         if (parent && map ) {
+            console.error(map)
             for (const child of parent.children) {
                 if (child.classList.contains('context-menu')) {
+                    child.classList.add('active')
                     child.style.display = 'block';
+                    child.style.marginTop = '' + (0 - map.scrollTop) + 'px';
+                    child.style.marginLeft = '' + (0 - map.scrollLeft - 375) + 'px';
                     // @todo fix offscreen possibility
-                    child.style.top = event.clientY+'px'; // -map.scrollTop
-                    child.style.left = 'auto';
-                    child.style.marginLeft = '-' + map.scrollLeft + 'px';
+                    child.style.top = 'calc('+(event.clientY+map.scrollTop)+'px - ' + (cellSizeInHalfEms*8) + 'px)';
+                    child.style.left = (event.clientX+map.scrollLeft)+'px';
+                    if (cell) {
+                        cell.style.border = 'solid #991c2c'
+                    }
                     break;
                 }
             }
         }
         event.preventDefault();
+        event.stopPropagation();
     }
 
-    let hideContextMenuOfMapItem = (event) => {
+    let showContextMenuOfDefaultCell = (event) => {
+        let parent = findParentWithSpecificClass(event.target, 'cell');
+        let map = findParentWithSpecificClass(event.target, 'campaign-map');
+        if (parent && map ) {
+            for (const child of parent.children) {
+                if (child.classList.contains('context-menu')) {
+                    child.classList.add('active')
+                    child.style.display = 'block';
+                    child.style.marginTop = '' + (0 - map.scrollTop) + 'px';
+                    child.style.marginLeft = '' + (0 - map.scrollLeft - 375) + 'px';
+                    // @todo fix offscreen possibility
+                    child.style.top = 'calc('+(event.clientY+map.scrollTop)+'px - ' + (cellSizeInHalfEms*8) + 'px)';
+                    child.style.left = (event.clientX+map.scrollLeft)+'px';
+                    break;
+                }
+            }
+            parent.style.border = 'solid #991c2c'
+        }
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
+    let hideCellContextMenu = (event) => {
+        let cell = findParentWithSpecificClass(event.target, 'cell');
+        if (cell) {
+            cell.style.border = null
+        }
         let parent = findParentWithSpecificClass(event.target, 'context-menu')
         if (parent) {
+            parent.classList.remove('active')
             parent.style.display = 'none'
         }
         event.preventDefault();
@@ -598,6 +643,15 @@
                     }
                 }
             }
+        }
+
+        // Remove Menus
+        let menus = document.getElementsByClassName("context-menu active");
+        for (let i = 0; i < menus.length; i++) {
+            let parent = findParentWithSpecificClass(menus[i], 'cell');
+            parent.style.border = null;
+            menus[i].style.display = 'none'
+            menus[i].classList.remove('active')
         }
 
         // modifying the rule in the stylesheet
