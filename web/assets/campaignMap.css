@@ -1,8 +1,8 @@
 
 .campaign-map {
-    overflow: scroll;
-    min-height: calc(100vh - 300px);
-    max-height: calc(100vh - 300px);
+    overflow: auto;
+    min-height: calc(100vh - 225px);
+    max-height: calc(100vh - 225px);
 }
 
 .campaign-map .grid {

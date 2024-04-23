@@ -10,6 +10,7 @@
     <meta charset="UTF-8">
 
     <!--Use bootstrap to make the application look nice-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" href="/assets/animations.css" crossorigin="anonymous">
     <link rel="stylesheet" href="/assets/go-dndStyles.css" crossorigin="anonymous">
@@ -21,4 +22,6 @@
 
 <body class="container-fluid">
     <!--Embed the menu.html template at this location-->
+    {{ if not .blockMenu }}
     {{ template "menu.html" . }}
+    {{ end }}

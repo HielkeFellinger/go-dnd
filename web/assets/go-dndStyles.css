@@ -30,8 +30,9 @@ body {
 }
 
 .chat-screen .chat-content {
-    min-height: calc(100vh - 152px);
-    max-height: calc(100vh - 152px);
+    min-height: calc(100vh - 125px);
+    max-height: calc(100vh - 125px);
+    margin-top: 0.25em;
     overflow-y: auto;
 }
 

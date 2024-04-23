@@ -3,7 +3,7 @@
         <h2>Character Overview</h2>
         <div style="display: flex; flex-flow: row; flex-wrap: wrap; align-content: center; width: 100%;">
             {{ range .chars }}
-                <div style="flex: 2 2 0;">
+                <div style="flex: 0 0 24%; margin-bottom: 0.25em; margin-right: 0.25em;">
                     {{ template "campaignManageCharacterSelectionBox" . }}
                 </div>
             {{ end }}

@@ -12,18 +12,32 @@
         </p>
         {{end}}
 
-        <div id="ui-left-bar" class="border chat-screen">
-            <h4> Chat </h4>
+        <div id="ui-left-bar" class="chat-screen">
+            <div>
+                <button class="btn" onclick="exitGame()" style="height: 2.5em; width: 2.5em" title="Exit Game">
+                    <b><i class="bi bi-door-closed"></i></b>
+                </button>
+                {{ if .campaign.UserIsLead }}
+                <button class="btn" onclick="saveGame()" style="height: 2.5em; width: 2.5em" title="Save current game state">
+                    <b><i class="bi bi-floppy"></i></b>
+                </button>
+                {{ end }}
+            </div>
             <div id="chat-content" class="chat-content">
 
             </div>
-            <hr>
-            <div class="form-group">
-                <label for="message">Message</label>
-                <input type="text" id="message" name="message">
-                <button id="messageButton" onclick="sendChatMessage()" class="btn btn-primary">Send</button>
+            <div class="form-group" style="margin-top: 0.25em; display: flex; flex-wrap: nowrap">
+                <div style="flex: 5 5 0">
+                    <label for="message" style="margin-left: 1em; min-width: 100%; min-height: 100%">
+                        <input type="text" id="message" name="message" style="min-width: 100%; height: 2.4em;" />
+                    </label>
+                </div>
+                <div style="flex: 1 1 0;">
+                    <button id="messageButton" onclick="sendChatMessage()" class="btn btn-primary" title="Send Message">
+                        <b><i class="bi bi-send"></i></b>
+                    </button>
+                </div>
             </div>
-            <br>
         </div>
 
         <div id="ui-center-bar" class="col border" style="min-width: 1100px;">
@@ -55,20 +69,16 @@
                     <!-- Tab Content -->
                     {{ if .campaign.UserIsLead }}
                     <div id="manageMaps" class="tab-content" style="display: none">
-                        <h3>Manage Maps</h3>
-                        <div id="manageMapsContent"></div>
+                        <div id="manageMapsContent" style="margin-top: 0.5em;"></div>
                     </div>
                     <div id="manageCharacters" class="tab-content" style="display: none">
-                        <h3>Manage Character!</h3>
-                        <div id="manageCharactersContent"></div>
+                        <div id="manageCharactersContent" style="margin-top: 0.5em;"></div>
                     </div>
                     <div id="manageInventory" class="tab-content" style="display: none">
-                        <h3>Manage Inventories!</h3>
-                        <div id="manageInventoryContent"></div>
+                        <div id="manageInventoryContent" style="margin-top: 0.5em;"></div>
                     </div>
                     <div id="manageItems" class="tab-content" style="display: none">
-                        <h3>Manage Items!</h3>
-                        <div id="manageItemsContent"></div>
+                        <div id="manageItemsContent" style="margin-top: 0.5em;"></div>
                     </div>
                     {{end}}
 
@@ -79,9 +89,12 @@
             </div>
         </div>
 
-        <div id="ui-right-bar" class="border" style="width: calc(3em + 553px);">
+        <div id="ui-right-bar" class="" style="width: calc(3em + 553px);">
             <div>
-                <button class="btn" id="toggle-right-bar-visibility" onclick="toggleVisibilityRightBar()" style="position: relative; left: 0;"><b>>></b></button>
+                <button class="btn" id="toggle-right-bar-visibility" onclick="toggleVisibilityRightBar()"
+                        style="position: relative; left: 0;">
+                    <b><i class="bi bi-box-arrow-right"></i></b>
+                </button>
                 <div id="right-bar-inner-content" style="position: relative; left: 3em; top: -2.4em; width: 543px">
                     <div id="char-details-holder" class="">
 
@@ -216,7 +229,9 @@
     let sendChatMessage = () => {
         let body = '' + document.getElementById("message").value
         document.getElementById("message").value = ''
-        sendEvent(wrapMessage(body, 800))
+        if (body && body.trim()) {
+            sendEvent(wrapMessage(body, 800))
+        }
     }
 
     let handleCharacterEvents = (data) => {
@@ -288,12 +303,12 @@
         let element = document.getElementById('toggle-right-bar-visibility')
 
         if (rightBarVisible) {
-            element.innerHTML = '>>'
+            element.innerHTML = '<b><i class="bi bi-box-arrow-right"></i></b>'
             document.getElementById('right-bar-inner-content').style.display = "inherit";
             document.getElementById('right-bar-inner-content').style.width = "543px";
             document.getElementById('ui-right-bar').style.width = "calc(553px + 3em)";
         } else {
-            element.innerHTML = '<<'
+            element.innerHTML = '<b><i class="bi bi-box-arrow-left"></i></b>'
             document.getElementById('right-bar-inner-content').style.display = "none";
             document.getElementById('right-bar-inner-content').style.width = "0";
             document.getElementById('ui-right-bar').style.width = "3em";
@@ -534,7 +549,15 @@
         // Send to back
         let mapVisibility = {}
         mapVisibility.Id = id
-        mapVisibility.Active = document.getElementById("is" + id + "Active").checked
+
+        mapVisibility.Active = !document.getElementById("is" + id + "Active").checked
+        document.getElementById("is" + id + "Active").checked = mapVisibility.Active
+
+        if (mapVisibility.Active) {
+            document.getElementById("is" + id + "Icon").className = 'bi bi-eye'
+        } else {
+            document.getElementById("is" + id + "Icon").className = 'bi bi-eye-slash'
+        }
 
         sendEvent(wrapMessage(JSON.stringify(mapVisibility), 544))
     }

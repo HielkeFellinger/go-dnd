@@ -79,7 +79,7 @@ func CampaignNew(c *gin.Context) {
 	rawUser, exists := c.Get("user")
 	if !exists {
 		templateMap[errMessage], templateMap[errTitle] = FailedAuthMessage, "Error"
-		c.HTML(http.StatusUnauthorized, "campaign.html", templateMap)
+		c.HTML(http.StatusUnauthorized, CampaignSelectHtmlFile, templateMap)
 	}
 	templateMap["user"] = rawUser.(models.User)
 
@@ -129,6 +129,7 @@ func CampaignSessionPage(c *gin.Context) {
 
 	templateMap["user"] = user
 	templateMap["campaign"] = campaign
+	templateMap["blockMenu"] = true
 	templateMap["title"] = fmt.Sprintf("GO-DND Campaign %s", rawCampaign.(models.Campaign).Title)
 
 	// Check if campaign is active (A (ws) Pool must be created by the Lead)

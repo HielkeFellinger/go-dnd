@@ -1,26 +1,36 @@
 {{define "campaignContentMap"}}
 <div id="{{.id}}" class="tab-content">
-    {{ if .lead }}
-    <div>
-        <label> Is Map public?
-            <input id="is{{.id}}Active" type="checkbox" {{ if .active }} checked {{end}} onchange="updateMapVisibility('{{.id}}')">
-        </label>
-        <button class="btn" onclick="">Refresh</button>
-        <br>
-        <label> Add Character
-            <select id="charToMap{{.id}}Select">
+
+    <div style="margin-top: 0.5em; margin-bottom: 0.25em;">
+        <button class="btn" onclick="makeMapsSmaller()" style="height: 2.5em; width: 2.5em" title="Shrink Map Cell Size">
+            <b><i class="bi bi-dash"></i></b>
+        </button>
+        <button class="btn" onclick="makeMapsBigger()" style="height: 2.5em; width: 2.5em" title="Expand Map Cell Size">
+            <b><i class="bi bi-plus"></i></b>
+        </button>
+        {{ if .lead }}
+        <b style="margin-left: 0.25em; margin-right: 0.25em;">|</b>
+        <button class="btn" onclick="updateMapVisibility('{{.id}}')" style="height: 2.5em; width: 2.5em"
+                title="Toggle map visibility">
+            <b><i id="is{{.id}}Icon" class="bi {{ if .active }} bi-eye {{ else }} bi-eye-slash {{end}}"></i></b>
+            <input hidden id="is{{.id}}Active" type="checkbox" {{ if .active }} checked {{end}}>
+        </button>
+        <button class="btn" onclick="" style="height: 2.5em; width: 2.5em">
+            <b><i class="bi bi-arrow-clockwise"></i></b>
+        </button>
+        <b style="margin-left: 0.25em; margin-right: 0.25em;">|</b>
+        <label>
+            <select id="charToMap{{.id}}Select" style="height: 2.4em;">
                 <option value="none">none</option>
                 {{ range $character := .characters}}
                     <option value="{{$character.GetId}}">{{$character.GetName}}</option>
                 {{ end }}
             </select>
         </label>
-        <button class="btn" onclick="addCharacterToMap('{{ .id }}')">Add</button>
-    </div>
-    {{ end }}
-    <div>
-        <h3> {{ .name }} {{.lead}} </h3>
-        <button class="btn" onclick="makeMapsSmaller()"><b>-</b></button> <button class="btn" onclick="makeMapsBigger()"><b>+</b></button> <span>MAP NAV BAR + - ' {{.backgroundImage}} '</span>
+        <button class="btn" onclick="addCharacterToMap('{{ .id }}')">
+            <b><i class="bi bi-person-fill-add"></i></b>
+        </button>
+        {{ end }}
     </div>
     <div class="campaign-map" onscroll="onMapScroll(this)">
         <div class="grid" style="background-image: url('{{.backgroundImage}}')">
