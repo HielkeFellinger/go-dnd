@@ -23,6 +23,16 @@ func (e *baseEventMessageHandler) handleManagementEvents(message EventMessage, p
 		return e.typeManageInventory(message, pool)
 	} else if message.Type == TypeManageItems {
 		return e.typeManageItems(message, pool)
+	} else if message.Type == TypeManageCampaign {
+		return e.typeManageCampaign(message, pool)
+	}
+
+	return nil
+}
+
+func (e *baseEventMessageHandler) typeManageCampaign(message EventMessage, pool CampaignPool) error {
+	if message.Source != pool.GetLeadId() {
+		return errors.New("managing the campaign is not allowed as non-lead")
 	}
 
 	return nil

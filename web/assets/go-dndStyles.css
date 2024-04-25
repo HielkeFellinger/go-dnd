@@ -90,13 +90,17 @@ div .nav-link {
     cursor: default;
 }
 
+.nav-item .nav-link {
+    cursor: pointer;
+}
+
 .nav-item .nav-link .btn-close {
     background: red;
     color: white;
     border: none;
     min-width: 1.75em;
     max-height: 1.5em;
-    cursor: pointer
+    cursor: pointer;
 }
 
 /* Character Ribbon */

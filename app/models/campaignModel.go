@@ -46,6 +46,14 @@ func (service *CampaignService) InsertCampaign(campaign *Campaign) error {
 	return nil
 }
 
+func (service *CampaignService) AddUserToCampaign(user User, campaign Campaign) error {
+	if err := DB.Model(&campaign).Association("Users").Append(&user); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (service *CampaignService) RetrieveCampaignsLinkedToUser(user User) ([]Campaign, error) {
 	var campaigns []Campaign
 	var campaignIds []uint

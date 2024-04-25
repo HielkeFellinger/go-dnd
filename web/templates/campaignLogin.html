@@ -1,9 +1,10 @@
-<!--login.html-->
+<!--campaignLogin.html-->
 
 <!--Embed the header.html template at this location-->
 {{ template "header.html" .}}
 
-<h1> Login</h1>
+<h1>Key required to access Campaign</h1>
+<h3>{{.campaignTitle}}</h3>
 
 <div class="panel panel-default col-sm-6">
     <div class="panel-body">
@@ -14,15 +15,11 @@
         </p>
         {{end}}
 
-        <!--Create a form that POSTs to the `/u/login` route-->
-        <form class="form" action="/u/login" method="POST">
+        <!--Create a form that POSTs to the `/campaign/login/{{.ID}}` route-->
+        <form class="form" action="/campaign/login/{{.ID}}" method="POST">
             <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
+                <label for="key">key</label>
+                <input class="form-control" type="password" id="key" name="key" required>
             </div>
             <div style="min-height: 4em; width: 12em; display: flex; flex-flow: row;" >
                 <div style="flex: 1 1 0;">
@@ -33,12 +30,11 @@
                 </div>
             </div>
         </form>
-        <a href="/u/register">Register a new user?</a>
     </div>
 </div>
 
 <script>
-    document.getElementById("password")
+    document.getElementById("key")
         .addEventListener("keypress", function(event) {
             if (event.key === "Enter") {
                 event.preventDefault();
@@ -47,8 +43,7 @@
         });
 
     let loadSpinner = () => {
-        if (document.getElementById("username").value.trim() !== '' &&
-            document.getElementById("password").value.trim() !== '') {
+        if (document.getElementById("key").value.trim() !== '') {
             document.getElementById("spinner").style.display = "block";
         }
     }

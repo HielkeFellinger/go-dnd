@@ -45,7 +45,7 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 		}
 	}
 
-	if message.Type >= TypeManageMaps && message.Type <= TypeManageItems {
+	if message.Type >= TypeManageMaps && message.Type <= TypeManageCampaign {
 		err := e.handleManagementEvents(message, pool)
 		if err != nil {
 			return err

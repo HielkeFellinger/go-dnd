@@ -4,22 +4,35 @@
 {{ template "header.html" .}}
 
 <h1> Select Campaign, {{ .user.Name}} </h1>
+<button class="btn btn-primary" onClick="window.location.reload();" title="Refresh">
+    <b><i class="bi bi-arrow-clockwise"></i></b>
+</button>
 <a href="/campaign/new">Create a new Campaign</a>
 
-<div class="panel panel-default">
+<div class="panel panel-default" style="margin-top: 0.25em">
     <div class="panel-body">
+        <!--If there's an error, display the error-->
+        {{ if .ErrorTitle}}
+            <p class="bg-danger">
+                {{.ErrorTitle}}: {{.ErrorMessage}}
+            </p>
+        {{end}}
         <div>
             <h2>My Campaigns</h2>
+            <div style="display: flex; flex-flow: row; flex-wrap: wrap; align-content: center; width: 100%;">
             {{ range .userCampaigns }}
                 {{template "selectCampaignBox.html" .}}
             {{ end }}
+            </div>
             <hr>
         </div>
         <div>
             <h2>All Other Campaigns</h2>
+            <div style="display: flex; flex-flow: row; flex-wrap: wrap; align-content: center; width: 100%;">
             {{ range .otherCampaigns }}
                 {{template "selectCampaignBox.html" .}}
             {{ end }}
+            </div>
         </div>
     </div>
 </div>

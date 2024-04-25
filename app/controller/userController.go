@@ -35,11 +35,6 @@ func Login(c *gin.Context) {
 	// Check if user exists
 	var user models.User
 	models.DB.First(&user, "name = ?", body.Username)
-	if user.ID == 0 {
-		templateMap[errMessage], templateMap[errTitle] = "Invalid username and or password", "Error"
-		c.HTML(http.StatusBadRequest, template, templateMap)
-		return
-	}
 
 	if errBcrypt := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password)); errBcrypt != nil {
 		templateMap[errMessage], templateMap[errTitle] = "Invalid username and or password", "Error"

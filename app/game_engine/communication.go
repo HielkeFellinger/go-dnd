@@ -40,6 +40,7 @@ const (
 	TypeManageCharacters EventType = 552
 	TypeManageInventory  EventType = 553
 	TypeManageItems      EventType = 554
+	TypeManageCampaign   EventType = 555
 
 	// Set attention to a specific tab
 

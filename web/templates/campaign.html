@@ -48,16 +48,19 @@
                 <ul id="campaign-tabs" class="nav nav-tabs">
                     {{ if .campaign.UserIsLead }}
                     <li class="nav-item" id="manageMapsList">
-                        <button id="manageMapsLink" class="nav-link" onclick="openTab('manageMaps');" style="color: goldenrod">Manage Maps</button>
+                        <button id="manageMapsLink" class="nav-link" onclick="openTab('manageMaps');" style="color: goldenrod"><i class="bi bi-pencil"></i> Maps</button>
                     </li>
                     <li class="nav-item" id="manageCharactersList">
-                        <button id="manageCharactersLink" class="nav-link" onclick="openTab('manageCharacters');" style="color: goldenrod">Manage Characters</button>
+                        <button id="manageCharactersLink" class="nav-link" onclick="openTab('manageCharacters');" style="color: goldenrod"><i class="bi bi-pencil"></i> Characters</button>
                     </li>
                     <li class="nav-item" id="manageInventoryList">
-                        <button id="manageInventoryLink" class="nav-link" onclick="openTab('manageInventory');" style="color: goldenrod">Manage Inventory</button>
+                        <button id="manageInventoryLink" class="nav-link" onclick="openTab('manageInventory');" style="color: goldenrod"><i class="bi bi-pencil"></i> Inventory</button>
                     </li>
                     <li class="nav-item" id="manageItemsList">
-                        <button id="manageItemsLink" class="nav-link" onclick="openTab('manageItems');" style="color: goldenrod">Manage Items</button>
+                        <button id="manageItemsLink" class="nav-link" onclick="openTab('manageItems');" style="color: goldenrod"><i class="bi bi-pencil"></i> Items</button>
+                    </li>
+                    <li class="nav-item" id="manageCampaignList">
+                        <button id="manageCampaignLink" class="nav-link" onclick="openTab('manageCampaign');" style="color: goldenrod"><i class="bi bi-pencil"></i> Campaign</button>
                     </li>
                     {{ end }}
                     <li class="nav-item" id="currentList">
@@ -79,6 +82,9 @@
                     </div>
                     <div id="manageItems" class="tab-content" style="display: none">
                         <div id="manageItemsContent" style="margin-top: 0.5em;"></div>
+                    </div>
+                    <div id="manageCampaign" class="tab-content" style="display: none">
+                        <div id="manageCampaignContent" style="margin-top: 0.5em;"></div>
                     </div>
                     {{end}}
 
@@ -382,6 +388,9 @@
         if (data.type === 554) {
             document.getElementById('manageItemsContent').innerHTML = html
         }
+        if (data.type === 555) {
+            document.getElementById('manageCampaignContent').innerHTML = html
+        }
     }
 
     let handleMapItemRemoval = (data) => {
@@ -623,6 +632,9 @@
         }
         if (targetId === 'manageItems') {
             sendEvent(wrapMessage('', 554))
+        }
+        if (targetId === 'manageCampaign') {
+            sendEvent(wrapMessage('', 555))
         }
         {{ end }}
     }
