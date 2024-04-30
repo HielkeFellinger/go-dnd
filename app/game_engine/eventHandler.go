@@ -38,7 +38,7 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 		}
 	}
 
-	if message.Type >= TypeUpdateMapEntity && message.Type <= TypeRemoveMapItem {
+	if message.Type >= TypeUpdateMapEntity && message.Type <= TypeSignalMapItem {
 		err := e.handleMapUpdateEvents(message, pool)
 		if err != nil {
 			return err

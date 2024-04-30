@@ -33,7 +33,18 @@
     max-height: inherit;
 }
 
+.campaign-map .grid .cell .content .signal {
+    display: flex;
+    align-items: center;
+    min-width: inherit;
+    max-width: inherit;
+    min-height: inherit;
+    max-height: inherit;
+    opacity: 0.5;
+}
+
 .campaign-map .grid .cell .content .element {
+    z-index: 500;
     min-width: inherit;
     max-width: inherit;
     min-height: inherit;

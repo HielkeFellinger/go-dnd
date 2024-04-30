@@ -8,6 +8,10 @@
         <button class="btn" onclick="makeMapsBigger()" style="height: 2.5em; width: 2.5em" title="Expand Map Cell Size">
             <b><i class="bi bi-plus"></i></b>
         </button>
+        <b style="margin-left: 0.25em; margin-right: 0.25em;">|</b>
+        <button class="btn" onclick="clearAllSignals();clearAllMenus()" style="height: 2.5em; width: 2.5em" title="Clean Signals and Menu's">
+            <b><i class="bi bi-eraser"></i></b>
+        </button>
         {{ if .lead }}
         <b style="margin-left: 0.25em; margin-right: 0.25em;">|</b>
         <button class="btn" onclick="updateMapVisibility('{{.id}}')" style="height: 2.5em; width: 2.5em"
@@ -33,15 +37,17 @@
         {{ end }}
     </div>
     <div class="campaign-map" onscroll="onMapScroll(this)">
-        <div class="grid" style="background-image: url('{{.backgroundImage}}')">
+        <div class="grid" style="background-image: url('{{.backgroundImage}}')" onclick="clearAllMenus()">
             {{ range $yVal := .y}}
                 {{ range $xVal := $.x}}
-                    <div class="cell" id="{{$.id}}-cell-y{{$yVal}}-x{{$xVal}}" oncontextmenu="showContextMenuOfDefaultCell(event)">
+                    <div class="cell" id="{{$.id}}-cell-y{{$yVal}}-x{{$xVal}}" oncontextmenu="showContextMenuOfDefaultCell(event)" style="overflow: hidden">
                         <div class="content" id="{{$.id}}-cell-y{{$yVal}}-x{{$xVal}}-content" ondrop="drop(event)" ondragover="allowDrop(event)">
 
                         </div>
                         <div id="{{$.id}}-cell-y{{$yVal}}-x{{$xVal}}-default-context-menu" class="context-menu" onclick="hideCellContextMenu(event)">
-                            <div class="context-menu-item" onclick="sendSignal('{{$.id}}-cell-y{{$yVal}}-x{{$xVal}}-default-context-menu')">Send Signal</div>
+                            <div class="context-menu-item" onclick="sendSignal('{{$.id}}','{{$yVal}}','{{$xVal}}','info')">Send Info Signal</div>
+                            <div class="context-menu-item" onclick="sendSignal('{{$.id}}','{{$yVal}}','{{$xVal}}','warn')">Send Warning Signal</div>
+                            <div class="context-menu-item" onclick="sendSignal('{{$.id}}','{{$yVal}}','{{$xVal}}','danger')">Send Danger Signal</div>
                             <div class="context-menu-item end" onclick="hideCellContextMenu(event)">Close</div>
                         </div>
                     </div>

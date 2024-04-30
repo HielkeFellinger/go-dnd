@@ -39,6 +39,61 @@ func (e *baseEventMessageHandler) handleMapUpdateEvents(message EventMessage, po
 			return err
 		}
 	}
+	if message.Type == TypeSignalMapItem {
+		err := e.typeSignalMapItem(message, pool)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (e *baseEventMessageHandler) typeSignalMapItem(message EventMessage, pool CampaignPool) error {
+	// Undo escaping
+	clearedBody := html.UnescapeString(message.Body)
+
+	var sendSignal SendSignal
+	if err := json.Unmarshal([]byte(clearedBody), &sendSignal); err != nil {
+		return err
+	}
+
+	log.Printf("- Map Update ??????: '%v'", sendSignal)
+
+	// Get the map and its MapItemRelationComponent and remove it
+	mapUuid, err := parseStingToUuid(sendSignal.Id)
+	if err != nil {
+		return err
+	}
+	mapEntity, match := pool.GetEngine().GetWorld().GetMapEntityByUuid(mapUuid)
+	if !match || mapEntity == nil {
+		return errors.New("failure of loading MAP by UUID")
+	}
+
+	data := make(map[string]any)
+	data["id"] = sendSignal.Id
+	data["x"] = sendSignal.X
+	data["y"] = sendSignal.Y
+
+	if sendSignal.Type == "danger" {
+		sendSignal.Html = e.handleLoadHtmlBody("signalDangerContent.html", "signalDangerContent", data)
+	} else if sendSignal.Type == "warn" {
+		sendSignal.Html = e.handleLoadHtmlBody("signalWarnContent.html", "signalWarnContent", data)
+	} else {
+		sendSignal.Html = e.handleLoadHtmlBody("signalInfoContent.html", "signalInfoContent", data)
+	}
+
+	rawJsonBytes, err := json.Marshal(sendSignal)
+	if err != nil {
+		return err
+	}
+
+	signalMapItemMessage := NewEventMessage()
+	signalMapItemMessage.Source = message.Source
+	signalMapItemMessage.Destinations = pool.GetAllClientIds()
+	signalMapItemMessage.Type = TypeSignalMapItem
+	signalMapItemMessage.Body = string(rawJsonBytes)
+	pool.TransmitEventMessage(signalMapItemMessage)
 
 	return nil
 }
@@ -53,8 +108,7 @@ func (e *baseEventMessageHandler) typeRemoveMapItem(message EventMessage, pool C
 	}
 
 	var removeMapItem RemoveMapItem
-	err := json.Unmarshal([]byte(clearedBody), &removeMapItem)
-	if err != nil {
+	if err := json.Unmarshal([]byte(clearedBody), &removeMapItem); err != nil {
 		return err
 	}
 	mapUuid, err := parseStingToUuid(removeMapItem.MapId)
@@ -100,8 +154,7 @@ func (e *baseEventMessageHandler) typeAddMapItem(message EventMessage, pool Camp
 	}
 
 	var newMapEntity AddMapItem
-	err := json.Unmarshal([]byte(clearedBody), &newMapEntity)
-	if err != nil {
+	if err := json.Unmarshal([]byte(clearedBody), &newMapEntity); err != nil {
 		return err
 	}
 
@@ -349,6 +402,14 @@ func (e *baseEventMessageHandler) typeUpdateMapEntity(message EventMessage, pool
 		}
 	}
 	return nil
+}
+
+type SendSignal struct {
+	Id   string `json:"Id"`
+	X    string `json:"X"`
+	Y    string `json:"Y"`
+	Type string `json:"Type"`
+	Html string `json:"Html"`
 }
 
 type SetActivity struct {

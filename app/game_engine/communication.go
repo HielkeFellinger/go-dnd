@@ -35,6 +35,7 @@ const (
 	TypeUpdateMapVisibility EventType = 544
 	TypeAddMapItem          EventType = 545
 	TypeRemoveMapItem       EventType = 546
+	TypeSignalMapItem       EventType = 547
 
 	TypeManageMaps       EventType = 551
 	TypeManageCharacters EventType = 552
