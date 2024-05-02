@@ -58,8 +58,6 @@ func (e *baseEventMessageHandler) typeSignalMapItem(message EventMessage, pool C
 		return err
 	}
 
-	log.Printf("- Map Update ??????: '%v'", sendSignal)
-
 	// Get the map and its MapItemRelationComponent and remove it
 	mapUuid, err := parseStingToUuid(sendSignal.Id)
 	if err != nil {
@@ -189,7 +187,7 @@ func (e *baseEventMessageHandler) typeAddMapItem(message EventMessage, pool Camp
 
 	// Get all
 	mapItems := mapEntity.GetAllComponentsOfType(ecs.MapItemRelationComponentType)
-	posissions := make([]string, len(mapItems))
+	positions := make([]string, len(mapItems))
 	for _, mapItem := range mapItems {
 		mapItemRelation := mapItem.(*ecs_components.MapItemRelationComponent)
 
@@ -200,7 +198,7 @@ func (e *baseEventMessageHandler) typeAddMapItem(message EventMessage, pool Camp
 
 		// Reserve position
 		if mapItemRelation.Position != nil {
-			posissions = append(posissions, fmt.Sprintf("%d-%d", mapItemRelation.Position.X, mapItemRelation.Position.Y))
+			positions = append(positions, fmt.Sprintf("%d-%d", mapItemRelation.Position.X, mapItemRelation.Position.Y))
 		}
 	}
 
@@ -211,7 +209,7 @@ func (e *baseEventMessageHandler) typeAddMapItem(message EventMessage, pool Camp
 	// Get an empty space on grid
 	for x := 0; x < int(mapArea.Width); x++ {
 		for y := 0; y < int(mapArea.Length); y++ {
-			if !slices.Contains(posissions, fmt.Sprintf("%d-%d", x, y)) {
+			if !slices.Contains(positions, fmt.Sprintf("%d-%d", x, y)) {
 				var position = ecs_components.NewPositionComponent().(*ecs_components.PositionComponent)
 				position.X = uint(x)
 				position.Y = uint(y)

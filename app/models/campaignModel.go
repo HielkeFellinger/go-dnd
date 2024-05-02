@@ -73,8 +73,17 @@ func (service *CampaignService) RetrieveCampaignsLinkedToUser(user User) ([]Camp
 	return campaigns, result.Error
 }
 
+func (service *CampaignService) RetrieveCampaignsById(id uint) (Campaign, error) {
+	var campaign Campaign
+	result := DB.Where("id = ?", id).
+		Preload("Users").
+		Find(&campaign)
+
+	return campaign, result.Error
+}
+
 func (service *CampaignService) RetrieveCampaignsByIds(ids []uint) ([]Campaign, error) {
-	// Insure a return
+	// Ensure a return
 	if len(ids) == 0 {
 		return make([]Campaign, 0), nil
 	}

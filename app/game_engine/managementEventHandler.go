@@ -35,6 +35,81 @@ func (e *baseEventMessageHandler) typeManageCampaign(message EventMessage, pool 
 		return errors.New("managing the campaign is not allowed as non-lead")
 	}
 
+	data := make(map[string]any)
+
+	// CRUD the basic campaign details
+	service := models.CampaignService{}
+	campaign, err := service.RetrieveCampaignsById(pool.GetId())
+	if err != nil {
+		return err
+	}
+	data["campaign"] = campaign
+
+	// Campaign users
+	campaignUsers := make([]string, 0)
+	for _, user := range campaign.Users {
+		if user.Name != pool.GetLeadId() {
+			campaignUsers = append(campaignUsers, user.Name)
+		}
+	}
+	sort.Strings(campaignUsers)
+	data["campaignUsers"] = campaignUsers
+
+	// Get all the player chars and see who controls them
+	characters := pool.GetEngine().GetWorld().GetCharacterEntities()
+	charControllers := make([]charUserController, 0)
+	for _, character := range characters {
+		if character.HasComponentType(ecs.PlayerComponentType) {
+			charUserControl := newCharUserController()
+			charUserControl.Id = character.GetId().String()
+			charUserControl.Name = character.GetName()
+
+			// Get list of controlling users
+			listOfControllingUserNames := make([]string, 0)
+			playerComponents := character.GetAllComponentsOfType(ecs.PlayerComponentType)
+			for index := 0; index < len(playerComponents); index++ {
+				playerComponent := playerComponents[0].(*ecs_components.PlayerComponent)
+				listOfControllingUserNames = append(listOfControllingUserNames, playerComponent.Name)
+			}
+
+			for _, user := range campaign.Users {
+				if user.Name != pool.GetLeadId() {
+					charUserControl.ControllingPlayers[user.Name] = slices.Contains(listOfControllingUserNames, user.Name)
+				}
+			}
+
+			var image *ecs_components.ImageComponent
+			var imageDetails = character.GetAllComponentsOfType(ecs.ImageComponentType)
+			if imageDetails != nil && len(imageDetails) == 1 {
+				image = imageDetails[0].(*ecs_components.ImageComponent)
+			} else {
+				// Set default
+				image = ecs_components.NewMissingImageComponent()
+			}
+			charUserControl.Image = models.CampaignImage{
+				Name: image.Name,
+				Url:  image.Url,
+			}
+
+			charControllers = append(charControllers, charUserControl)
+		}
+	}
+	data["charToPlayers"] = charControllers
+
+	rawJsonBytes, err := json.Marshal(
+		e.handleLoadHtmlBodyMultipleTemplateFiles([]string{"campaignManageCampaign.html", "diceSpinnerSvg.html"},
+			"campaignManageCampaign", data))
+	if err != nil {
+		return err
+	}
+
+	manageCampaign := NewEventMessage()
+	manageCampaign.Source = message.Source
+	manageCampaign.Type = TypeManageCampaign
+	manageCampaign.Body = string(rawJsonBytes)
+	manageCampaign.Destinations = append(manageCampaign.Destinations, pool.GetLeadId())
+	pool.TransmitEventMessage(manageCampaign)
+
 	return nil
 }
 
@@ -155,4 +230,17 @@ func (e *baseEventMessageHandler) typeManageMaps(message EventMessage, pool Camp
 	pool.TransmitEventMessage(manageMaps)
 
 	return nil
+}
+
+type charUserController struct {
+	Id                 string
+	Name               string
+	Image              models.CampaignImage
+	ControllingPlayers map[string]bool
+}
+
+func newCharUserController() charUserController {
+	return charUserController{
+		ControllingPlayers: make(map[string]bool),
+	}
 }
