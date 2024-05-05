@@ -854,6 +854,26 @@
         sendEvent(wrapMessage(JSON.stringify(charHealth), 511))
     }
 
+    let linkCharacterToPlayer = (elementId, id, playerName, connect) => {
+        let charToPlayer = {}
+        charToPlayer.id = id
+        charToPlayer.connect = connect
+        charToPlayer.playerName = playerName
+
+        let element = document.getElementById(elementId)
+        if (element) {
+            if (element.classList.contains('btn-success')){
+                element.classList.remove('btn-success')
+            } else {
+                element.classList.add('btn-success')
+            }
+        }
+
+        // @TODO: FIX here; add message + new code!
+
+        //sendEvent(wrapMessage(JSON.stringify(charHealth), 511))
+    }
+
     // Innit Websocket only after loading all JS
     if (window["WebSocket"]) {
         console.log("WS support");

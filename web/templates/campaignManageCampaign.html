@@ -1,72 +1,78 @@
 {{define "campaignManageCampaign"}}
     <div>
-        <h2>Campaign {{ .campaign.Title }}</h2>
-        <div style="display: flex; flex-flow: row; flex-wrap: wrap; align-content: center; width: 100%;">
-            <form class="form" >
-                <div class="form-group">
-                    <label for="title">Title</label>
-                    <input type="text" name="title" class="form-control" id="title" placeholder="Title" required value="{{ .campaign.Title }}">
-                </div>
-                <div class="form-group">
-                    <label for="description">Description</label>
-                    <textarea name="description" class="form-control" id="description" placeholder="Description">{{ .campaign.Description }}</textarea>
-                </div>
-                <div class="form-group">
-                    <label for="password">Password (Optional)</label>
-                    <input type="password" name="password" class="form-control" id="password" placeholder="Password">
-                </div>
-                <div class="form-group">
-                    <label for="passwordCheck">Password (Check)</label>
-                    <input type="password" name="passwordCheck" class="form-control" id="passwordCheck" placeholder="Password (Again)">
-                </div>
-                <div style="min-height: 4em; width: 12em; display: flex; flex-flow: row;" >
-                    <div style="flex: 1 1 0;">
-                        <button id="submit" type="submit" class="btn btn-primary" onclick="loadSpinner()">Update</button>
+        <details open="">
+            <summary style="font-size: 2em;">Edit Campaign Details of: '{{ .campaign.Title }}'</summary>
+            <div style="display: flex; flex-flow: row; flex-wrap: wrap; align-content: center; width: 100%;">
+                <form class="form" >
+                    <div class="form-group">
+                        <label for="title">Title</label>
+                        <input type="text" name="title" class="form-control" id="title" placeholder="Title" required value="{{ .campaign.Title }}">
                     </div>
-                    <div id="spinner" style="flex: 1 1 0; display: none">
-                        {{ template "diceSpinnerSvg.html" .}}
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea name="description" class="form-control" id="description" placeholder="Description">{{ .campaign.Description }}</textarea>
                     </div>
-                </div>
-            </form>
-        </div>
-        <h2>Connect Character to Player(s)</h2>
-        <div style="width: 100%;">
-            <table style="width: 100%;">
-                <thead>
-                <tr>
-                    <th> Image </th>
-                    <th> Name </th>
-                    {{ range .campaignUsers }}
-                    <th> {{ . }} </th>
-                    {{ end }}
-                </tr>
-                </thead>
-                <tbody>
-                {{ range .charToPlayers }}
-                <tr>
-                    <td>
-                        <div style="background-image: url('{{ .Image.Url }}'); height: 1.5em; width: 1.5em; background-size: 75%; background-repeat: no-repeat;"></div>
-                    </td>
-                    <td> {{ .Name }} </td>
-                    {{ range $key, $value := .ControllingPlayers }}
-                        <td>
-                            {{ if $value }}
-                            <button class="btn btn-danger">
-                                <i class="bi bi-person-dash-fill"></i>
-                            </button>
-                            {{ else }}
-                            <button class="btn btn-success">
-                                <i class="bi bi-person-plus-fill"></i>
-                            </button>
+                    <div class="form-group">
+                        <label for="password">Password (Optional)</label>
+                        <input type="password" name="password" class="form-control" id="password" placeholder="Password">
+                    </div>
+                    <div class="form-group">
+                        <label for="passwordCheck">Password (Check)</label>
+                        <input type="password" name="passwordCheck" class="form-control" id="passwordCheck" placeholder="Password (Again)">
+                    </div>
+                    <div style="min-height: 4em; width: 12em; display: flex; flex-flow: row;" >
+                        <div style="flex: 1 1 0;">
+                            <button id="submit" type="submit" class="btn btn-primary" onclick="loadSpinner()">Update</button>
+                        </div>
+                        <div id="spinner" style="flex: 1 1 0; display: none">
+                            {{ template "diceSpinnerSvg.html" .}}
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </details>
+        <br>
+        <details open="">
+            <summary style="font-size: 2em;">Add/Remove Players control of Character</summary>
+            <div style="width: max-content;">
+                <table style="width: max-content;">
+                    <thead>
+                    <tr style="padding-bottom: 0.25em;">
+                        <th style="min-width: 10em;"> Image </th>
+                        <th style="min-width: 10em;"> Name </th>
+                        {{ range .campaignUsers }}
+                            <th style="min-width: 10em;"> {{ . }} </th>
+                        {{ end }}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{ range $ignore, $charToPlayer := .charToPlayers }}
+                        <tr style="padding-bottom: 0.25em;">
+                            <td>
+                                <div style="background-image: url('{{ .Image.Url }}'); height: 1.5em; width: 1.5em; background-size: 75%; background-repeat: no-repeat;"></div>
+                            </td>
+                            <td> {{ $charToPlayer.Name }} </td>
+                            {{ range $key, $value := .ControllingPlayers }}
+                                <td>
+                                    {{ if $value }}
+                                        <button id="{{$charToPlayer.Id}}-{{$charToPlayer.Name}}-{{$key}}" class="btn btn-success"
+                                                onclick="linkCharacterToPlayer('{{$charToPlayer.Id}}-{{$charToPlayer.Name}}-{{$key}}', '{{$charToPlayer.Id}}', '{{$key}}', false)">
+                                            <i class="bi bi-person-dash-fill"></i>
+                                        </button>
+                                    {{ else }}
+                                        <button id="{{$charToPlayer.Id}}-{{$charToPlayer.Name}}-{{$key}}" class="btn"
+                                                onclick="linkCharacterToPlayer('{{$charToPlayer.Id}}-{{$charToPlayer.Name}}-{{$key}}', '{{$charToPlayer.Id}}', '{{$key}}', true)">
+                                            <i class="bi bi-person-plus-fill"></i>
+                                        </button>
+                                    {{ end }}
+                                </td>
                             {{ end }}
-                        </td>
+                        </tr>
                     {{ end }}
-                </tr>
-                {{ end }}
-                </tbody>
-            </table>
-        </div>
-
+                    </tbody>
+                </table>
+            </div>
+        </details>
     </div>
     <script>
         // Add
