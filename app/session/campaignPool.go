@@ -135,5 +135,5 @@ func (pool *baseCampaignPool) transmitMessage(message game_engine.EventMessage) 
 			log.Printf("Error while sending Message ID: '%s'. Error: '%s'", message.Id, err.Error())
 		}
 	}
-	log.Printf("Message(s) Transmitted ID: '%s'", message.Id)
+	log.Printf("Message Transmitted. ID: '%s' and Type: '%v'", message.Id, message.Type)
 }

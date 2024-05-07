@@ -33,6 +33,10 @@ func (c *FilterRelationComponent) LoadFromRawComponentRelation(raw ecs.RawCompon
 	return c.CheckValuesParsedFromRaw(loadedValues, raw)
 }
 
+func (c *FilterRelationComponent) AllowMultipleOfType() bool {
+	return true
+}
+
 func (c *FilterRelationComponent) ModeFromString(mode string) error {
 	c.Mode = MapStringToFilterMode(mode)
 	if c.Mode == ecs.UnknownFilterMode {

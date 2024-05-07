@@ -34,6 +34,10 @@ func (c *CreatesRelationComponent) LoadFromRawComponentRelation(raw ecs.RawCompo
 	return c.CheckValuesParsedFromRaw(loadedValues, raw)
 }
 
+func (c *CreatesRelationComponent) AllowMultipleOfType() bool {
+	return true
+}
+
 func (c *CreatesRelationComponent) CountFromString(count string) error {
 	n, err := strconv.Atoi(count)
 	c.Count = uint(n)

@@ -246,9 +246,16 @@
         if (data.type === 501) {
             document.getElementById("char-ribbon-row").innerHTML = data.body;
         } else if (data.type === 504) {
-            // If empty body user is not allowed to see details, reset to old state
+            // If empty body, user is not allowed to see details, reset to old state
             if (!data.body.trim()) {
-                selectedCharDetailsId = loadedCharDetailsId
+                // User may be not allowed to view old state, if so clean-up
+                if (selectedCharDetailsId === loadedCharDetailsId) {
+                    selectedCharDetailsId = ""
+                    loadedCharDetailsId = ""
+                    document.getElementById("char-details-holder").innerHTML = ""
+                } else {
+                    selectedCharDetailsId = loadedCharDetailsId
+                }
             } else {
                 let body = JSON.parse(data.body)
                 if (selectedCharDetailsId === body.Id) {
@@ -854,24 +861,27 @@
         sendEvent(wrapMessage(JSON.stringify(charHealth), 511))
     }
 
-    let linkCharacterToPlayer = (elementId, id, playerName, connect) => {
+    let linkCharacterToPlayer = (elementId, id, playerName) => {
         let charToPlayer = {}
         charToPlayer.id = id
-        charToPlayer.connect = connect
         charToPlayer.playerName = playerName
 
         let element = document.getElementById(elementId)
         if (element) {
             if (element.classList.contains('btn-success')){
                 element.classList.remove('btn-success')
+                charToPlayer.connect = false
             } else {
                 element.classList.add('btn-success')
+                charToPlayer.connect = true
             }
         }
 
-        // @TODO: FIX here; add message + new code!
+        sendEvent(wrapMessage(JSON.stringify(charToPlayer), 512))
+    }
 
-        //sendEvent(wrapMessage(JSON.stringify(charHealth), 511))
+    let loadSpinner = () => {
+        document.getElementById("spinner").style.display = "block";
     }
 
     // Innit Websocket only after loading all JS

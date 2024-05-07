@@ -31,7 +31,7 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 		}
 	}
 
-	if message.Type == TypeUpdateCharacterHealth {
+	if message.Type >= TypeUpdateCharacterHealth && message.Type <= TypeUpdateCharacterUsers {
 		err := e.handleUpdateCharacterEvents(message, pool)
 		if err != nil {
 			return err

@@ -50,6 +50,10 @@ func (c *MapItemRelationComponent) IsRelationalComponent() bool {
 	return true
 }
 
+func (c *MapItemRelationComponent) AllowMultipleOfType() bool {
+	return true
+}
+
 func (c *MapItemRelationComponent) GetEntity() ecs.Entity {
 	return c.Entity
 }

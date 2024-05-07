@@ -207,7 +207,7 @@ func (e *BaseEntity) GetAllComponentsOfType(ct uint64) []Component {
 }
 
 func (e *BaseEntity) isComponentTypeAllowedToBeAdded(c Component) bool {
-	if !c.IsRelationalComponent() {
+	if !c.AllowMultipleOfType() {
 		for _, component := range e.Components {
 			if component.ComponentType() == c.ComponentType() {
 				return false

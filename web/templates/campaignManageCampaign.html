@@ -22,7 +22,7 @@
                     </div>
                     <div style="min-height: 4em; width: 12em; display: flex; flex-flow: row;" >
                         <div style="flex: 1 1 0;">
-                            <button id="submit" type="submit" class="btn btn-primary" onclick="loadSpinner()">Update</button>
+                            <button id="campaignUpdateSubmit" type="submit" class="btn btn-primary" onclick="loadSpinner()">Update</button>
                         </div>
                         <div id="spinner" style="flex: 1 1 0; display: none">
                             {{ template "diceSpinnerSvg.html" .}}
@@ -56,12 +56,12 @@
                                 <td>
                                     {{ if $value }}
                                         <button id="{{$charToPlayer.Id}}-{{$charToPlayer.Name}}-{{$key}}" class="btn btn-success"
-                                                onclick="linkCharacterToPlayer('{{$charToPlayer.Id}}-{{$charToPlayer.Name}}-{{$key}}', '{{$charToPlayer.Id}}', '{{$key}}', false)">
+                                                onclick="linkCharacterToPlayer('{{$charToPlayer.Id}}-{{$charToPlayer.Name}}-{{$key}}', '{{$charToPlayer.Id}}', '{{$key}}')">
                                             <i class="bi bi-person-dash-fill"></i>
                                         </button>
                                     {{ else }}
                                         <button id="{{$charToPlayer.Id}}-{{$charToPlayer.Name}}-{{$key}}" class="btn"
-                                                onclick="linkCharacterToPlayer('{{$charToPlayer.Id}}-{{$charToPlayer.Name}}-{{$key}}', '{{$charToPlayer.Id}}', '{{$key}}', true)">
+                                                onclick="linkCharacterToPlayer('{{$charToPlayer.Id}}-{{$charToPlayer.Name}}-{{$key}}', '{{$charToPlayer.Id}}', '{{$key}}')">
                                             <i class="bi bi-person-plus-fill"></i>
                                         </button>
                                     {{ end }}
@@ -74,7 +74,4 @@
             </div>
         </details>
     </div>
-    <script>
-        // Add
-    </script>
 {{end}}

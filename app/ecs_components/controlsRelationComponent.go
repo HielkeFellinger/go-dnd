@@ -23,6 +23,10 @@ func (c *ControlsRelationComponent) LoadFromRawComponentRelation(raw ecs.RawComp
 	return c.CheckValuesParsedFromRaw(loadedValues, raw)
 }
 
+func (c *ControlsRelationComponent) AllowMultipleOfType() bool {
+	return true
+}
+
 func (c *ControlsRelationComponent) ComponentType() uint64 {
 	return ecs.ControlsRelationComponentType
 }

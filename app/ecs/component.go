@@ -44,6 +44,7 @@ const (
 
 type Component interface {
 	ComponentType() uint64
+	AllowMultipleOfType() bool
 	LoadFromRawComponent(raw RawComponent) error
 	IsRelationalComponent() bool
 	GetId() uuid.UUID
@@ -78,6 +79,10 @@ func (c *BaseComponent) CheckValuesParsedFromRaw(loadedValues int, raw RawCompon
 
 func (c *BaseComponent) LoadFromRawComponent(raw RawComponent) error {
 	return errors.New(fmt.Sprintf("loadFromRawComponent(raw RawComponent) not implemented. Raw type: '%s'", raw.ComponentType))
+}
+
+func (c *BaseComponent) AllowMultipleOfType() bool {
+	return false
 }
 
 func (c *BaseComponent) ComponentType() uint64 {

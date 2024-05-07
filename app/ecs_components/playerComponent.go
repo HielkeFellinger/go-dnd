@@ -29,3 +29,7 @@ func (c *PlayerComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
 func (c *PlayerComponent) ComponentType() uint64 {
 	return ecs.PlayerComponentType
 }
+
+func (c *PlayerComponent) AllowMultipleOfType() bool {
+	return true
+}
