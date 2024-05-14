@@ -68,7 +68,7 @@ func (e *baseEventMessageHandler) typeManageCampaign(message EventMessage, pool 
 			listOfControllingUserNames := make([]string, 0)
 			playerComponents := character.GetAllComponentsOfType(ecs.PlayerComponentType)
 			for index := 0; index < len(playerComponents); index++ {
-				playerComponent := playerComponents[0].(*ecs_components.PlayerComponent)
+				playerComponent := playerComponents[index].(*ecs_components.PlayerComponent)
 				listOfControllingUserNames = append(listOfControllingUserNames, playerComponent.Name)
 			}
 
