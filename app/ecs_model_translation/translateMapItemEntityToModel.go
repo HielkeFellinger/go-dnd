@@ -12,7 +12,7 @@ func MapItemEntityToCampaignMapItemElement(rawMapItemComponent ecs.Component, ma
 	var image = ecs_components.NewMissingImageComponent()
 	var controllingPlayers = make([]string, 0)
 
-	// Translate; nil saves exit
+	// Translate; nil save exit
 	mapItemComponent, ok := rawMapItemComponent.(*ecs_components.MapItemRelationComponent)
 	if !ok || mapItemComponent == nil || mapItemComponent.Entity == nil {
 		return models.CampaignScreenMapItemElement{

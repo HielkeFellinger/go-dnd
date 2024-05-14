@@ -36,7 +36,7 @@ func (service UserService) InsertUser(user *User) error {
 	}
 	user.Password = string(hashByteArray)
 
-	// Attempt to saves
+	// Attempt to save
 	if result := DB.Create(&user); result.Error != nil {
 		return errors.New("user could not created")
 	}
