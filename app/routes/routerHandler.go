@@ -5,6 +5,8 @@ import (
 	"github.com/hielkefellinger/go-dnd/app/controller"
 	"github.com/hielkefellinger/go-dnd/app/middelware"
 	"github.com/hielkefellinger/go-dnd/app/session"
+	"net/http"
+	"os"
 )
 
 func HandleControllerRoutes(router *gin.Engine) {
@@ -37,6 +39,11 @@ func HandleControllerRoutes(router *gin.Engine) {
 func HandleStaticContent(router *gin.Engine) {
 	router.Static("/assets", "web/assets")
 	router.Static("/images", "web/images")
+
+	campaignDataRoutes := router.Group("/campaign_data", middelware.RequireAuthAndCampaignAccess)
+	{
+		campaignDataRoutes.StaticFS("", http.Dir(os.Getenv("CAMPAIGN_DATA_DIR")))
+	}
 }
 
 func HandleTemplates(router *gin.Engine) {
