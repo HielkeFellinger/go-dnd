@@ -7,24 +7,45 @@ import (
 	"github.com/hielkefellinger/go-dnd/app/models"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
 const loginPageLocation = "/u/login"
 
+func RequireAuth(c *gin.Context) {
+	user, err := retrieveUserFromCookie(c)
+	if err != nil || user.ID == 0 {
+		c.Redirect(http.StatusFound, loginPageLocation)
+		c.AbortWithStatus(http.StatusUnauthorized)
+	}
+
+	c.Set("user", user)
+	c.Next()
+}
+
 func RequireAuthAndCampaign(c *gin.Context) {
 	// Validate User
 	user, err := retrieveUserFromCookie(c)
 	if err != nil || user.ID == 0 {
-		c.Redirect(302, loginPageLocation)
-		c.AbortWithStatus(401)
+		c.Redirect(http.StatusFound, loginPageLocation)
+		c.AbortWithStatus(http.StatusUnauthorized)
 	}
 
-	// Validate Campaign @todo; see if user is linked to campaign or "admin"
+	// Validate Campaign
 	var campaign models.Campaign
 	id := c.Params.ByName("id")
 	models.DB.Preload("Users").Preload("Lead").First(&campaign, id)
 	if campaign.ID == 0 {
+		c.AbortWithStatus(http.StatusNotFound)
+	}
+
+	// See if user is linked to campaign or is Lead
+	hasConnection := campaign.LeadID == user.ID
+	for _, campaignUser := range campaign.Users {
+		hasConnection = hasConnection || campaignUser.ID == user.ID
+	}
+	if !hasConnection {
 		c.AbortWithStatus(http.StatusNotFound)
 	}
 
@@ -34,14 +55,45 @@ func RequireAuthAndCampaign(c *gin.Context) {
 	c.Next()
 }
 
-func RequireAuth(c *gin.Context) {
+func RequireAuthAndCampaignAccess(c *gin.Context) {
+	filePathParts := strings.Split(strings.TrimPrefix(c.Param("filepath"), "/"), "/")
+
+	if len(filePathParts) < 3 {
+		c.AbortWithStatus(http.StatusNotFound)
+	}
+
+	// Validate User
 	user, err := retrieveUserFromCookie(c)
 	if err != nil || user.ID == 0 {
-		c.Redirect(302, loginPageLocation)
-		c.AbortWithStatus(401)
+		c.Redirect(http.StatusFound, loginPageLocation)
+		c.AbortWithStatus(http.StatusNotFound)
+	}
+
+	// Validate Campaign @todo;
+	var campaign models.Campaign
+	id := filePathParts[0]
+	models.DB.Preload("Users").Preload("Lead").First(&campaign, id)
+	if campaign.ID == 0 {
+		c.AbortWithStatus(http.StatusNotFound)
+	}
+
+	// See if user is linked to campaign or is Lead
+	isLead := campaign.LeadID == user.ID
+	hasConnection := false
+	for _, campaignUser := range campaign.Users {
+		hasConnection = hasConnection || campaignUser.ID == user.ID
+	}
+
+	// Only allow access to images if not a lead
+	if !isLead && filePathParts[1] != "images" {
+		c.AbortWithStatus(http.StatusNotFound)
+	} else if !isLead && !hasConnection {
+		c.AbortWithStatus(http.StatusNotFound)
 	}
 
 	c.Set("user", user)
+	c.Set("campaign", campaign)
+
 	c.Next()
 }
 
