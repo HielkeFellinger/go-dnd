@@ -36,6 +36,17 @@ func (c *RangeComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
 	return c.CheckValuesParsedFromRaw(loadedValues, raw)
 }
 
+func (c *RangeComponent) ParseToRawComponent() (ecs.RawComponent, error) {
+	rawComponent := ecs.RawComponent{
+		ComponentType: ecs.TypeNameToNthBit[c.ComponentType()].Name,
+		Params: map[string]string{
+			"min": strconv.Itoa(c.Min),
+			"max": strconv.Itoa(c.Max),
+		},
+	}
+	return rawComponent, nil
+}
+
 func (c *RangeComponent) MinFromString(min string) error {
 	n, err := strconv.Atoi(min)
 	c.Min = n

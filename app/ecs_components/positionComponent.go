@@ -36,6 +36,17 @@ func (c *PositionComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
 	return c.CheckValuesParsedFromRaw(loadedValues, raw)
 }
 
+func (c *PositionComponent) ParseToRawComponent() (ecs.RawComponent, error) {
+	rawComponent := ecs.RawComponent{
+		ComponentType: ecs.TypeNameToNthBit[c.ComponentType()].Name,
+		Params: map[string]string{
+			"x": strconv.Itoa(int(c.X)),
+			"y": strconv.Itoa(int(c.Y)),
+		},
+	}
+	return rawComponent, nil
+}
+
 func (c *PositionComponent) XFromString(x string) error {
 	n, err := strconv.Atoi(x)
 	c.X = uint(n)

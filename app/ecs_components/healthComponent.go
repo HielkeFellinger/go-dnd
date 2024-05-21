@@ -43,6 +43,18 @@ func (c *HealthComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
 	return c.CheckValuesParsedFromRaw(loadedValues, raw)
 }
 
+func (c *HealthComponent) ParseToRawComponent() (ecs.RawComponent, error) {
+	rawComponent := ecs.RawComponent{
+		ComponentType: ecs.TypeNameToNthBit[c.ComponentType()].Name,
+		Params: map[string]string{
+			"damage":    strconv.Itoa(int(c.Damage)),
+			"temporary": strconv.Itoa(int(c.Temporary)),
+			"maximum":   strconv.Itoa(int(c.Maximum)),
+		},
+	}
+	return rawComponent, nil
+}
+
 func (c *HealthComponent) DamageFromString(damage string) error {
 	n, err := strconv.Atoi(damage)
 	c.Damage = uint(n)

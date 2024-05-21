@@ -30,6 +30,16 @@ func (c *MapComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
 	return c.CheckValuesParsedFromRaw(loadedValues, raw)
 }
 
+func (c *MapComponent) ParseToRawComponent() (ecs.RawComponent, error) {
+	rawComponent := ecs.RawComponent{
+		ComponentType: ecs.TypeNameToNthBit[c.ComponentType()].Name,
+		Params: map[string]string{
+			"active": strconv.FormatBool(c.Active),
+		},
+	}
+	return rawComponent, nil
+}
+
 func (c *MapComponent) ActiveFromString(bool string) error {
 	b, err := strconv.ParseBool(bool)
 	c.Active = b

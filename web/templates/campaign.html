@@ -95,18 +95,19 @@
             </div>
         </div>
 
-        <div id="ui-right-bar" class="" style="width: calc(3em + 553px);">
-            <div>
-                <button class="btn" id="toggle-right-bar-visibility" onclick="toggleVisibilityRightBar()"
-                        style="position: relative; left: 0;">
-                    <b><i class="bi bi-box-arrow-right"></i></b>
-                </button>
-                <div id="right-bar-inner-content" style="position: relative; left: 3em; top: -2.4em; width: 543px">
-                    <div id="char-details-holder" class="">
+        <div id="ui-right-bar" class="" style="width: calc(3em + 553px); min-height: 100%;">
+            <button class="btn" id="toggle-right-bar-visibility" onclick="toggleVisibilityRightBar()"
+                    style="position: relative; left: 0;">
+                <b><i class="bi bi-box-arrow-right"></i></b>
+            </button>
+            <div id="right-bar-inner-content" style="position: relative; min-height: 100%; left: 3em; top: -2.4em; width: 543px">
+                <div id="char-details-holder" class="">
 
-                    </div>
+                </div>
+                <div style="min-height: 25em; max-height: 25em; margin-top: auto; position: absolute; bottom: 0">
                     <h4> Events </h4>
                     <div id="event-content" class="">
+
 
                     </div>
                 </div>
@@ -215,9 +216,12 @@
         document.getElementById("event-content").innerHTML += evt.data;
     }
 
+    let saveGame = () => {
+        sendEvent(wrapMessage('', 2))
+    }
+
     let fullRefresh = () => {
-        let body = ''
-        sendEvent(wrapMessage(body, 500))
+        sendEvent(wrapMessage('', 500))
     }
 
     let wrapMessage = (body, type) => {
@@ -662,16 +666,21 @@
         }
     }
 
+    let lastMessageSender = ''
     let handleChatEvents = (data) => {
         let chatMessage = '';
         if (data.source === currentUser) {
             chatMessage += '<div class="chat-box chat-box-me">'
-        } else if (data.source.toLocaleUpperCase() === "server") {
+        } else if (data.source.toLowerCase() === "server") {
             chatMessage += '<div class="chat-box chat-box-server">'
         } else {
             chatMessage += '<div class="chat-box chat-box-other">'
         }
-        chatMessage += '<p style="margin: 0">' + data.source + ' @ ' + data.dateTime + '</p>'
+
+        if (lastMessageSender !== data.source) {
+            lastMessageSender = data.source
+            chatMessage += '<p style="margin: 0"><i><b>' + data.source + '</b> @ ' + data.dateTime + '</i></p>'
+        }
         chatMessage += '<p style="margin: 0">' + data.body + '</p>'
         chatMessage += '</div>'
 

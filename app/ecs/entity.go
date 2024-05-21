@@ -18,6 +18,7 @@ type Entity interface {
 	RemoveComponentByUuid(uuid uuid.UUID) bool
 	AddComponent(c Component) error
 	LoadFromRawEntity(raw RawEntity) error
+	GetAllComponents() []Component
 	GetAllComponentsOfType(ct uint64) []Component
 	hasCircularRef(uuid uuid.UUID) bool
 	HasRelationWithEntityByUuid(uuid uuid.UUID) bool
@@ -204,6 +205,10 @@ func (e *BaseEntity) GetAllComponentsOfType(ct uint64) []Component {
 	}
 
 	return make([]Component, 0)
+}
+
+func (e *BaseEntity) GetAllComponents() []Component {
+	return e.Components
 }
 
 func (e *BaseEntity) isComponentTypeAllowedToBeAdded(c Component) bool {

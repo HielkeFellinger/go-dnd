@@ -29,6 +29,16 @@ func (c *VisibilityComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
 	return c.CheckValuesParsedFromRaw(loadedValues, raw)
 }
 
+func (c *VisibilityComponent) ParseToRawComponent() (ecs.RawComponent, error) {
+	rawComponent := ecs.RawComponent{
+		ComponentType: ecs.TypeNameToNthBit[c.ComponentType()].Name,
+		Params: map[string]string{
+			"hidden": strconv.FormatBool(c.Hidden),
+		},
+	}
+	return rawComponent, nil
+}
+
 func (c *VisibilityComponent) HiddenFromString(bool string) error {
 	b, err := strconv.ParseBool(bool)
 	c.Hidden = b

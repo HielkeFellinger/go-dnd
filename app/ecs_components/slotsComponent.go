@@ -29,6 +29,16 @@ func (c *SlotsComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
 	return c.CheckValuesParsedFromRaw(loadedValues, raw)
 }
 
+func (c *SlotsComponent) ParseToRawComponent() (ecs.RawComponent, error) {
+	rawComponent := ecs.RawComponent{
+		ComponentType: ecs.TypeNameToNthBit[c.ComponentType()].Name,
+		Params: map[string]string{
+			"count": strconv.Itoa(int(c.Count)),
+		},
+	}
+	return rawComponent, nil
+}
+
 func (c *SlotsComponent) CounterFromString(counter string) error {
 	n, err := strconv.Atoi(counter)
 	c.Count = uint(n)

@@ -3,6 +3,7 @@ package ecs_components
 import (
 	"github.com/google/uuid"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
+	"strconv"
 )
 
 type MapItemRelationComponent struct {
@@ -40,6 +41,18 @@ func (c *MapItemRelationComponent) LoadFromRawComponentRelation(raw ecs.RawCompo
 	}
 
 	return c.CheckValuesParsedFromRaw(loadedValues, raw)
+}
+
+func (c *MapItemRelationComponent) ParseToRawComponent() (ecs.RawComponent, error) {
+	rawComponent := ecs.RawComponent{
+		ComponentType: ecs.TypeNameToNthBit[c.ComponentType()].Name,
+		Params: map[string]string{
+			"entity": c.Entity.GetId().String(),
+			"x":      strconv.Itoa(int(c.Position.X)),
+			"y":      strconv.Itoa(int(c.Position.Y)),
+		},
+	}
+	return rawComponent, nil
 }
 
 func (c *MapItemRelationComponent) ComponentType() uint64 {

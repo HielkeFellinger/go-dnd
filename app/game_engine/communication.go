@@ -13,6 +13,7 @@ type EventType int
 const (
 	TypeGameClose EventType = 0
 	TypeGameStart EventType = 1
+	TypeGameSave  EventType = 2
 
 	TypeUserJoin EventType = 400
 

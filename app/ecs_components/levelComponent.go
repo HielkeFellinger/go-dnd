@@ -35,6 +35,16 @@ func (c *LevelComponent) LevelFromString(level string) error {
 	return err
 }
 
+func (c *LevelComponent) ParseToRawComponent() (ecs.RawComponent, error) {
+	rawComponent := ecs.RawComponent{
+		ComponentType: ecs.TypeNameToNthBit[c.ComponentType()].Name,
+		Params: map[string]string{
+			"level": strconv.Itoa(int(c.Level)),
+		},
+	}
+	return rawComponent, nil
+}
+
 func (c *LevelComponent) ComponentType() uint64 {
 	return ecs.LevelComponentType
 }

@@ -21,6 +21,7 @@ func loadGame(gameFile string) ecs.World {
 		log.Println(err)
 	}
 	fmt.Println(path)
+
 	data, err := os.ReadFile(gameFile)
 	if err != nil {
 		log.Fatalln(err)
@@ -78,11 +79,21 @@ func loadGame(gameFile string) ecs.World {
 	// Add the fully updated Entities to the world
 	log.Println("Done loading raw/base Game. Now filling world")
 	world := ecs.NewBaseWorld()
-	world.AddEntities(items)
-	world.AddEntities(chars)
-	world.AddEntities(factions)
-	world.AddEntities(maps)
-	world.AddEntities(inventories)
+	if err := world.AddEntities(items); err != nil {
+		log.Fatalln(err.Error())
+	}
+	if err := world.AddEntities(chars); err != nil {
+		log.Fatalln(err.Error())
+	}
+	if err := world.AddEntities(factions); err != nil {
+		log.Fatalln(err.Error())
+	}
+	if err := world.AddEntities(maps); err != nil {
+		log.Fatalln(err.Error())
+	}
+	if err := world.AddEntities(inventories); err != nil {
+		log.Fatalln(err.Error())
+	}
 	log.Println("Done filling world")
 	return &world
 }

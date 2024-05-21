@@ -17,6 +17,13 @@ type baseEventMessageHandler struct {
 func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool CampaignPool) error {
 	log.Printf("Message Handler Parsing ID: '%+v' of Type: '%d' \n", message.Id, message.Type)
 
+	if message.Type == TypeGameSave {
+		err := e.handlePersistDataEvents(message, pool)
+		if err != nil {
+			return err
+		}
+	}
+
 	if message.Type == TypeLoadFullGame || (message.Type >= TypeLoadCharacters && message.Type <= TypeLoadCharactersDetails) {
 		err := e.handleLoadCharacterEvents(message, pool)
 		if err != nil {

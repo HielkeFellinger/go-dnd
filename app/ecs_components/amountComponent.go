@@ -29,6 +29,16 @@ func (c *AmountComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
 	return c.CheckValuesParsedFromRaw(loadedValues, raw)
 }
 
+func (c *AmountComponent) ParseToRawComponent() (ecs.RawComponent, error) {
+	rawComponent := ecs.RawComponent{
+		ComponentType: ecs.TypeNameToNthBit[c.ComponentType()].Name,
+		Params: map[string]string{
+			"amount": strconv.Itoa(c.Amount),
+		},
+	}
+	return rawComponent, nil
+}
+
 func (c *AmountComponent) AmountFromString(amount string) error {
 	n, err := strconv.Atoi(amount)
 	c.Amount = n

@@ -37,6 +37,7 @@ body {
 }
 
 .chat-screen .chat-content .chat-box {
+    min-width: 350px;
     max-width: 350px;
     word-break: break-all;
     white-space: normal;

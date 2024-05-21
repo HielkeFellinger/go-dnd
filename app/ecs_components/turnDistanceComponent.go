@@ -35,6 +35,16 @@ func (c *TurnDistanceComponent) DistanceFromString(amount string) error {
 	return err
 }
 
+func (c *TurnDistanceComponent) ParseToRawComponent() (ecs.RawComponent, error) {
+	rawComponent := ecs.RawComponent{
+		ComponentType: ecs.TypeNameToNthBit[c.ComponentType()].Name,
+		Params: map[string]string{
+			"distance": strconv.Itoa(int(c.Distance)),
+		},
+	}
+	return rawComponent, nil
+}
+
 func (c *TurnDistanceComponent) ComponentType() uint64 {
 	return ecs.TurnDistanceComponentType
 }

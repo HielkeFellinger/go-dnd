@@ -24,7 +24,7 @@ func (c *StatComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
 		c.Name = value
 		loadedValues++
 	}
-	if value, ok := raw.Params["count"]; ok {
+	if value, ok := raw.Params["value"]; ok {
 		if err := c.ValueFromString(value); err != nil {
 			return err
 		}
@@ -32,6 +32,17 @@ func (c *StatComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
 	}
 
 	return c.CheckValuesParsedFromRaw(loadedValues, raw)
+}
+
+func (c *StatComponent) ParseToRawComponent() (ecs.RawComponent, error) {
+	rawComponent := ecs.RawComponent{
+		ComponentType: ecs.TypeNameToNthBit[c.ComponentType()].Name,
+		Params: map[string]string{
+			"name":  c.Name,
+			"value": strconv.Itoa(int(c.Value)),
+		},
+	}
+	return rawComponent, nil
 }
 
 func (c *StatComponent) ValueFromString(value string) error {

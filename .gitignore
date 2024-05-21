@@ -4,3 +4,6 @@ tmp
 
 /coverage.txt
 /go-dnd
+
+# Do not sync campaign data
+/campaign_data/**

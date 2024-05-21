@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/google/uuid"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
+	"strconv"
 )
 
 type FilterRelationComponent struct {
@@ -31,6 +32,17 @@ func (c *FilterRelationComponent) LoadFromRawComponentRelation(raw ecs.RawCompon
 	loadedValues++
 
 	return c.CheckValuesParsedFromRaw(loadedValues, raw)
+}
+
+func (c *FilterRelationComponent) ParseToRawComponent() (ecs.RawComponent, error) {
+	rawComponent := ecs.RawComponent{
+		ComponentType: ecs.TypeNameToNthBit[c.ComponentType()].Name,
+		Params: map[string]string{
+			"entity": c.Entity.GetId().String(),
+			"mode":   strconv.Itoa(int(c.Mode)),
+		},
+	}
+	return rawComponent, nil
 }
 
 func (c *FilterRelationComponent) AllowMultipleOfType() bool {

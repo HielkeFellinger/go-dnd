@@ -37,6 +37,18 @@ func (c *FactionComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
 	return c.CheckValuesParsedFromRaw(loadedValues, raw)
 }
 
+func (c *FactionComponent) ParseToRawComponent() (ecs.RawComponent, error) {
+	rawComponent := ecs.RawComponent{
+		ComponentType: ecs.TypeNameToNthBit[c.ComponentType()].Name,
+		Params: map[string]string{
+			"name":        c.Name,
+			"description": c.Description,
+			"colour_hex":  c.ColourHex,
+		},
+	}
+	return rawComponent, nil
+}
+
 func (c *FactionComponent) ComponentType() uint64 {
 	return ecs.FactionComponentType
 }

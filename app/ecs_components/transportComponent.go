@@ -31,6 +31,17 @@ func (c *TransportComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
 	return c.CheckValuesParsedFromRaw(loadedValues, raw)
 }
 
+func (c *TransportComponent) ParseToRawComponent() (ecs.RawComponent, error) {
+	rawComponent := ecs.RawComponent{
+		ComponentType: ecs.TypeNameToNthBit[c.ComponentType()].Name,
+		Params: map[string]string{
+			"name":        c.Name,
+			"description": c.Description,
+		},
+	}
+	return rawComponent, nil
+}
+
 func (c *TransportComponent) ComponentType() uint64 {
 	return ecs.TransportComponentType
 }

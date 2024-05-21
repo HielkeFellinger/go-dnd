@@ -37,11 +37,23 @@ func (c *ImageComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
 		loadedValues++
 	}
 	if value, ok := raw.Params["base64"]; ok {
-		c.Url = value
+		c.Base64 = value
 		loadedValues++
 	}
 
 	return c.CheckValuesParsedFromRaw(loadedValues, raw)
+}
+
+func (c *ImageComponent) ParseToRawComponent() (ecs.RawComponent, error) {
+	rawComponent := ecs.RawComponent{
+		ComponentType: ecs.TypeNameToNthBit[c.ComponentType()].Name,
+		Params: map[string]string{
+			"name":   c.Name,
+			"url":    c.Url,
+			"base64": c.Base64,
+		},
+	}
+	return rawComponent, nil
 }
 
 func (c *ImageComponent) ComponentType() uint64 {

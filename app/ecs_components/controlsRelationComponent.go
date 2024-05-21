@@ -23,6 +23,16 @@ func (c *ControlsRelationComponent) LoadFromRawComponentRelation(raw ecs.RawComp
 	return c.CheckValuesParsedFromRaw(loadedValues, raw)
 }
 
+func (c *ControlsRelationComponent) ParseToRawComponent() (ecs.RawComponent, error) {
+	rawComponent := ecs.RawComponent{
+		ComponentType: ecs.TypeNameToNthBit[c.ComponentType()].Name,
+		Params: map[string]string{
+			"entity": c.Entity.GetId().String(),
+		},
+	}
+	return rawComponent, nil
+}
+
 func (c *ControlsRelationComponent) AllowMultipleOfType() bool {
 	return true
 }

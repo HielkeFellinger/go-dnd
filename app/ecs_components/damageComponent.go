@@ -26,6 +26,16 @@ func (c *DamageComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
 	return c.CheckValuesParsedFromRaw(loadedValues, raw)
 }
 
+func (c *DamageComponent) ParseToRawComponent() (ecs.RawComponent, error) {
+	rawComponent := ecs.RawComponent{
+		ComponentType: ecs.TypeNameToNthBit[c.ComponentType()].Name,
+		Params: map[string]string{
+			"amount": c.Amount,
+		},
+	}
+	return rawComponent, nil
+}
+
 func (c *DamageComponent) ComponentType() uint64 {
 	return ecs.DamageComponentType
 }

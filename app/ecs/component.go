@@ -6,46 +6,11 @@ import (
 	"github.com/google/uuid"
 )
 
-const (
-	UnknownComponentType      uint64 = 0
-	PositionComponentType     uint64 = 1 << 0
-	AreaComponentType         uint64 = 1 << 1
-	RangeComponentType        uint64 = 1 << 2
-	DamageComponentType       uint64 = 1 << 3
-	RestoreComponentType      uint64 = 1 << 4
-	ItemComponentType         uint64 = 1 << 5
-	AmountComponentType       uint64 = 1 << 6
-	WeightComponentType       uint64 = 1 << 7
-	SlotsComponentType        uint64 = 1 << 8
-	LevelComponentType        uint64 = 1 << 9
-	TypeComponentType         uint64 = 1 << 10
-	ValutaComponentType       uint64 = 1 << 11
-	ResourceComponentType     uint64 = 1 << 12
-	TransportComponentType    uint64 = 1 << 13
-	TurnDistanceComponentType uint64 = 1 << 14
-	VisibilityComponentType   uint64 = 1 << 15
-	HealthComponentType       uint64 = 1 << 16
-	StatComponentType         uint64 = 1 << 17
-	FactionComponentType      uint64 = 1 << 18
-	CharacterComponentType    uint64 = 1 << 19
-	MapComponentType          uint64 = 1 << 20
-	ImageComponentType        uint64 = 1 << 21
-	PlayerComponentType       uint64 = 1 << 22
-
-	/* Relational ComponentTypes */
-
-	ControlsRelationComponentType uint64 = 1 << 40
-	HasRelationComponentType      uint64 = 1 << 41
-	RequiresRelationComponentType uint64 = 1 << 42
-	CreatesRelationComponentType  uint64 = 1 << 43
-	FilterRelationComponentType   uint64 = 1 << 44
-	MapItemRelationComponentType  uint64 = 1 << 45
-)
-
 type Component interface {
 	ComponentType() uint64
 	AllowMultipleOfType() bool
 	LoadFromRawComponent(raw RawComponent) error
+	ParseToRawComponent() (RawComponent, error)
 	IsRelationalComponent() bool
 	GetId() uuid.UUID
 }
@@ -57,8 +22,8 @@ type RelationalComponent interface {
 }
 
 type BaseComponent struct {
-	Version uint // Placeholder; take changes into account
-	Id      uuid.UUID
+	Version uint      // Placeholder; take changes into account
+	Id      uuid.UUID `yaml:"id"`
 }
 
 func (c *BaseComponent) GetId() uuid.UUID {
@@ -79,6 +44,10 @@ func (c *BaseComponent) CheckValuesParsedFromRaw(loadedValues int, raw RawCompon
 
 func (c *BaseComponent) LoadFromRawComponent(raw RawComponent) error {
 	return errors.New(fmt.Sprintf("loadFromRawComponent(raw RawComponent) not implemented. Raw type: '%s'", raw.ComponentType))
+}
+
+func (c *BaseComponent) ParseToRawComponent() (RawComponent, error) {
+	return RawComponent{}, errors.New(fmt.Sprintf("ParseToRawComponent() not implemented. on type: '%d'", c.ComponentType()))
 }
 
 func (c *BaseComponent) AllowMultipleOfType() bool {

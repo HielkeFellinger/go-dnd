@@ -1,275 +1,284 @@
-version: 0.1
+version: "0.1"
 type_translation:
-  Position: 0
-  Area: 1
-  Range: 2
-  Damage: 3
-  Restore: 4
-  Item: 5
   Amount: 6
-  Weight: 7
-  Slots: 8
+  Area: 1
+  Character: 19
+  ControlsRelation: 40
+  CreatesRelation: 43
+  Damage: 3
+  Faction: 18
+  FilterRelation: 44
+  HasRelation: 41
+  Health: 16
+  Image: 21
+  Item: 5
   Level: 9
-  Type: 10
-  Valuta: 11
+  Map: 20
+  MapItemRelation: 45
+  Player: 22
+  Position: 0
+  Range: 2
+  RequiresRelation: 42
   Resource: 12
+  Restore: 4
+  Slots: 8
+  Stat: 17
   Transport: 13
   TurnDistance: 14
+  Type: 10
+  Valuta: 11
   Visibility: 15
-  Health: 16
-  Stat: 17
-  Faction: 18
-  Character: 19
-  Map: 20
-  Image: 21
-  Player: 22
-  # Relational Types
-  ControlsRelation: 40
-  HasRelation: 41
-  RequiresRelation: 42
-  CreatesRelation: 43
-  FilterRelation: 44
-  MapItemRelation: 45
-filerModes:
-  unknown: 0
-
-campaign_info:
-  - name: YATRPG
-  - description: Test Campaign Template
-
+  Weight: 7
 base_items:
-  - id: dagger
-    name: Dagger
-    components:
-      - type: Damage
-        params:
-          amount: 1d4+2
-      - type: Item
-        params:
-          name: Dagger
-          description: A Small sharpened Knife
-  - id: knife
+  - id: 917b7c34-9434-4d76-89ea-c818dbb4f667
     name: Knife
+    description: ""
     components:
       - type: Damage
         params:
-         amount: 1d4+1
+          amount: 1d4+1
       - type: Item
         params:
-          name: Knife
           description: A Sharp Knife
-  - id: sword
+          name: Knife
+  - id: 32c93086-4951-46b4-a259-dd21a69c23eb
     name: Sword
+    description: ""
     components:
       - type: Damage
         params:
           amount: 1d6+1
       - type: Item
         params:
-          name: Sword
           description: A Sharp Sword
-
-base_characters:
-  - id: piet
-    name: piet
+          name: Sword
+  - id: b138657e-8493-4e65-afbd-f9e5d2deb70e
+    name: Dagger
+    description: ""
     components:
-      - type: Character
+      - type: Damage
         params:
-          name: Piet
-          description: test
-      - type: Health
+          amount: 1d4+2
+      - type: Item
         params:
-          damage: 1
-          temporary: 5
-          maximum: 31
-      - type: HasRelation
-        params:
-          count: 1
-          entity: inventory_piet
-      - type: Player
-        params:
-          name: user
-  - id: jheronimus
-    name: jheronimus
-    components:
-      - type: Character
-        params:
-          name: Jheronimus
-          description: test
-      - type: HasRelation
-        params:
-          count: 1
-          entity: inventory_jheronimus
-      - type: Health
-        params:
-          damage: 1
-          temporary: 5
-          maximum: 21
-      - type: Player
-        params:
-          name:
-  - id: judith
-    name: judith
-    components:
-      - type: Character
-        params:
-          name: Judith
-          description: test
-      - type: HasRelation
-        params:
-          count: 1
-          entity: inventory_judith
-      - type: Player
-        params:
-          name:
-      - type: Health
-        params:
-          damage: 12
-          temporary: 7
-          maximum: 41
-  - id: pirate
-    name: pirate
-    components:
-      - type: Character
-        params:
-          name: Pirate
-          description: Arrrrrgh
-      - type: Health
-        params:
-          damage: 0
-          temporary: 5
-          maximum: 10
-      - type: HasRelation
-        params:
-          count: 1
-          entity: inventory_pirate
-  - id: ninja
-    name: ninja
-    components:
-      - type: Character
-        params:
-          name: Ninja
-          description: <sneak>
-      - type: Health
-        params:
-          damage: 0
-          temporary: 0
-          maximum: 15
-      - type: HasRelation
-        params:
-          count: 1
-          entity: inventory_ninja
-      - type: Visibility
-        params:
-          hidden: true
-
-base_factions:
-  - id: united_earth
-    name: United Earth
-    components:
-      - type: Faction
-        params:
-          name: United Earth
-          colour_hex: 5b92e5
-          description: Faction United Nations from Earth
-
+          description: A Small sharpened Knife
+          name: Dagger
 base_maps:
   - id: 1f984588-dce3-47b4-9f64-4bbfcf4df736
     name: plane_0
+    description: ""
     components:
       - type: Map
         params:
-          active: true
+          active: "true"
       - type: Area
         params:
-          width: 30
-          length: 29
+          length: "29"
+          width: "30"
       - type: Image
         params:
+          base64: ""
           name: background
-          url: "/images/space/map_30x29.png"
+          url: /images/space/map_30x29.png
       - type: MapItemRelation
         params:
-          x: 7
-          y: 8
-          entity: piet
+          entity: 614eac41-7184-43d5-aa19-fe6f687fcc8a
+          x: "7"
+          "y": "8"
       - type: MapItemRelation
         params:
-          x: 9
-          y: 10
-          entity: pirate
+          entity: 2d68cb2b-c112-4b83-b614-4971b8961dde
+          x: "9"
+          "y": "10"
       - type: MapItemRelation
         params:
-          x: 6
-          y: 12
-          entity: ninja
+          entity: c352fd49-3022-4efa-8a16-bf01a83dd9a8
+          x: "6"
+          "y": "12"
   - id: 1337257c-aac6-46a2-8803-61c581e4f2a5
     name: plane_1
+    description: ""
     components:
       - type: Map
         params:
-          active: false
+          active: "false"
       - type: Area
         params:
-          width: 33
-          length: 27
+          length: "27"
+          width: "33"
       - type: Image
         params:
+          base64: ""
           name: background
-          url: "/images/space/map_33x27.png"
-
+          url: /images/space/map_33x27.png
+base_factions:
+  - id: 0f450536-bd22-419e-bd80-b3eec3fb6f3e
+    name: United Earth
+    description: ""
+    components:
+      - type: Faction
+        params:
+          colour_hex: 5b92e5
+          description: Faction United Nations from Earth
+          name: United Earth
+base_characters:
+  - id: 614eac41-7184-43d5-aa19-fe6f687fcc8a
+    name: piet
+    description: ""
+    components:
+      - type: Character
+        params:
+          description: test
+          name: Piet
+      - type: Health
+        params:
+          damage: "1"
+          maximum: "31"
+          temporary: "5"
+      - type: HasRelation
+        params:
+          count: "1"
+          entity: b4804495-c026-455d-8076-46b021e2f169
+      - type: Player
+        params:
+          name: user
+  - id: fa058b32-f00c-4e6d-bd10-736afee6a97c
+    name: jheronimus
+    description: ""
+    components:
+      - type: Character
+        params:
+          description: test
+          name: Jheronimus
+      - type: HasRelation
+        params:
+          count: "1"
+          entity: 8f52d526-55af-45d3-84cb-92b35de3d10d
+      - type: Health
+        params:
+          damage: "1"
+          maximum: "21"
+          temporary: "5"
+      - type: Player
+        params:
+          name: ""
+      - type: Player
+        params:
+          name: kaas
+  - id: e2eccc52-5b09-4cb2-b969-e62110a55bce
+    name: judith
+    description: ""
+    components:
+      - type: Character
+        params:
+          description: test
+          name: Judith
+      - type: HasRelation
+        params:
+          count: "1"
+          entity: 674882ee-d1c3-4941-9232-0877d85a00d3
+      - type: Player
+        params:
+          name: ""
+      - type: Health
+        params:
+          damage: "12"
+          maximum: "41"
+          temporary: "7"
+  - id: 2d68cb2b-c112-4b83-b614-4971b8961dde
+    name: pirate
+    description: ""
+    components:
+      - type: Character
+        params:
+          description: Arrrrrgh
+          name: Pirate
+      - type: Health
+        params:
+          damage: "0"
+          maximum: "10"
+          temporary: "5"
+      - type: HasRelation
+        params:
+          count: "1"
+          entity: 1653053d-ed45-43b7-b2f3-2bd92d50f332
+  - id: c352fd49-3022-4efa-8a16-bf01a83dd9a8
+    name: ninja
+    description: ""
+    components:
+      - type: Character
+        params:
+          description: <sneak>
+          name: Ninja
+      - type: Health
+        params:
+          damage: "0"
+          maximum: "15"
+          temporary: "0"
+      - type: HasRelation
+        params:
+          count: "1"
+          entity: 69d5c0b1-d1e9-49e6-aa70-a28fcaba70c0
+      - type: Visibility
+        params:
+          hidden: "true"
 base_inventories:
-  - id: inventory_piet
+  - id: b4804495-c026-455d-8076-46b021e2f169
     name: inventory_piet
+    description: ""
     components:
       - type: Slots
         params:
-          count: 200
+          count: "200"
       - type: HasRelation
         params:
-          count: 1
-          entity: knife
-  - id: inventory_jheronimus
+          count: "1"
+          entity: 917b7c34-9434-4d76-89ea-c818dbb4f667
+  - id: 8f52d526-55af-45d3-84cb-92b35de3d10d
     name: inventory_jheronimus
+    description: ""
     components:
       - type: Slots
         params:
-          count: 200
+          count: "200"
       - type: HasRelation
         params:
-          count: 1
-          entity: knife
+          count: "1"
+          entity: 917b7c34-9434-4d76-89ea-c818dbb4f667
       - type: HasRelation
         params:
-          count: 1
-          entity: sword
-  - id: inventory_judith
+          count: "1"
+          entity: 32c93086-4951-46b4-a259-dd21a69c23eb
+  - id: 674882ee-d1c3-4941-9232-0877d85a00d3
     name: inventory_judith
+    description: ""
     components:
       - type: Slots
         params:
-          count: 200
+          count: "200"
       - type: HasRelation
         params:
-          count: 1
-          entity: sword
-  - id: inventory_pirate
+          count: "1"
+          entity: 32c93086-4951-46b4-a259-dd21a69c23eb
+  - id: 1653053d-ed45-43b7-b2f3-2bd92d50f332
     name: inventory_pirate
+    description: ""
     components:
       - type: Slots
         params:
-          count: 200
+          count: "200"
       - type: HasRelation
         params:
-          count: 1
-          entity: sword
-  - id: inventory_ninja
+          count: "1"
+          entity: 32c93086-4951-46b4-a259-dd21a69c23eb
+  - id: 69d5c0b1-d1e9-49e6-aa70-a28fcaba70c0
     name: inventory_ninja
+    description: ""
     components:
       - type: Slots
         params:
-          count: 200
+          count: "200"
       - type: HasRelation
         params:
-          count: 1
-          entity: dagger
+          count: "1"
+          entity: b138657e-8493-4e65-afbd-f9e5d2deb70e

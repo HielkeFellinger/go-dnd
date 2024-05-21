@@ -36,6 +36,17 @@ func (c *AreaComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
 	return c.CheckValuesParsedFromRaw(loadedValues, raw)
 }
 
+func (c *AreaComponent) ParseToRawComponent() (ecs.RawComponent, error) {
+	rawComponent := ecs.RawComponent{
+		ComponentType: ecs.TypeNameToNthBit[c.ComponentType()].Name,
+		Params: map[string]string{
+			"length": strconv.Itoa(int(c.Length)),
+			"width":  strconv.Itoa(int(c.Width)),
+		},
+	}
+	return rawComponent, nil
+}
+
 func (c *AreaComponent) LengthFromString(length string) error {
 	n, err := strconv.Atoi(length)
 	c.Length = uint(n)

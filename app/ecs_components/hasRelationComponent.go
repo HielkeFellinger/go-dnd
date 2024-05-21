@@ -33,6 +33,17 @@ func (c *HasRelationComponent) LoadFromRawComponentRelation(raw ecs.RawComponent
 	return c.CheckValuesParsedFromRaw(loadedValues, raw)
 }
 
+func (c *HasRelationComponent) ParseToRawComponent() (ecs.RawComponent, error) {
+	rawComponent := ecs.RawComponent{
+		ComponentType: ecs.TypeNameToNthBit[c.ComponentType()].Name,
+		Params: map[string]string{
+			"entity": c.Entity.GetId().String(),
+			"count":  strconv.Itoa(int(c.Count)),
+		},
+	}
+	return rawComponent, nil
+}
+
 func (c *HasRelationComponent) AllowMultipleOfType() bool {
 	return true
 }
