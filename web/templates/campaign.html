@@ -95,22 +95,24 @@
             </div>
         </div>
 
-        <div id="ui-right-bar" class="" style="width: calc(3em + 553px); min-height: 100%;">
+        <div id="ui-right-bar" class="" style="width: calc(3em); min-height: 100%;">
             <button class="btn" id="toggle-right-bar-visibility" onclick="toggleVisibilityRightBar()"
                     style="position: relative; left: 0;">
-                <b><i class="bi bi-box-arrow-right"></i></b>
+                <b><i class="bi bi-chevron-double-left"></i></b>
             </button>
-            <div id="right-bar-inner-content" style="position: relative; min-height: 100%; left: 3em; top: -2.4em; width: 543px">
+            <div id="right-bar-inner-content" style="position: relative; min-height: 100%; left: 3em; top: -2.4em; width: 0; display: none">
                 <div id="char-details-holder" class="">
 
                 </div>
-                <div style="min-height: 25em; max-height: 25em; margin-top: auto; position: absolute; bottom: 0">
-                    <h4> Events </h4>
-                    <div id="event-content" class="">
+                {{ if .campaign.UserIsLead }}
+                <div style="min-height: 25em; max-height: 25em; margin-top: auto; position: absolute; bottom: 0;">
+                    <h4> Audit Events </h4>
+                    <div id="event-content" class="" style="max-height: 21em; overflow-y: auto">
 
 
                     </div>
                 </div>
+                {{end}}
             </div>
         </div>
     </div>
@@ -208,12 +210,14 @@
         }
 
         // Parse Chat-messages
-        if (payLoad.type >= 800 && payLoad.type < 900) {
+        if ((payLoad.type >= 400 && payLoad.type < 410) || (payLoad.type >= 800 && payLoad.type < 900)) {
             handleChatEvents(payLoad)
             return
         }
 
+        {{ if .campaign.UserIsLead }}
         document.getElementById("event-content").innerHTML += evt.data;
+        {{ end }}
     }
 
     let saveGame = () => {
@@ -316,18 +320,18 @@
         }
     }
 
-    let rightBarVisible = true
+    let rightBarVisible = false
     let toggleVisibilityRightBar = () => {
         rightBarVisible = !rightBarVisible
         let element = document.getElementById('toggle-right-bar-visibility')
 
         if (rightBarVisible) {
-            element.innerHTML = '<b><i class="bi bi-box-arrow-right"></i></b>'
+            element.innerHTML = '<b><i class="bi bi-chevron-double-right"></i></b>'
             document.getElementById('right-bar-inner-content').style.display = "inherit";
             document.getElementById('right-bar-inner-content').style.width = "543px";
             document.getElementById('ui-right-bar').style.width = "calc(553px + 3em)";
         } else {
-            element.innerHTML = '<b><i class="bi bi-box-arrow-left"></i></b>'
+            element.innerHTML = '<b><i class="bi bi-chevron-double-left"></i></b>'
             document.getElementById('right-bar-inner-content').style.display = "none";
             document.getElementById('right-bar-inner-content').style.width = "0";
             document.getElementById('ui-right-bar').style.width = "3em";

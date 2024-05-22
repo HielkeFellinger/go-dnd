@@ -1,16 +1,15 @@
 {{define "campaignContentMapCell"}}
 <div id="{{.mapId}}-{{.id}}-cell-element" class="element" {{ if .hasControl }} onclick="loadCharDetailsByMapItem('{{.id}}')" draggable="true" ondragstart="drag(event)" {{ end }}
-     style="background-image: url('{{.backgroundImage}}')">
-    <span><b>{{.entityName}}</b></span>
+style="background-image: url('{{.backgroundImage}}'); display: flex; flex-direction: column; justify-content: space-between;">
+    <span style="min-width: 100%; background: rgba(34,34,34,.8)">
+        <b>{{.entityName}}</b>{{ if .hidden }}<i class="bi bi-eye-slash-fill" style="float: right; padding-right: 5px;"></i>{{ end}}
+    </span>
     <!--  Hide / Hidden icon  -->
-    {{ if .hidden }}
-        <span>Hidden</span>
-    {{ else }}
-        <span>Visible</span>
-    {{ end}}
+
     <!--  Health bar  -->
     {{ if .healthBar }}
-    <progress id="{{.mapId}}-{{.id}}-health" value="{{.healthCurrent}}" max="{{.healthTotal}}" style="max-width: 100%; min-width: 100%"></progress>
+        <progress id="{{.mapId}}-{{.id}}-health" value="{{.healthCurrent}}" max="{{.healthTotal}}"
+                  style="max-width: 100%; min-width: 100%; border: none;"></progress>
     {{ end }}
 
     {{ if .hasControl }}

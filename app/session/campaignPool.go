@@ -68,7 +68,7 @@ func (pool *baseCampaignPool) Run() {
 			var transmitMessage = game_engine.NewEventMessage()
 			transmitMessage.Type = game_engine.TypeUserJoin
 			transmitMessage.Source = game_engine.ServerUser
-			transmitMessage.Body = fmt.Sprintf("User '%s' Joins the content", client.Id)
+			transmitMessage.Body = fmt.Sprintf("User '%s' Joins the campaign", client.Id)
 			pool.transmitMessage(transmitMessage)
 
 			pool.updateCharacterRibbon(client.Id)
@@ -96,6 +96,11 @@ func (pool *baseCampaignPool) Run() {
 
 			log.Printf("Size of Connection Pool `%d`: %d", pool.Id, len(pool.Clients))
 			pool.updateCharacterRibbon(client.Id)
+			var transmitMessage = game_engine.NewEventMessage()
+			transmitMessage.Type = game_engine.TypeUserLeave
+			transmitMessage.Source = game_engine.ServerUser
+			transmitMessage.Body = fmt.Sprintf("User '%s' Left the campaign!", client.Id)
+			pool.transmitMessage(transmitMessage)
 
 			break
 		case eventMessage := <-pool.Receive:

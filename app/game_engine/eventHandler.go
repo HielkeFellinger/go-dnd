@@ -60,8 +60,10 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 	}
 
 	if message.Type >= TypeChatBroadcast && message.Type <= TypeChatWhisper {
-		// Just pass message trough
-		pool.TransmitEventMessage(message)
+		err := e.handleChatEventMessage(message, pool)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

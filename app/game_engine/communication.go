@@ -15,7 +15,8 @@ const (
 	TypeGameStart EventType = 1
 	TypeGameSave  EventType = 2
 
-	TypeUserJoin EventType = 400
+	TypeUserJoin  EventType = 400
+	TypeUserLeave EventType = 401
 
 	TypeLoadFullGame EventType = 500
 
