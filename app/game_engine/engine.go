@@ -47,6 +47,12 @@ func (e *baseEngine) SaveWorld(campaignId uint) error {
 
 func InitGameEngine(campaign models.Campaign) Engine {
 	var baseEngine = baseEngine{}
+	baseLocation := os.Getenv("CAMPAIGN_DATA_DIR") + "/" + strconv.Itoa(int(campaign.ID))
+	gameFile := baseLocation + "/save/" + "campaign.yml"
+
+	if _, err := os.Stat(gameFile); err == nil {
+		campaign.GameFile = gameFile
+	}
 
 	if campaign.GameFile != "" {
 		baseEngine.World = loadGame(campaign.GameFile)
