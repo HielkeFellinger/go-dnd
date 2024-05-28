@@ -199,6 +199,8 @@
                 handleMapItemRemoval(payLoad)
             } else if (payLoad.type === 547) {
                 handleSignal(payLoad)
+            } else if (payLoad.type === 548) {
+                handleNewMapBackground(payLoad)
             }
             return
         }
@@ -450,6 +452,19 @@
         }
     }
 
+    let handleNewMapBackground = (data) => {
+        let body = JSON.parse(data.body);
+        let mapId = body.MapId;
+        let url = body.Url;
+
+        let mapGrid = document.getElementById("mapGrid" + mapId);
+
+        console.error(mapGrid);
+        if (mapGrid) {
+            mapGrid.style.backgroundImage = "url('" + url + "')";
+        }
+    }
+
     let removeSignal = (id) => {
         let signal = document.getElementById(id);
         if (signal) {
@@ -668,6 +683,14 @@
         if (mapItemAdd.EntityId !== 'none') {
             sendEvent(wrapMessage(JSON.stringify(mapItemAdd), 545))
         }
+    }
+
+    let changeActiveMapBackground = (mapId) => {
+        let mapItemAdd = {}
+        mapItemAdd.ImageId = document.getElementById("imageAsActive" + mapId + "Select").value
+        mapItemAdd.MapId = mapId
+
+        sendEvent(wrapMessage(JSON.stringify(mapItemAdd), 548))
     }
 
     let lastMessageSender = ''

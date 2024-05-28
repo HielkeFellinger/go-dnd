@@ -24,7 +24,7 @@ func CharacterEntityToCampaignCharacterModel(rawCharacterEntity ecs.Entity) mode
 			character.Description = characterComponent.Description
 		}
 
-		// Get Possible Image
+		// Get Possible ActiveImage
 		imagePlaceholder := ecs_components.NewMissingImageComponent()
 		characterImages := rawCharacterEntity.GetAllComponentsOfType(ecs.ImageComponentType)
 		if len(characterImages) >= 1 {

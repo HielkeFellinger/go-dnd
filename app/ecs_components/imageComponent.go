@@ -3,12 +3,14 @@ package ecs_components
 import (
 	"github.com/google/uuid"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
+	"strconv"
 )
 
 type ImageComponent struct {
 	ecs.BaseComponent
 	Name   string `yaml:"name"`
 	Url    string `yaml:"url"`
+	Active bool   `yaml:"active"`
 	Base64 string `yaml:"base64"`
 }
 
@@ -36,6 +38,12 @@ func (c *ImageComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
 		c.Url = value
 		loadedValues++
 	}
+	if value, ok := raw.Params["active"]; ok {
+		if err := c.ActiveFromString(value); err != nil {
+			return err
+		}
+		loadedValues++
+	}
 	if value, ok := raw.Params["base64"]; ok {
 		c.Base64 = value
 		loadedValues++
@@ -50,6 +58,7 @@ func (c *ImageComponent) ParseToRawComponent() (ecs.RawComponent, error) {
 		Params: map[string]string{
 			"name":   c.Name,
 			"url":    c.Url,
+			"active": strconv.FormatBool(c.Active),
 			"base64": c.Base64,
 		},
 	}
@@ -58,4 +67,14 @@ func (c *ImageComponent) ParseToRawComponent() (ecs.RawComponent, error) {
 
 func (c *ImageComponent) ComponentType() uint64 {
 	return ecs.ImageComponentType
+}
+
+func (c *ImageComponent) ActiveFromString(bool string) error {
+	b, err := strconv.ParseBool(bool)
+	c.Active = b
+	return err
+}
+
+func (c *ImageComponent) AllowMultipleOfType() bool {
+	return true
 }

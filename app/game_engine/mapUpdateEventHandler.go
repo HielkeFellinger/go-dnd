@@ -45,6 +45,80 @@ func (e *baseEventMessageHandler) handleMapUpdateEvents(message EventMessage, po
 			return err
 		}
 	}
+	if message.Type == TypeChangeMapBackgroundImage {
+		err := e.typeChangeMapBackgroundImage(message, pool)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (e *baseEventMessageHandler) typeChangeMapBackgroundImage(message EventMessage, pool CampaignPool) error {
+	// Undo escaping
+	clearedBody := html.UnescapeString(message.Body)
+
+	// Check if user is lead
+	if message.Source != pool.GetLeadId() {
+		return errors.New("adding items to map is not allowed as non-lead")
+	}
+
+	var activeMapBackground ActiveMapBackground
+	if err := json.Unmarshal([]byte(clearedBody), &activeMapBackground); err != nil {
+		return err
+	}
+
+	componentUuid, err := parseStingToUuid(activeMapBackground.ImageId)
+	if err != nil {
+		return err
+	}
+	mapUuid, err := parseStingToUuid(activeMapBackground.MapId)
+	if err != nil {
+		return err
+	}
+
+	mapEntity, match := pool.GetEngine().GetWorld().GetMapEntityByUuid(mapUuid)
+	if !match || mapEntity == nil {
+		return errors.New("failure of loading MAP by UUID")
+	}
+
+	if !mapEntity.HasComponentByUuid(componentUuid) {
+		return errors.New("requested image component does not exist on map")
+	}
+
+	// Get map size
+	hasUpdate := false
+	var updateImage ecs_components.ImageComponent
+	backgroundImages := mapEntity.GetAllComponentsOfType(ecs.ImageComponentType)
+	for _, backgroundImage := range backgroundImages {
+		image := backgroundImage.(*ecs_components.ImageComponent)
+		if image.Id == componentUuid {
+			if !image.Active {
+				image.Active = true
+				updateImage = *image
+				hasUpdate = true
+			}
+		} else {
+			image.Active = false
+		}
+	}
+
+	if hasUpdate {
+		rawJsonBytes, err := json.Marshal(SendNewMapBackgroundImage{
+			MapId: activeMapBackground.MapId,
+			Id:    activeMapBackground.ImageId,
+			Url:   updateImage.Url,
+		})
+		if err != nil {
+			return err
+		}
+		var updateMessage = NewEventMessage()
+		updateMessage.Type = TypeChangeMapBackgroundImage
+		updateMessage.Body = string(rawJsonBytes)
+		updateMessage.Source = message.Source
+		pool.TransmitEventMessage(updateMessage)
+	}
 
 	return nil
 }
@@ -410,6 +484,12 @@ type SendSignal struct {
 	Html string `json:"Html"`
 }
 
+type SendNewMapBackgroundImage struct {
+	Id    string `json:"Id"`
+	MapId string `json:"MapId"`
+	Url   string `json:"Url"`
+}
+
 type SetActivity struct {
 	Id     string `json:"Id"`
 	Active bool   `json:"Active"`
@@ -418,6 +498,11 @@ type SetActivity struct {
 type AddMapItem struct {
 	EntityId string `json:"EntityId"`
 	MapId    string `json:"MapId"`
+}
+
+type ActiveMapBackground struct {
+	ImageId string `json:"ImageId"`
+	MapId   string `json:"MapId"`
 }
 
 type RemoveMapItem struct {

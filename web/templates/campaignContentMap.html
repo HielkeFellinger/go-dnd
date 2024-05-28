@@ -31,13 +31,24 @@
                 {{ end }}
             </select>
         </label>
-        <button class="btn" onclick="addCharacterToMap('{{ .id }}')">
+        <button class="btn" onclick="addCharacterToMap('{{ .id }}')" title="Add Selected Player to this map">
             <b><i class="bi bi-person-fill-add"></i></b>
+        </button>
+        <b style="margin-left: 0.25em; margin-right: 0.25em;">|</b>
+        <label>
+            <select id="imageAsActive{{.id}}Select" style="height: 2.4em;">
+                {{ range $image := .altImage}}
+                    <option value="{{$image.Id}}" {{ if $image.Active }} selected {{ end }}>{{$image.Name}}</option>
+                {{ end }}
+            </select>
+        </label>
+        <button class="btn" onclick="changeActiveMapBackground('{{ .id }}')" title="Change Map background to this image">
+            <b><i class="bi bi-card-image"></i></b>
         </button>
         {{ end }}
     </div>
     <div class="campaign-map" onscroll="onMapScroll(this)">
-        <div class="grid" style="background-image: url('{{.backgroundImage}}')" onclick="clearAllMenus()">
+        <div class="grid" id="mapGrid{{ .id }}" style="background-image: url('{{.backgroundImage.Url}}')" onclick="clearAllMenus()">
             {{ range $yVal := .y}}
                 {{ range $xVal := $.x}}
                     <div class="cell" id="{{$.id}}-cell-y{{$yVal}}-x{{$xVal}}" oncontextmenu="showContextMenuOfDefaultCell(event)" style="overflow: hidden">

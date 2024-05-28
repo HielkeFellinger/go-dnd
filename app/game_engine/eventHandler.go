@@ -45,7 +45,7 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 		}
 	}
 
-	if message.Type >= TypeUpdateMapEntity && message.Type <= TypeSignalMapItem {
+	if message.Type >= TypeUpdateMapEntity && message.Type <= TypeChangeMapBackgroundImage {
 		err := e.handleMapUpdateEvents(message, pool)
 		if err != nil {
 			return err

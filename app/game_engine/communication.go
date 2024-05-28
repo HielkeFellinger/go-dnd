@@ -34,11 +34,12 @@ const (
 	TypeAddMap          EventType = 534
 	TypeRemoveMap       EventType = 535
 
-	TypeUpdateMapEntity     EventType = 543
-	TypeUpdateMapVisibility EventType = 544
-	TypeAddMapItem          EventType = 545
-	TypeRemoveMapItem       EventType = 546
-	TypeSignalMapItem       EventType = 547
+	TypeUpdateMapEntity          EventType = 543
+	TypeUpdateMapVisibility      EventType = 544
+	TypeAddMapItem               EventType = 545
+	TypeRemoveMapItem            EventType = 546
+	TypeSignalMapItem            EventType = 547
+	TypeChangeMapBackgroundImage EventType = 548
 
 	TypeManageMaps       EventType = 551
 	TypeManageCharacters EventType = 552

@@ -7,12 +7,15 @@ type CampaignMap struct {
 	X           uint
 	Y           uint
 	Active      bool
-	Image       CampaignImage
+	ActiveImage CampaignImage
+	Images      []CampaignImage
 }
 
 type CampaignImage struct {
-	Name string `json:"Name"`
-	Url  string `json:"Url"`
+	Name   string `json:"Name"`
+	Url    string `json:"Url"`
+	Id     string
+	Active bool
 }
 
 type CampaignMapCellContent struct {

@@ -243,7 +243,8 @@ func (e *baseEventMessageHandler) buildMapData(model models.CampaignMap, isLead 
 	data["name"] = model.Name
 	data["lead"] = isLead
 	data["active"] = model.Active
-	data["backgroundImage"] = model.Image.Url
+	data["backgroundImage"] = model.ActiveImage
+	data["altImage"] = model.Images
 	data["characters"] = characters
 
 	xVal := make([]string, model.X)

@@ -14,12 +14,26 @@ func MapEntityToCampaignMapModel(rawMapEntity ecs.Entity) models.CampaignMap {
 		mapEntity = mapDetails[0].(*ecs_components.MapComponent)
 	}
 
-	// Get CampaignImage
+	// Get CampaignImage(s)
+	images := make([]models.CampaignImage, 0)
 	var image *ecs_components.ImageComponent
 	var imageDetails = rawMapEntity.GetAllComponentsOfType(ecs.ImageComponentType)
-	if imageDetails != nil && len(imageDetails) == 1 {
-		image = imageDetails[0].(*ecs_components.ImageComponent)
-	} else {
+	if imageDetails != nil && len(imageDetails) > 0 {
+		// Loop to find active image and build image option; but set the first as default
+		for index, imageDetail := range imageDetails {
+			castedImage := imageDetail.(*ecs_components.ImageComponent)
+			images = append(images, models.CampaignImage{
+				Name:   castedImage.Name,
+				Url:    castedImage.Url,
+				Id:     castedImage.Id.String(),
+				Active: castedImage.Active,
+			})
+			if index == 0 || castedImage.Active {
+				image = castedImage
+			}
+		}
+	}
+	if image == nil {
 		image = ecs_components.NewMissingImageComponent()
 	}
 
@@ -34,10 +48,8 @@ func MapEntityToCampaignMapModel(rawMapEntity ecs.Entity) models.CampaignMap {
 		Id:          rawMapEntity.GetId().String(),
 		Name:        rawMapEntity.GetName(),
 		Description: rawMapEntity.GetDescription(),
-		Image: models.CampaignImage{
-			Name: image.Name,
-			Url:  image.Url,
-		},
+		ActiveImage: models.CampaignImage{Id: image.Id.String(), Name: image.Name, Url: image.Url},
+		Images:      images,
 	}
 
 	if mapEntity != nil {
