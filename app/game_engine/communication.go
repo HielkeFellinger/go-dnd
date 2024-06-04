@@ -49,10 +49,10 @@ const (
 
 	// Set attention to a specific tab
 
-	TypeChatBroadcast EventType = 800
-	TypeChatServerMsg EventType = 801
-	TypeChatCommand   EventType = 802
-	TypeChatWhisper   EventType = 802
+	TypeChatBroadcast   EventType = 800
+	TypeChatServerMsg   EventType = 801
+	TypeChatCommandRoll EventType = 802
+	TypeChatWhisper     EventType = 803
 )
 
 type EventMessage struct {
