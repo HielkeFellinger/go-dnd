@@ -112,7 +112,7 @@ base_maps:
           active: "false"
           name: background_plane_1_A
           url: /images/space/map_33x27.png
-      - type: ActiveImage
+      - type: Image
         params:
           active: "true"
           base64: ""

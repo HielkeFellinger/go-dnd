@@ -26,7 +26,7 @@ func MapItemEntityToCampaignMapItemElement(rawMapItemComponent ecs.Component, ma
 		}
 	}
 
-	// Get (possible) ActiveImage
+	// Get (possible) Image
 	var imageDetails = mapItemComponent.Entity.GetAllComponentsOfType(ecs.ImageComponentType)
 	if imageDetails != nil && len(imageDetails) == 1 {
 		image = imageDetails[0].(*ecs_components.ImageComponent)
