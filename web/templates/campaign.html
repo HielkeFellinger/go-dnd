@@ -694,6 +694,7 @@
     }
 
     let lastMessageSender = ''
+
     let handleChatEvents = (data) => {
         let chatMessage = '';
         if (data.source === currentUser) {
@@ -708,10 +709,18 @@
             lastMessageSender = data.source
             chatMessage += '<p style="margin: 0"><i><b>' + data.source + '</b> @ ' + data.dateTime + '</i></p>'
         }
-        chatMessage += '<p style="margin: 0">' + data.body + '</p>'
-        chatMessage += '</div>'
 
-        document.getElementById("chat-content").innerHTML += chatMessage;
+        chatMessage += '<p style="margin: 0">'
+        if (data.type === 802) {
+            chatMessage += '<i class="bi bi-dice-6-fill spin-inline-4"></i>&nbsp;'
+        }
+        chatMessage += data.body
+        chatMessage += '</p></div>'
+
+        // Set content and scroll to bottom of chat
+        let chatContent = document.getElementById("chat-content");
+        chatContent.innerHTML += chatMessage;
+        chatContent.scrollTop = chatContent.scrollHeight;
     }
 
     let openTab = (targetId) => {

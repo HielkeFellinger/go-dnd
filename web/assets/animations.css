@@ -1,22 +1,27 @@
+.spin-inline {
+    animation: spin 2s linear infinite;
+    display: inline-block;
+}
+
+.spin-inline-4 {
+    animation: spin 2s linear 4;
+    display: inline-block;
+}
+
+.spin {
+    animation: spin 2s linear infinite;
+}
+
 #diceSVG {
-    animation: rollDice 2s linear infinite;
+    animation: spin 2s linear infinite;
 }
 #rolling_dice {
     animation: bounceDice 2s linear infinite;
 }
 
-@keyframes rollDice {
+@keyframes spin {
     0% {
         transform: rotate(0deg);
-    }
-    25% {
-        transform: rotate(90deg);
-    }
-    50% {
-        transform: rotate(180deg);
-    }
-    75% {
-        transform: rotate(270deg);
     }
     100% {
         transform: rotate(360deg);
