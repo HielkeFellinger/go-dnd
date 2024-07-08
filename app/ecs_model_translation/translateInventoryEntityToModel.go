@@ -28,40 +28,7 @@ func InventoryEntityToCampaignInventoryModel(rawInventoryEntity ecs.Entity) mode
 			// Check if containing entity is an Item
 			if hasRelation.Entity != nil && hasRelation.Entity.HasComponentType(ecs.ItemComponentType) {
 
-				inventoryItem := &models.CampaignInventoryItem{
-					Id:    hasRelation.Entity.GetId().String(),
-					Count: hasRelation.Count,
-				}
-
-				// Check Item Details
-				itemComponents := hasRelation.Entity.GetAllComponentsOfType(ecs.ItemComponentType)
-				if len(itemComponents) >= 1 {
-					itemComponent := itemComponents[0].(*ecs_components.ItemComponent)
-					inventoryItem.Name = itemComponent.Name
-					inventoryItem.Description = itemComponent.Description
-				}
-
-				// Check Restore
-				restoreComponents := hasRelation.Entity.GetAllComponentsOfType(ecs.RestoreComponentType)
-				if len(restoreComponents) >= 1 {
-					inventoryItem.Restore = restoreComponents[0].(*ecs_components.RestoreComponent).Amount
-				}
-
-				// Check Damage
-				damageComponents := hasRelation.Entity.GetAllComponentsOfType(ecs.DamageComponentType)
-				if len(damageComponents) >= 1 {
-					inventoryItem.Damage = damageComponents[0].(*ecs_components.DamageComponent).Amount
-				}
-
-				// Check Range
-				rangeComponents := hasRelation.Entity.GetAllComponentsOfType(ecs.RangeComponentType)
-				if len(rangeComponents) >= 1 {
-					rangeComponent := rangeComponents[0].(*ecs_components.RangeComponent)
-					inventoryItem.Range = models.CampaignInventoryItemRange{
-						Min: strconv.Itoa(rangeComponent.Min),
-						Max: strconv.Itoa(rangeComponent.Max),
-					}
-				}
+				inventoryItem := ItemEntityToCampaignInventoryItem(hasRelation.Entity, hasRelation.Count)
 
 				inventory.Items = append(inventory.Items, *inventoryItem)
 			}
@@ -69,4 +36,42 @@ func InventoryEntityToCampaignInventoryModel(rawInventoryEntity ecs.Entity) mode
 	}
 
 	return *inventory
+}
+
+func ItemEntityToCampaignInventoryItem(rawItemEntity ecs.Entity, count uint) *models.CampaignInventoryItem {
+	inventoryItem := &models.CampaignInventoryItem{
+		Id:    rawItemEntity.GetId().String(),
+		Count: count,
+	}
+
+	// Check Item Details
+	itemComponents := rawItemEntity.GetAllComponentsOfType(ecs.ItemComponentType)
+	if len(itemComponents) >= 1 {
+		itemComponent := itemComponents[0].(*ecs_components.ItemComponent)
+		inventoryItem.Name = itemComponent.Name
+		inventoryItem.Description = itemComponent.Description
+	}
+
+	// Check Restore
+	restoreComponents := rawItemEntity.GetAllComponentsOfType(ecs.RestoreComponentType)
+	if len(restoreComponents) >= 1 {
+		inventoryItem.Restore = restoreComponents[0].(*ecs_components.RestoreComponent).Amount
+	}
+
+	// Check Damage
+	damageComponents := rawItemEntity.GetAllComponentsOfType(ecs.DamageComponentType)
+	if len(damageComponents) >= 1 {
+		inventoryItem.Damage = damageComponents[0].(*ecs_components.DamageComponent).Amount
+	}
+
+	// Check Range
+	rangeComponents := rawItemEntity.GetAllComponentsOfType(ecs.RangeComponentType)
+	if len(rangeComponents) >= 1 {
+		rangeComponent := rangeComponents[0].(*ecs_components.RangeComponent)
+		inventoryItem.Range = models.CampaignInventoryItemRange{
+			Min: strconv.Itoa(rangeComponent.Min),
+			Max: strconv.Itoa(rangeComponent.Max),
+		}
+	}
+	return inventoryItem
 }

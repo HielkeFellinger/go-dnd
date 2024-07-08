@@ -30,6 +30,47 @@ func (e *baseEventMessageHandler) handleManagementEvents(message EventMessage, p
 	return nil
 }
 
+func (e *baseEventMessageHandler) typeManageItems(message EventMessage, pool CampaignPool) error {
+	if message.Source != pool.GetLeadId() {
+		return errors.New("managing game Item elements is not allowed as non-lead")
+	}
+
+	// Get all Items and parse them to CampaignInventoryItem's
+	data := make(map[string]any)
+	parsedItems := make([]*models.CampaignInventoryItem, 0)
+	allItemEntities := pool.GetEngine().GetWorld().GetItemEntities()
+	for _, itemEntity := range allItemEntities {
+		parsedItems = append(parsedItems, ecs_model_translation.ItemEntityToCampaignInventoryItem(itemEntity, 0))
+	}
+	data["Items"] = parsedItems
+
+	rawJsonBytes, err := json.Marshal(
+		e.handleLoadHtmlBody("campaignManageItems.html", "campaignManageItems", data))
+	if err != nil {
+		return err
+	}
+
+	// @todo Add Crud
+
+	// Send
+	manageItems := NewEventMessage()
+	manageItems.Source = message.Source
+	manageItems.Type = TypeManageItems
+	manageItems.Body = string(rawJsonBytes)
+	manageItems.Destinations = append(manageItems.Destinations, pool.GetLeadId())
+	pool.TransmitEventMessage(manageItems)
+
+	return nil
+}
+
+func (e *baseEventMessageHandler) typeManageInventory(message EventMessage, pool CampaignPool) error {
+	if message.Source != pool.GetLeadId() {
+		return errors.New("managing game Inventory elements is not allowed as non-lead")
+	}
+
+	return nil
+}
+
 func (e *baseEventMessageHandler) typeManageCampaign(message EventMessage, pool CampaignPool) error {
 	if message.Source != pool.GetLeadId() {
 		return errors.New("managing the campaign is not allowed as non-lead")
@@ -109,22 +150,6 @@ func (e *baseEventMessageHandler) typeManageCampaign(message EventMessage, pool 
 	manageCampaign.Body = string(rawJsonBytes)
 	manageCampaign.Destinations = append(manageCampaign.Destinations, pool.GetLeadId())
 	pool.TransmitEventMessage(manageCampaign)
-
-	return nil
-}
-
-func (e *baseEventMessageHandler) typeManageItems(message EventMessage, pool CampaignPool) error {
-	if message.Source != pool.GetLeadId() {
-		return errors.New("managing game Item elements is not allowed as non-lead")
-	}
-
-	return nil
-}
-
-func (e *baseEventMessageHandler) typeManageInventory(message EventMessage, pool CampaignPool) error {
-	if message.Source != pool.GetLeadId() {
-		return errors.New("managing game Inventory elements is not allowed as non-lead")
-	}
 
 	return nil
 }

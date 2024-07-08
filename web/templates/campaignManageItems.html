@@ -1,0 +1,34 @@
+{{define "campaignManageItems"}}
+    <div>
+        <h2>Item Overview</h2>
+        <button class="btn">Add +</button>
+        <br>
+        <div style="width: 100%;">
+            <table style="width: 100%;">
+                <caption>{{ .Id }}</caption>
+                <thead>
+                <tr>
+                    <th> Name </th>
+                    <th> Description </th>
+                    <th> Damage </th>
+                    <th> Restore </th>
+                    <th> Range </th>
+                    <th style="display: none;"> ID </th>
+                </tr>
+                </thead>
+                <tbody>
+                {{ range .Items }}
+                    <tr>
+                        <td> {{ .Name }} </td>
+                        <td> {{ .Description }} </td>
+                        <td> {{ .Damage }} </td>
+                        <td> {{ .Restore }} </td>
+                        <td> {{ if .Range.Min }} Min: {{ .Range.Min }} {{ end }} {{ if .Range.Max }} Max: {{ .Range.Max }} {{ end }}</td>
+                        <td style="display: none;"> {{ .Id }} </td>
+                    </tr>
+                {{ end }}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{{end}}
