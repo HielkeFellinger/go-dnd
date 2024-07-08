@@ -42,6 +42,9 @@ func (e *baseEventMessageHandler) typeManageItems(message EventMessage, pool Cam
 	for _, itemEntity := range allItemEntities {
 		parsedItems = append(parsedItems, ecs_model_translation.ItemEntityToCampaignInventoryItem(itemEntity, 0))
 	}
+	sort.Slice(parsedItems, func(i, j int) bool {
+		return parsedItems[i].Name < parsedItems[j].Name
+	})
 	data["Items"] = parsedItems
 
 	rawJsonBytes, err := json.Marshal(
