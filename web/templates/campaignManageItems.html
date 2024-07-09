@@ -1,7 +1,7 @@
 {{define "campaignManageItems"}}
     <div>
         <h2>Item Overview</h2>
-        <button class="btn">Add +</button>
+        <button class="btn" onclick="upsertItem('')">Add +</button>
         <br>
         <div style="width: 100%;">
             <table style="width: 100%;">
@@ -13,6 +13,7 @@
                     <th> Damage </th>
                     <th> Restore </th>
                     <th> Range </th>
+                    <th> Edit </th>
                     <th style="display: none;"> ID </th>
                 </tr>
                 </thead>
@@ -24,6 +25,11 @@
                         <td> {{ .Damage }} </td>
                         <td> {{ .Restore }} </td>
                         <td> {{ if .Range.Min }} Min: {{ .Range.Min }} {{ end }} {{ if .Range.Max }} Max: {{ .Range.Max }} {{ end }}</td>
+                        <td>
+                            <button class="btn" onclick="upsertItem('{{ .Id }}')" style="height: 2.5em; width: 2.5em">
+                                <b><i class="bi bi-pencil"></i></b>
+                            </button>
+                        </td>
                         <td style="display: none;"> {{ .Id }} </td>
                     </tr>
                 {{ end }}

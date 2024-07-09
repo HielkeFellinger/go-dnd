@@ -101,13 +101,13 @@
                 <b><i class="bi bi-chevron-double-left"></i></b>
             </button>
             <div id="right-bar-inner-content" style="position: relative; min-height: 100%; left: 3em; top: -2.4em; width: 0; display: none">
-                <div id="char-details-holder" class="">
+                <div id="entity-details-holder" class="">
 
                 </div>
                 {{ if .campaign.UserIsLead }}
-                <div style="min-height: 25em; max-height: 25em; margin-top: auto; position: absolute; bottom: 0;">
+                <div style="min-height: 15em; max-height: 15em; margin-top: auto; position: absolute; bottom: 0;">
                     <h4> Audit Events </h4>
-                    <div id="event-content" class="" style="max-height: 21em; overflow-y: auto">
+                    <div id="event-content" class="" style="max-height: 11em; overflow-y: auto">
 
 
                     </div>
@@ -206,8 +206,13 @@
         }
 
         // Parse Manage Events
-        if (payLoad.type >= 550 && payLoad.type < 559) {
+        if (payLoad.type >= 550 && payLoad.type <= 559) {
             handleManagePage(payLoad)
+            return;
+        }
+
+        if (payLoad.type >= 560 && payLoad.type <= 569 ) {
+            handleItemEvents(payLoad)
             return;
         }
 
@@ -262,7 +267,7 @@
                 if (selectedCharDetailsId === loadedCharDetailsId) {
                     selectedCharDetailsId = ""
                     loadedCharDetailsId = ""
-                    document.getElementById("char-details-holder").innerHTML = ""
+                    document.getElementById("entity-details-holder").innerHTML = ""
                 } else {
                     selectedCharDetailsId = loadedCharDetailsId
                 }
@@ -273,7 +278,7 @@
                     if (!rightBarVisible) {
                         toggleVisibilityRightBar()
                     }
-                    document.getElementById("char-details-holder").innerHTML = body.Html
+                    document.getElementById("entity-details-holder").innerHTML = body.Html
                 }
             }
         }
@@ -289,6 +294,23 @@
         if (mapItemIdToEntityId.has(mapItemId)) {
             selectedCharDetailsId = mapItemIdToEntityId.get(mapItemId)
             sendEvent(wrapMessage(selectedCharDetailsId, 504))
+        }
+    }
+
+    let upsertItem = (id) => {
+        sendEvent(wrapMessage(JSON.stringify(id), 561))
+    }
+
+    let handleItemEvents = (data) => {
+        if (data.type === 561) {
+            let body = JSON.parse(data.body)
+            // Reset possible Char links
+            selectedCharDetailsId = ""
+            loadedCharDetailsId = ""
+            if (!rightBarVisible) {
+                toggleVisibilityRightBar()
+            }
+            document.getElementById("entity-details-holder").innerHTML = body
         }
     }
 

@@ -63,13 +63,13 @@ func CampaignNewPage(c *gin.Context) {
 	}
 	templateMap["user"] = rawUser.(models.User)
 
-	c.HTML(http.StatusOK, "campaignCrud.html", templateMap)
+	c.HTML(http.StatusOK, "campaignAdd.html", templateMap)
 }
 
 func CampaignNew(c *gin.Context) {
 	templateMap := gin.H{}
 	templateMap["title"] = "GO-DND Create Campaign"
-	const template = "campaignCrud.html"
+	const template = "campaignAdd.html"
 
 	// Block non post content
 	if c.Request.Method != http.MethodPost {

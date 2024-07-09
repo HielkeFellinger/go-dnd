@@ -47,6 +47,9 @@ const (
 	TypeManageItems      EventType = 554
 	TypeManageCampaign   EventType = 555
 
+	TypeLoadItem   EventType = 561
+	TypeUpsertItem EventType = 562
+
 	// Set attention to a specific tab
 
 	TypeChatBroadcast   EventType = 800

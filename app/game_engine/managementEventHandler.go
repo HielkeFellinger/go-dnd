@@ -71,6 +71,23 @@ func (e *baseEventMessageHandler) typeManageInventory(message EventMessage, pool
 		return errors.New("managing game Inventory elements is not allowed as non-lead")
 	}
 
+	data := make(map[string]any)
+
+	// Load the inventories
+
+	rawJsonBytes, err := json.Marshal(
+		e.handleLoadHtmlBody("campaignManageInventories.html", "campaignManageInventories", data))
+	if err != nil {
+		return err
+	}
+
+	manageInventories := NewEventMessage()
+	manageInventories.Source = message.Source
+	manageInventories.Type = TypeManageInventory
+	manageInventories.Body = string(rawJsonBytes)
+	manageInventories.Destinations = append(manageInventories.Destinations, pool.GetLeadId())
+	pool.TransmitEventMessage(manageInventories)
+
 	return nil
 }
 

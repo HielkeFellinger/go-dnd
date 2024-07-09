@@ -59,6 +59,13 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 		}
 	}
 
+	if message.Type >= TypeLoadItem && message.Type <= TypeUpsertItem {
+		err := e.handleItemEvents(message, pool)
+		if err != nil {
+			return err
+		}
+	}
+
 	if message.Type >= TypeChatBroadcast && message.Type <= TypeChatWhisper {
 		err := e.handleChatEventMessage(message, pool)
 		if err != nil {
