@@ -298,7 +298,28 @@
     }
 
     let upsertItem = (id) => {
+        stopLoadSpinner()
         sendEvent(wrapMessage(JSON.stringify(id), 561))
+    }
+
+    let submitUpsertItem = () => {
+
+        let formElement = document.forms.upsertItemForm;
+
+        if (formElement) {
+            let formData = new FormData(formElement);
+            let item = {}
+            item.Id = formData.get('id');
+            item.Name = formData.get('name');
+            item.Description = formData.get('description');
+            item.Damage = formData.get('damage');
+            item.Restore = formData.get('restore');
+            item.RangeMin = formData.get('rangeMin');
+            item.RangeMax = formData.get('rangeMax');
+            sendEvent(wrapMessage(JSON.stringify(item), 562))
+        } else {
+            stopLoadSpinner()
+        }
     }
 
     let handleItemEvents = (data) => {
@@ -949,6 +970,14 @@
 
     let loadSpinner = () => {
         document.getElementById("spinner").style.display = "block";
+    }
+
+    let stopLoadSpinner = () => {
+        let spinner = document.getElementById("spinner");
+
+        if (spinner) {
+            document.getElementById("spinner").style.display = "none";
+        }
     }
 
     // Innit Websocket only after loading all JS

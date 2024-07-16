@@ -47,8 +47,6 @@ func (e *baseEventMessageHandler) typeLoadItem(message EventMessage, pool Campai
 		}
 	}
 
-	log.Printf("- Item ID: '%v' Obj: '%v'", clearedBody, data)
-
 	rawJsonBytes, err := json.Marshal(
 		e.handleLoadHtmlBodyMultipleTemplateFiles([]string{"campaignUpsertItem.html", "diceSpinnerSvg.html"},
 			"campaignUpsertItem", data))
@@ -67,11 +65,20 @@ func (e *baseEventMessageHandler) typeLoadItem(message EventMessage, pool Campai
 }
 
 func (e *baseEventMessageHandler) typeUpsertItem(message EventMessage, pool CampaignPool) error {
+	// Undo escaping
+	clearedBody := html.UnescapeString(message.Body)
 
 	// Check if user is lead
 	if message.Source != pool.GetLeadId() {
 		return errors.New("modifying items is not allowed as non-lead")
 	}
 
-	return nil
+	// @TODO translate to object and update
+
+	log.Printf("- Item ID: '%v'", clearedBody)
+
+	loadItemMessage := NewEventMessage()
+	loadItemMessage.Source = pool.GetLeadId()
+	loadItemMessage.Body = ""
+	return e.typeLoadItem(loadItemMessage, pool)
 }

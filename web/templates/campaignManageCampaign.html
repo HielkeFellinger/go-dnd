@@ -3,7 +3,7 @@
         <details open="">
             <summary style="font-size: 2em;">Edit Campaign Details of: '{{ .campaign.Title }}'</summary>
             <div style="display: flex; flex-flow: row; flex-wrap: wrap; align-content: center; width: 100%;">
-                <form class="form" >
+                <form class="form" onsubmit="return false">
                     <div class="form-group">
                         <label for="title">Title</label>
                         <input type="text" name="title" class="form-control" id="title" placeholder="Title" required value="{{ .campaign.Title }}">

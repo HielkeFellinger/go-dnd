@@ -3,7 +3,7 @@
 <details open="">
     <summary style="font-size: 2em;">Upsert Item</summary>
     <div style="width: 100%;">
-        <form class="form" style="width: 100%;">
+        <form class="form" onsubmit="return false" style="width: 100%;" id="upsertItemForm">
 
             {{ if and .Item .Item.Id }}
             <div class="form-group">
@@ -46,7 +46,7 @@
             </div>
             <div style="min-height: 4em; width: 12em; display: flex; flex-flow: row;">
                 <div style="flex: 1 1 0;">
-                    <button id="itemUpsertSubmit" type="submit" class="btn btn-primary" onclick="loadSpinner()">Upsert</button>
+                    <button id="itemUpsertSubmit" type="submit" class="btn btn-primary" onclick="loadSpinner();submitUpsertItem()">Upsert</button>
                 </div>
                 <div id="spinner" style="flex: 1 1 0; display: none">
                     {{ template "diceSpinnerSvg.html" .}}
