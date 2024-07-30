@@ -6,6 +6,7 @@ import (
 	"github.com/hielkefellinger/go-dnd/app/ecs"
 	"github.com/hielkefellinger/go-dnd/app/ecs_model_translation"
 	"github.com/hielkefellinger/go-dnd/app/models"
+	"golang.org/x/net/html"
 	"log"
 	"slices"
 	"strconv"
@@ -19,9 +20,73 @@ func (e *baseEventMessageHandler) handleMapLoadEvents(message EventMessage, pool
 	if message.Type == TypeLoadMapEntities || message.Type == TypeLoadFullGame {
 		e.typeLoadMapEntities(message, pool)
 	}
+	if message.Type == TypeLoadUpsertMap {
+		return e.typeLoadUpsertMap(message, pool)
+	}
+	if message.Type == TypeUpsertMap {
+		return e.typeUpsertMap(message, pool)
+	}
 	if message.Type == TypeLoadMapEntity {
 		return e.typeLoadMapEntity(message, pool)
 	}
+
+	return nil
+}
+
+func (e *baseEventMessageHandler) typeUpsertMap(message EventMessage, pool CampaignPool) error {
+	// Undo escaping
+	clearedBody := html.UnescapeString(message.Body)
+
+	// Check if user is lead
+	if message.Source != pool.GetLeadId() {
+		return errors.New("modifying items is not allowed as non-lead")
+	}
+
+	// @TODO translate to object and update
+
+	log.Printf("- Map values: '%v'", clearedBody)
+
+	// Check if it needs to be updated; or inserted
+
+	loadUpsertMapMessage := NewEventMessage()
+	loadUpsertMapMessage.Source = pool.GetLeadId()
+	loadUpsertMapMessage.Body = ""
+	return e.typeLoadUpsertMap(loadUpsertMapMessage, pool)
+}
+
+func (e *baseEventMessageHandler) typeLoadUpsertMap(message EventMessage, pool CampaignPool) error {
+	// Undo escaping
+	clearedBody := html.UnescapeString(message.Body)
+
+	// Check if user is lead
+	if message.Source != pool.GetLeadId() {
+		return errors.New("modifying maps is not allowed as non-lead")
+	}
+
+	data := make(map[string]any)
+
+	// Check if there is an existing map with the supplied uuid
+	uuidItemFilter, err := parseStingToUuid(clearedBody)
+	if err == nil {
+		mapCandidate, match := pool.GetEngine().GetWorld().GetEntityByUuid(uuidItemFilter)
+		if match && mapCandidate.HasComponentType(ecs.MapComponentType) {
+			data["Map"] = ecs_model_translation.MapEntityToCampaignMapModel(mapCandidate)
+		}
+	}
+
+	rawJsonBytes, err := json.Marshal(
+		e.handleLoadHtmlBodyMultipleTemplateFiles([]string{"campaignUpsertMap.html", "diceSpinnerSvg.html"},
+			"campaignUpsertMap", data))
+	if err != nil {
+		return err
+	}
+
+	loadItemMessage := NewEventMessage()
+	loadItemMessage.Source = message.Source
+	loadItemMessage.Type = TypeLoadUpsertMap
+	loadItemMessage.Body = string(rawJsonBytes)
+	loadItemMessage.Destinations = append(loadItemMessage.Destinations, pool.GetLeadId())
+	pool.TransmitEventMessage(loadItemMessage)
 
 	return nil
 }

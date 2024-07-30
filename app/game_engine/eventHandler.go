@@ -31,7 +31,7 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 		}
 	}
 
-	if message.Type == TypeLoadFullGame || (message.Type >= TypeLoadMap && message.Type <= TypeRemoveMap) {
+	if message.Type == TypeLoadFullGame || (message.Type >= TypeLoadMap && message.Type <= TypeUpsertMap) {
 		err := e.handleMapLoadEvents(message, pool)
 		if err != nil {
 			return err
@@ -59,7 +59,7 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 		}
 	}
 
-	if message.Type >= TypeLoadItem && message.Type <= TypeUpsertItem {
+	if message.Type >= TypeLoadUpsertItem && message.Type <= TypeUpsertItem {
 		err := e.handleItemEvents(message, pool)
 		if err != nil {
 			return err

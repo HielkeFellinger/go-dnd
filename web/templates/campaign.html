@@ -193,7 +193,10 @@
                 handleCampaignContentMapItemsEvents(payLoad)
             } else if (payLoad.type === 533) {
                 handleCampaignContentMapItemEvents(payLoad)
-            } else if (payLoad.type === 544) {
+            } else if (payLoad.type === 534) {
+                handleRightBarCrudHtml(payLoad)
+            }
+            else if (payLoad.type === 544) {
                 handleCampaignContentMapVisibility(payLoad)
             } else if (payLoad.type === 546) {
                 handleMapItemRemoval(payLoad)
@@ -302,6 +305,11 @@
         sendEvent(wrapMessage(JSON.stringify(id), 561))
     }
 
+    let upsertMap = (id) => {
+        stopLoadSpinner()
+        sendEvent(wrapMessage(JSON.stringify(id), 534))
+    }
+
     let submitUpsertItem = () => {
 
         let formElement = document.forms.upsertItemForm;
@@ -322,17 +330,42 @@
         }
     }
 
+    let submitUpsertMap = () => {
+        let formElement = document.forms.upsertMapForm;
+
+        if (formElement) {
+            let formData = new FormData(formElement);
+            let item = {}
+            item.Id = formData.get('id');
+            item.Name = formData.get('name');
+            item.Description = formData.get('description');
+            item.Image = formData.get('image');
+
+            console.error(formData.get('image'))
+
+            item.X = formData.get('area_x');
+            item.Y = formData.get('area_y');
+            sendEvent(wrapMessage(JSON.stringify(item), 536))
+        } else {
+            stopLoadSpinner()
+        }
+    }
+
     let handleItemEvents = (data) => {
         if (data.type === 561) {
-            let body = JSON.parse(data.body)
-            // Reset possible Char links
-            selectedCharDetailsId = ""
-            loadedCharDetailsId = ""
-            if (!rightBarVisible) {
-                toggleVisibilityRightBar()
-            }
-            document.getElementById("entity-details-holder").innerHTML = body
+            handleRightBarCrudHtml(data)
         }
+    }
+
+    let handleRightBarCrudHtml = (data) => {
+        let body = JSON.parse(data.body)
+        // Reset possible Char links
+        selectedCharDetailsId = ""
+        loadedCharDetailsId = ""
+        if (!rightBarVisible) {
+            toggleVisibilityRightBar()
+        }
+        document.getElementById("entity-details-holder").innerHTML = body
     }
 
     let campaignMapTabIds = [];

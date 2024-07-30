@@ -31,8 +31,9 @@ const (
 	TypeLoadMap         EventType = 531
 	TypeLoadMapEntities EventType = 532
 	TypeLoadMapEntity   EventType = 533
-	TypeAddMap          EventType = 534
+	TypeLoadUpsertMap   EventType = 534
 	TypeRemoveMap       EventType = 535
+	TypeUpsertMap       EventType = 536
 
 	TypeUpdateMapEntity          EventType = 543
 	TypeUpdateMapVisibility      EventType = 544
@@ -47,8 +48,8 @@ const (
 	TypeManageItems      EventType = 554
 	TypeManageCampaign   EventType = 555
 
-	TypeLoadItem   EventType = 561
-	TypeUpsertItem EventType = 562
+	TypeLoadUpsertItem EventType = 561
+	TypeUpsertItem     EventType = 562
 
 	// Set attention to a specific tab
 

@@ -12,8 +12,8 @@ import (
 func (e *baseEventMessageHandler) handleItemEvents(message EventMessage, pool CampaignPool) error {
 	log.Printf("- Item Update Event Type: '%d' Message: '%s'", message.Type, message.Id)
 
-	if message.Type == TypeLoadItem {
-		err := e.typeLoadItem(message, pool)
+	if message.Type == TypeLoadUpsertItem {
+		err := e.typeLoadUpsertItem(message, pool)
 		if err != nil {
 			return err
 		}
@@ -27,7 +27,7 @@ func (e *baseEventMessageHandler) handleItemEvents(message EventMessage, pool Ca
 	return nil
 }
 
-func (e *baseEventMessageHandler) typeLoadItem(message EventMessage, pool CampaignPool) error {
+func (e *baseEventMessageHandler) typeLoadUpsertItem(message EventMessage, pool CampaignPool) error {
 	// Undo escaping
 	clearedBody := html.UnescapeString(message.Body)
 
@@ -56,7 +56,7 @@ func (e *baseEventMessageHandler) typeLoadItem(message EventMessage, pool Campai
 
 	loadItemMessage := NewEventMessage()
 	loadItemMessage.Source = message.Source
-	loadItemMessage.Type = TypeLoadItem
+	loadItemMessage.Type = TypeLoadUpsertItem
 	loadItemMessage.Body = string(rawJsonBytes)
 	loadItemMessage.Destinations = append(loadItemMessage.Destinations, pool.GetLeadId())
 	pool.TransmitEventMessage(loadItemMessage)
@@ -77,8 +77,10 @@ func (e *baseEventMessageHandler) typeUpsertItem(message EventMessage, pool Camp
 
 	log.Printf("- Item ID: '%v'", clearedBody)
 
+	// Check if it needs to be updated; or inserted
+
 	loadItemMessage := NewEventMessage()
 	loadItemMessage.Source = pool.GetLeadId()
 	loadItemMessage.Body = ""
-	return e.typeLoadItem(loadItemMessage, pool)
+	return e.typeLoadUpsertItem(loadItemMessage, pool)
 }

@@ -5,11 +5,24 @@
     <div style="width: 100%;">
         <form class="form" onsubmit="return false" style="width: 100%;" id="upsertItemForm">
 
+            <!-- If there's an error, display -->
+            {{ if .ErrorTitle}}
+                <p class="bg-danger">
+                    {{.ErrorTitle}}: {{.ErrorMessage}}
+                </p>
+            {{end}}
+            <!-- If there's a success message, display -->
+            {{ if .SuccessTitle}}
+                <p class="bg-danger">
+                    {{.SuccessTitle}}: {{.SuccessMessage}}
+                </p>
+            {{end}}
+
             {{ if and .Item .Item.Id }}
             <div class="form-group">
                 <label for="id">Id</label>
                 <input type="text" name="id" class="form-control" id="id" placeholder="Id" required
-                       value="{{.Item.Id}}">
+                       value="{{.Item.Id}}" disabled>
             </div>
             {{end}}
 
