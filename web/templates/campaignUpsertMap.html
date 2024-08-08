@@ -34,14 +34,18 @@
                 <label for="description">Description</label>
                 <textarea name="description" class="form-control" id="description" placeholder="Description">{{ if and .Map .Map.Description }}{{.Map.Description}}{{end}}</textarea>
             </div>
-            {{ if not .Map }}
-                <div class="form-group">
-                    <label for="image">Background Image</label>
-                    <input type="file" name="image" class="form-control" id="image" placeholder="Image" required>
-                </div>
-            {{end}}
+            <div class="form-group">
+                <label for="image">{{ if not .Map }}Set{{else}}Add{{end}} Background Image</label>
+                <input type="file" name="image" accept="image/svg+xml,image/png,image/gif,image/jpeg" class="form-control"
+                       id="image" placeholder="Image" {{ if not .Map }}required{{end}}>
+            </div>
+            <div class="form-group">
+                <label for="imageName">Background Image Name</label>
+                <input type="text" name="imageName" class="form-control" id="imageName" placeholder="Image Name"
+                       {{ if not .Map }}required{{end}}>
+            </div>
             <div style="display: flex; flex-direction: row; flex-grow: 2;  flex-wrap: wrap">
-                <div class="form-group" style="margin-right: 2em;">
+                <div class="form-group" style="padding-right: 2em;">
                     <label for="area_x">Area X</label>
                     <input type="number" name="area_x" class="form-control" id="area_x" placeholder="Width"
                            value="{{ if and .Map .Map.X }}{{.Map.X}}{{end}}">
@@ -52,6 +56,22 @@
                            value="{{ if and .Map .Map.Y }}{{.Map.Y}}{{end}}">
                 </div>
             </div>
+            {{ if .Map }}
+            <div style="display: flex; flex-direction: row; flex-grow: 3; flex-shrink: 1; flex-wrap: wrap">
+                {{ range $image := .Map.Images }}
+                <div style="flex: 1 1 0;">
+                    <div style="width: 100%; align-content: center">{{$image.Name}}</div>
+                    <div style="background-image:url('{{$image.Url}}'); min-width: 10em; min-height: 10em;
+                            max-width: 10em; max-height: 10em; background-size: 100%; background-repeat: no-repeat; margin-right: 0.5em">
+                        <button class="btn btn-danger" style="margin-top: auto; height: 2.5em; width: 2.5em; bottom: 0; right: 0">
+                            <b>x</b>
+                        </button>
+                    </div>
+                </div>
+
+                {{end}}
+            </div>
+            {{end}}
             <div style="min-height: 4em; width: 12em; display: flex; flex-flow: row;">
                 <div style="flex: 1 1 0;">
                     <button id="mapUpsertSubmit" type="submit" class="btn btn-primary" onclick="loadSpinner();submitUpsertMap()">Upsert</button>

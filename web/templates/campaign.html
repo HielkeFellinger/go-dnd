@@ -311,9 +311,7 @@
     }
 
     let submitUpsertItem = () => {
-
         let formElement = document.forms.upsertItemForm;
-
         if (formElement) {
             let formData = new FormData(formElement);
             let item = {}
@@ -332,20 +330,53 @@
 
     let submitUpsertMap = () => {
         let formElement = document.forms.upsertMapForm;
-
         if (formElement) {
             let formData = new FormData(formElement);
             let item = {}
             item.Id = formData.get('id');
             item.Name = formData.get('name');
             item.Description = formData.get('description');
-            item.Image = formData.get('image');
-
-            console.error(formData.get('image'))
-
             item.X = formData.get('area_x');
             item.Y = formData.get('area_y');
-            sendEvent(wrapMessage(JSON.stringify(item), 536))
+            if (formData.get('image')) {
+                let sendFunction = (image) => {
+                    item.Image = image;
+                    sendEvent(wrapMessage(JSON.stringify(item), 536));
+                    stopLoadSpinner()
+                }
+                item.ImageName = formData.get('imageName');
+                parseFormFileToBase64(formData.get('image'), sendFunction);
+            }
+        } else {
+            stopLoadSpinner()
+        }
+    }
+
+    let parseFormFileToBase64 = (file, doneFunction) => {
+        let parsedFile = {
+            Name: "",
+            Size: 0,
+            Type: "",
+            FileBase64: "",
+        };
+
+        if (file && file instanceof File && doneFunction instanceof Function) {
+            try {
+                parsedFile.Name = file.name;
+                parsedFile.Size = file.size;
+                parsedFile.Type = file.type;
+                let reader = new FileReader();
+                let rawData = new ArrayBuffer();
+                reader.onload = (e) => {
+                    rawData = e.target.result;
+                    parsedFile.FileBase64 = btoa(String.fromCharCode.apply(null, new Uint8Array(rawData)));
+                    doneFunction(parsedFile);
+                }
+                reader.readAsArrayBuffer(file);
+            } catch (e) {
+                // ignore; send empty
+                stopLoadSpinner()
+            }
         } else {
             stopLoadSpinner()
         }
