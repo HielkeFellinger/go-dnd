@@ -3,12 +3,15 @@
         <div style="flex: 1 1 0; background-image: url('{{ .ActiveImage.Url }}'); width: 100%; background-size: 75%;background-repeat: no-repeat; cursor: pointer;"
              onclick="requestMapLoadFromServer('{{.Id}}')">
         </div>
-        <div style="flex: 4 4 0;">
-            <h4>{{ .Name }}</h4>
+        <div style="flex: 3 3 0;">
+            <h5>{{ .Name }}</h5>
             <h5>{{ .Description }}</h5>
-            <h5>Active: {{ .Active }}</h5>
-            <h5>Size: X: {{ .X }} Y: {{ .Y }}</h5>
-            <button class="btn" onclick="upsertMap('{{ .Id }}')" style="height: 2.5em; width: 2.5em">
+            <p>Active: {{ .Active }}</p>
+            <p>Size: X: {{ .X }} Y: {{ .Y }}</p>
+        </div>
+        <div style="flex: 1 1 0; align-content: flex-start">
+            <button class="btn" onclick="upsertMap('{{ .Id }}')" style="height: 2.5em; width: 2.5em; margin-top: 0.3em;
+            margin-right: 0.35em; float: right">
                 <b><i class="bi bi-pencil"></i></b>
             </button>
         </div>

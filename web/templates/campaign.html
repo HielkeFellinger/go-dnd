@@ -62,6 +62,9 @@
                     <li class="nav-item" id="manageCampaignList">
                         <button id="manageCampaignLink" class="nav-link" onclick="openTab('manageCampaign');" style="color: goldenrod"><i class="bi bi-pencil"></i> Campaign</button>
                     </li>
+                    <li class="nav-item" id="manageAuditEventsList">
+                        <button id="manageAuditEventsLink" class="nav-link" onclick="openTab('manageAuditEvents');" style="color: goldenrod"><i class="bi bi-eye"></i> Audit</button>
+                    </li>
                     {{ end }}
                     <li class="nav-item" id="currentList">
                         <button id="currentLink" class="nav-link active" onclick="openTab('current')">Current</button>
@@ -86,6 +89,19 @@
                     <div id="manageCampaign" class="tab-content" style="display: none">
                         <div id="manageCampaignContent" style="margin-top: 0.5em;"></div>
                     </div>
+                    <div id="manageAuditEvents" class="tab-content" style="display: none">
+                        <div id="manageCampaignContent" style="margin-top: 0.5em;">
+                            {{ if .campaign.UserIsLead }}
+                                <div style="min-height: 15em;">
+                                    <h4> Audit Events </h4>
+                                    <div id="event-content" class="" style="max-height: 11em; overflow-y: auto">
+
+
+                                    </div>
+                                </div>
+                            {{end}}
+                        </div>
+                    </div>
                     {{end}}
 
                     <div id="current" class="tab-content">
@@ -104,15 +120,6 @@
                 <div id="entity-details-holder" class="">
 
                 </div>
-                {{ if .campaign.UserIsLead }}
-                <div style="min-height: 15em; max-height: 15em; margin-top: auto; position: absolute; bottom: 0;">
-                    <h4> Audit Events </h4>
-                    <div id="event-content" class="" style="max-height: 11em; overflow-y: auto">
-
-
-                    </div>
-                </div>
-                {{end}}
             </div>
         </div>
     </div>
@@ -268,51 +275,51 @@
             if (!data.body.trim()) {
                 // User may be not allowed to view old state, if so clean-up
                 if (selectedCharDetailsId === loadedCharDetailsId) {
-                    selectedCharDetailsId = ""
-                    loadedCharDetailsId = ""
-                    document.getElementById("entity-details-holder").innerHTML = ""
+                    selectedCharDetailsId = "";
+                    loadedCharDetailsId = "";
+                    document.getElementById("entity-details-holder").innerHTML = "";
                 } else {
-                    selectedCharDetailsId = loadedCharDetailsId
+                    selectedCharDetailsId = loadedCharDetailsId;
                 }
             } else {
                 let body = JSON.parse(data.body)
                 if (selectedCharDetailsId === body.Id) {
-                    loadedCharDetailsId = body.Id
+                    loadedCharDetailsId = body.Id;
                     if (!rightBarVisible) {
-                        toggleVisibilityRightBar()
+                        toggleVisibilityRightBar();
                     }
-                    document.getElementById("entity-details-holder").innerHTML = body.Html
+                    document.getElementById("entity-details-holder").innerHTML = body.Html;
                 }
             }
         }
     }
 
-    let selectedCharDetailsId = ""
-    let loadedCharDetailsId = ""
+    let selectedCharDetailsId = "";
+    let loadedCharDetailsId = "";
     let loadCharDetails = (id) => {
-        selectedCharDetailsId = id
-        sendEvent(wrapMessage(id, 504))
+        selectedCharDetailsId = id;
+        sendEvent(wrapMessage(id, 504));
     }
     let loadCharDetailsByMapItem = (mapItemId) => {
         if (mapItemIdToEntityId.has(mapItemId)) {
-            selectedCharDetailsId = mapItemIdToEntityId.get(mapItemId)
-            sendEvent(wrapMessage(selectedCharDetailsId, 504))
+            selectedCharDetailsId = mapItemIdToEntityId.get(mapItemId);
+            sendEvent(wrapMessage(selectedCharDetailsId, 504));
         }
     }
 
     let upsertItem = (id) => {
-        stopLoadSpinner()
-        sendEvent(wrapMessage(JSON.stringify(id), 561))
+        stopLoadSpinner();
+        sendEvent(wrapMessage(JSON.stringify(id), 561));
     }
 
     let upsertMap = (id) => {
-        stopLoadSpinner()
-        sendEvent(wrapMessage(JSON.stringify(id), 534))
+        stopLoadSpinner();
+        sendEvent(wrapMessage(JSON.stringify(id), 534));
     }
 
     let submitUpsertItem = () => {
-        let formElement = document.forms.upsertItemForm;
-        if (formElement) {
+        let formElement = document.forms['upsertItemForm'];
+        if (formElement && formElement.reportValidity()) {
             let formData = new FormData(formElement);
             let item = {}
             item.Id = formData.get('id');
@@ -329,8 +336,8 @@
     }
 
     let submitUpsertMap = () => {
-        let formElement = document.forms.upsertMapForm;
-        if (formElement) {
+        let formElement = document.forms['upsertMapForm'];
+        if (formElement && formElement.reportValidity()) {
             let formData = new FormData(formElement);
             let item = {}
             item.Id = formData.get('id');
@@ -338,6 +345,16 @@
             item.Description = formData.get('description');
             item.X = formData.get('area_x');
             item.Y = formData.get('area_y');
+            item.RemoveImages = []
+            if (document.getElementById("removeImages") && document.getElementById("removeImages").value) {
+                let images = document.getElementById("removeImages").value
+                for (const imageIds in images.split('_')) {
+                    if (imageIds) {
+                        item.RemoveImages.push(imageIds)
+                    }
+                }
+            }
+
             if (formData.get('image')) {
                 let sendFunction = (image) => {
                     item.Image = image;
@@ -346,6 +363,9 @@
                 }
                 item.ImageName = formData.get('imageName');
                 parseFormFileToBase64(formData.get('image'), sendFunction);
+            } else {
+                // Send without image
+                sendEvent(wrapMessage(JSON.stringify(item), 536));
             }
         } else {
             stopLoadSpinner()
@@ -379,6 +399,30 @@
             }
         } else {
             stopLoadSpinner()
+        }
+    }
+
+    let handleRemovalOfImagesRequest = (id) => {
+        if (document.getElementById("removeImages")) {
+            console.log(document.getElementById("removeImages").value)
+            // Check if to be removed or needs to be recovered
+            if (document.getElementById("removeImages").value &&
+                document.getElementById("removeImages").value.indexOf(id) > 0) {
+                document.getElementById("image_title_" + id).style.textDecoration = '';
+                document.getElementById("image_" + id).style.opacity = '100%';
+                let button = document.getElementById("btn_remove_" + id);
+                button.title = "Remove Image";
+                button.innerHTML = '<b>x</b>';
+                document.getElementById("removeImages").value =
+                    document.getElementById("removeImages").value.replace('_' + id, '');
+            } else {
+                document.getElementById("removeImages").value += '_' + id;
+                document.getElementById("image_title_" + id).style.textDecoration = 'line-through';
+                document.getElementById("image_" + id).style.opacity = '30%';
+                let button = document.getElementById('btn_remove_' + id);
+                button.title= "Undo Removal of Image";
+                button.innerHTML = '<b>-</b>';
+            }
         }
     }
 

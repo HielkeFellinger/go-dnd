@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
 	"github.com/hielkefellinger/go-dnd/app/ecs_model_translation"
+	"github.com/hielkefellinger/go-dnd/app/helpers"
 	"github.com/hielkefellinger/go-dnd/app/models"
 	"golang.org/x/net/html"
 	"log"
@@ -42,11 +43,32 @@ func (e *baseEventMessageHandler) typeUpsertMap(message EventMessage, pool Campa
 		return errors.New("modifying items is not allowed as non-lead")
 	}
 
-	// @TODO translate to object and update
-
-	log.Printf("- Map values: '%v'", clearedBody)
+	var mapUpdateRequest MapUpsertRequest
+	err := json.Unmarshal([]byte(clearedBody), &mapUpdateRequest)
+	if err != nil {
+		return err
+	}
 
 	// Check if it needs to be updated; or inserted
+	if mapUpdateRequest.Id != "" {
+		mapUuid, err := parseStingToUuid(mapUpdateRequest.Id)
+		if err != nil {
+			return err
+		}
+
+		mapEntity, match := pool.GetEngine().GetWorld().GetMapEntityByUuid(mapUuid)
+		if !match || mapEntity == nil {
+			return errors.New("failure of loading MAP by UUID")
+		}
+
+		// TODO: Handle Loading
+	} else {
+		// TODO: Handle Create
+	}
+
+	// TODO: Handle "Overloading" / Adding of components
+	// (image add)
+	_, _ = helpers.SaveImageToCampaign(mapUpdateRequest.Image, pool.GetId(), mapUpdateRequest.ImageName)
 
 	loadUpsertMapMessage := NewEventMessage()
 	loadUpsertMapMessage.Source = pool.GetLeadId()
@@ -323,4 +345,15 @@ func (e *baseEventMessageHandler) buildMapData(model models.CampaignMap, isLead 
 	data["x"] = xVal
 	data["y"] = yVal
 	return data
+}
+
+type MapUpsertRequest struct {
+	Id           string             `json:"Id"`
+	Name         string             `json:"Name"`
+	Description  string             `json:"Description"`
+	X            string             `json:"X"`
+	Y            string             `json:"Y"`
+	ImageName    string             `json:"ImageName"`
+	RemoveImages []string           `json:"RemoveImages"`
+	Image        helpers.FileUpload `json:"Image"`
 }
