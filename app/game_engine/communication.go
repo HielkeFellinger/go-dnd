@@ -42,6 +42,8 @@ const (
 	TypeSignalMapItem            EventType = 547
 	TypeChangeMapBackgroundImage EventType = 548
 
+	// Management Events
+
 	TypeManageMaps       EventType = 551
 	TypeManageCharacters EventType = 552
 	TypeManageInventory  EventType = 553
@@ -50,6 +52,8 @@ const (
 
 	TypeLoadUpsertItem EventType = 561
 	TypeUpsertItem     EventType = 562
+
+	TypeManagementError EventType = 599
 
 	// Set attention to a specific tab
 

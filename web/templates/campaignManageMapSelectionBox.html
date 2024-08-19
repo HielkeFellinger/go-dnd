@@ -4,14 +4,15 @@
              onclick="requestMapLoadFromServer('{{.Id}}')">
         </div>
         <div style="flex: 3 3 0;">
-            <h5>{{ .Name }}</h5>
-            <h5>{{ .Description }}</h5>
+            <h5>{{ .Name }} </h5>
+            <h5>{{ .Description }}&nbsp</h5>
             <p>Active: {{ .Active }}</p>
             <p>Size: X: {{ .X }} Y: {{ .Y }}</p>
         </div>
         <div style="flex: 1 1 0; align-content: flex-start">
-            <button class="btn" onclick="upsertMap('{{ .Id }}')" style="height: 2.5em; width: 2.5em; margin-top: 0.3em;
-            margin-right: 0.35em; float: right">
+            <button class="btn" style="height: 2.5em; width: 2.5em; margin-top: 0.3em;
+            margin-right: 0.35em; float: right" {{ if .Active }} disabled title="Editing is blocked due to Map is set as active"
+            {{else}} onclick="upsertMap('{{ .Id }}')"{{end}}>
                 <b><i class="bi bi-pencil"></i></b>
             </button>
         </div>

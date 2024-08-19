@@ -253,6 +253,9 @@ func (e *baseEventMessageHandler) typeManageMaps(message EventMessage, pool Camp
 	// Update possible Map Entities
 	mapEntries := make([]models.CampaignMap, 0)
 	mapEntities := pool.GetEngine().GetWorld().GetMapEntities()
+	sort.Slice(mapEntities, func(i, j int) bool {
+		return mapEntities[i].GetName() < mapEntities[j].GetName()
+	})
 	for _, mapEntity := range mapEntities {
 		mapEntries = append(mapEntries, ecs_model_translation.MapEntityToCampaignMapModel(mapEntity))
 	}
@@ -275,6 +278,25 @@ func (e *baseEventMessageHandler) typeManageMaps(message EventMessage, pool Camp
 	pool.TransmitEventMessage(manageMaps)
 
 	return nil
+}
+
+func (e *baseEventMessageHandler) sendManagementError(title string, message string, pool CampaignPool) error {
+	body, err := json.Marshal(models.ManagementError{
+		Title:   title,
+		Message: message,
+	})
+	if err != nil {
+		return err
+	}
+
+	errorMessage := NewEventMessage()
+	errorMessage.Source = pool.GetLeadId()
+	errorMessage.Type = TypeManagementError
+	errorMessage.Body = string(body)
+	errorMessage.Destinations = append(errorMessage.Destinations, pool.GetLeadId())
+
+	pool.TransmitEventMessage(errorMessage)
+	return errors.New(message)
 }
 
 type charUserController struct {

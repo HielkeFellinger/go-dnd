@@ -220,7 +220,6 @@
             handleManagePage(payLoad)
             return;
         }
-
         if (payLoad.type >= 560 && payLoad.type <= 569 ) {
             handleItemEvents(payLoad)
             return;
@@ -339,7 +338,8 @@
         let formElement = document.forms['upsertMapForm'];
         if (formElement && formElement.reportValidity()) {
             let formData = new FormData(formElement);
-            let item = {}
+            console.warn(formData);
+            let item = {};
             item.Id = formData.get('id');
             item.Name = formData.get('name');
             item.Description = formData.get('description');
@@ -348,9 +348,10 @@
             item.RemoveImages = []
             if (document.getElementById("removeImages") && document.getElementById("removeImages").value) {
                 let images = document.getElementById("removeImages").value
-                for (const imageIds in images.split('_')) {
-                    if (imageIds) {
-                        item.RemoveImages.push(imageIds)
+                let splited = images.split('_');
+                for (const key in splited) {
+                    if (splited[key]) {
+                        item.RemoveImages.push(splited[key])
                     }
                 }
             }

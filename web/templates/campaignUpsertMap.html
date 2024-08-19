@@ -1,88 +1,86 @@
 {{define "campaignUpsertMap"}}
 
-<details open="">
-    <summary style="font-size: 2em;">Upsert Map</summary>
-    <div style="width: 100%;">
-        <form class="form" onsubmit="return false" style="width: 100%;" id="upsertMapForm">
 
-            <!-- If there's an error, display -->
-            {{ if .ErrorTitle}}
-                <p class="bg-danger">
-                    {{.ErrorTitle}}: {{.ErrorMessage}}
-                </p>
-            {{end}}
-            <!-- If there's a success message, display -->
-            {{ if .SuccessTitle}}
-                <p class="bg-danger">
-                    {{.SuccessTitle}}: {{.SuccessMessage}}
-                </p>
-            {{end}}
+<h2>{{ if and .Map .Map.Id }}Update{{else}}Add{{end}} Map</h2>
+<div style="width: 100%;">
+    <form class="form" onsubmit="return false" style="width: 100%;" id="upsertMapForm">
 
-            {{ if and .Map .Map.Id }}
+        <!-- If there's an error, display -->
+        <p class="bg-danger" id="managementCrudError" style="visibility: hidden">
+
+        </p>
+
+        {{ if and .Map .Map.Id }}
+        <div class="form-group">
+            <label for="id">Id</label>
+            <input type="text" name="id" class="form-control" id="id" placeholder="Id" required readonly value="{{.Map.Id}}">
+        </div>
+        {{end}}
+        <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" name="name" class="form-control" id="name" placeholder="Name" required
+                   value="{{ if and .Map .Map.Name }}{{.Map.Name}}{{end}}">
+        </div>
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea name="description" class="form-control" id="description" placeholder="Description">{{ if and .Map .Map.Description }}{{.Map.Description}}{{end}}</textarea>
+        </div>
+        <div class="form-group">
+            <label for="image">{{ if not .Map }}Set{{else}}Add{{end}} Background Image</label>
+            <input type="file" name="image" accept="image/svg+xml,image/png,image/gif,image/jpeg" class="form-control"
+                   id="image" placeholder="Image" {{ if not .Map }}required{{end}}>
+        </div>
+        <div class="form-group">
+            <label for="imageName">Background Image Name</label>
+            <input type="text" name="imageName" class="form-control" id="imageName" placeholder="Image Name"
+                   {{ if not .Map }}required{{end}}>
+        </div>
+        <div style="display: flex; flex-direction: row; flex-grow: 2;  flex-wrap: wrap">
+            <div class="form-group" style="padding-right: 2em;">
+                <label for="area_x">Area X</label>
+                <input type="number" name="area_x" class="form-control" id="area_x" placeholder="Width" min="2"
+                       value="{{ if and .Map .Map.X }}{{.Map.X}}{{end}}">
+            </div>
             <div class="form-group">
-                <label for="id">Id</label>
-                <input type="text" name="id" class="form-control" id="id" placeholder="Id" required
-                       value="{{.Map.Id}}" disabled>
+                <label for="area_y">Area Y</label>
+                <input type="number" name="area_y" class="form-control" id="area_y" placeholder="Length" min="2"
+                       value="{{ if and .Map .Map.Y }}{{.Map.Y}}{{end}}">
             </div>
-            {{end}}
-            <div class="form-group">
-                <label for="name">Name</label>
-                <input type="text" name="name" class="form-control" id="name" placeholder="Name" required
-                       value="{{ if and .Map .Map.Name }}{{.Map.Name}}{{end}}">
-            </div>
-            <div class="form-group">
-                <label for="description">Description</label>
-                <textarea name="description" class="form-control" id="description" placeholder="Description">{{ if and .Map .Map.Description }}{{.Map.Description}}{{end}}</textarea>
-            </div>
-            <div class="form-group">
-                <label for="image">{{ if not .Map }}Set{{else}}Add{{end}} Background Image</label>
-                <input type="file" name="image" accept="image/svg+xml,image/png,image/gif,image/jpeg" class="form-control"
-                       id="image" placeholder="Image" {{ if not .Map }}required{{end}}>
-            </div>
-            <div class="form-group">
-                <label for="imageName">Background Image Name</label>
-                <input type="text" name="imageName" class="form-control" id="imageName" placeholder="Image Name"
-                       {{ if not .Map }}required{{end}}>
-            </div>
-            <div style="display: flex; flex-direction: row; flex-grow: 2;  flex-wrap: wrap">
-                <div class="form-group" style="padding-right: 2em;">
-                    <label for="area_x">Area X</label>
-                    <input type="number" name="area_x" class="form-control" id="area_x" placeholder="Width"
-                           value="{{ if and .Map .Map.X }}{{.Map.X}}{{end}}">
-                </div>
-                <div class="form-group">
-                    <label for="area_y">Area Y</label>
-                    <input type="number" name="area_y" class="form-control" id="area_y" placeholder="Length"
-                           value="{{ if and .Map .Map.Y }}{{.Map.Y}}{{end}}">
-                </div>
-            </div>
-            {{ if .Map }}
-            <div style="display: flex; flex-direction: row; flex-grow: 3; flex-shrink: 1; flex-wrap: wrap">
-                {{ range $image := .Map.Images }}
-                <div style="flex: 1 1 0;">
-                    <div id="image_title_{{$image.Id}}" style="width: 100%; align-content: center">{{$image.Name}}</div>
-                    <div id="image_{{$image.Id}}" style="background-image:url('{{$image.Url}}'); min-width: 10em; min-height: 10em;
-                            max-width: 10em; max-height: 10em; background-size: 100%; background-repeat: no-repeat; margin-right: 0.5em">
-                        <button id="btn_remove_{{$image.Id}}" class="btn btn-danger" onclick="handleRemovalOfImagesRequest('{{$image.Id}}')"
-                                title="Remove Image" style="margin-top: auto; height: 2.5em; width: 2.5em; margin-top: 0.3em; margin-left: 0.35em;">
-                            <b>x</b>
+        </div>
+        {{ if .Map }}
+        <div style="display: flex; flex-direction: row; flex-grow: 3; flex-shrink: 1; flex-wrap: wrap">
+            {{ $mapLengt := len .Map.Images }}
+            {{ range $image := .Map.Images }}
+            <div style="flex: 1 1 0;">
+                <div id="image_title_{{$image.Id}}" style="width: 100%; align-content: center">{{$image.Name}}</div>
+                <div id="image_{{$image.Id}}" style="background-image:url('{{$image.Url}}'); min-width: 10em; min-height: 10em;
+                        max-width: 10em; max-height: 10em; background-size: 100%; background-repeat: no-repeat; margin-right: 0.5em">
+                    {{ if gt $mapLengt 1 }}
+                    <button id="btn_remove_{{$image.Id}}" class="btn btn-danger" onclick="handleRemovalOfImagesRequest('{{$image.Id}}')"
+                            title="Remove Image" style="margin-top: auto; height: 2.5em; width: 2.5em; margin-top: 0.3em; margin-left: 0.35em;">
+                        <b>x</b>
+                    </button>
+                    {{else}}
+                        <button class="btn btn-danger" title="Locked; due to only image left" disabled
+                                style="margin-top: auto; height: 2.5em; width: 2.5em; margin-top: 0.3em; margin-left: 0.35em;">
+                            <i class="bi bi-lock-fill"></i>
                         </button>
-                    </div>
+                    {{end}}
                 </div>
-                {{end}}
-                <input id="removeImages" name="removeImages" hidden>
             </div>
             {{end}}
-            <div style="min-height: 4em; width: 12em; display: flex; flex-flow: row; margin-top: 0.25em">
-                <div style="flex: 1 1 0;">
-                    <button id="mapUpsertSubmit" type="submit" class="btn btn-primary" onclick="loadSpinner();submitUpsertMap()">Upsert</button>
-                </div>
-                <div id="spinner" style="flex: 1 1 0; display: none">
-                    {{ template "diceSpinnerSvg.html" .}}
-                </div>
+            <input id="removeImages" name="removeImages" hidden>
+        </div>
+        {{end}}
+        <div style="min-height: 4em; width: 12em; display: flex; flex-flow: row; margin-top: 0.25em">
+            <div style="flex: 1 1 0;">
+                <button id="mapUpsertSubmit" type="submit" class="btn btn-primary" onclick="loadSpinner();submitUpsertMap()">Save</button>
             </div>
-        </form>
-    </div>
-</details>
+            <div id="spinner" style="flex: 1 1 0; display: none">
+                {{ template "diceSpinnerSvg.html" .}}
+            </div>
+        </div>
+    </form>
+</div>
 
 {{ end }}

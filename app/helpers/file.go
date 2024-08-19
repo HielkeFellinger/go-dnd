@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func SaveImageToCampaign(image FileUpload, campaignId uint, rawFileName string) (string, error) {
+func SaveImageToCampaign(image FileUpload, campaignId uint, rawnNewFileName string) (string, error) {
 	baseLocation := os.Getenv("CAMPAIGN_DATA_DIR") + "/" + strconv.Itoa(int(campaignId))
 
 	// Ensure Campaign dir exists
@@ -23,7 +23,7 @@ func SaveImageToCampaign(image FileUpload, campaignId uint, rawFileName string) 
 
 	// Clean filename
 	reg, _ := regexp.Compile("\\s+")
-	strippedFileName := reg.ReplaceAllString(rawFileName, "")
+	strippedFileName := reg.ReplaceAllString(rawnNewFileName, "")
 
 	// Decode base64 content
 	newImageContent, err := base64.StdEncoding.DecodeString(image.FileBase64)
@@ -45,12 +45,15 @@ func SaveImageToCampaign(image FileUpload, campaignId uint, rawFileName string) 
 	}
 
 	// Attempt to write to storage; do not override
-	newImageFileName := baseLocation + "/images/" + strippedFileName + fileExtensions[0]
+	fileShortName := strippedFileName + fileExtensions[0]
+	newImageFileName := baseLocation + "/images/" + fileShortName
 	if _, err := os.Stat(newImageFileName); os.IsNotExist(err) {
 		if err := os.WriteFile(newImageFileName, newImageContent, 0644); err != nil {
 			return "", err
 		}
-		return newImageFileName, nil
+
+		// Return the external (Relative) URL
+		return "/campaign_data/" + strconv.Itoa(int(campaignId)) + "/images/" + fileShortName, nil
 	} else {
 		return "", errors.New("file already exists")
 	}
