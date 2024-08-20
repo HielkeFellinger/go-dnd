@@ -200,8 +200,6 @@
                 handleCampaignContentMapItemsEvents(payLoad)
             } else if (payLoad.type === 533) {
                 handleCampaignContentMapItemEvents(payLoad)
-            } else if (payLoad.type === 534) {
-                handleRightBarCrudHtml(payLoad)
             }
             else if (payLoad.type === 544) {
                 handleCampaignContentMapVisibility(payLoad)
@@ -220,9 +218,19 @@
             handleManagePage(payLoad)
             return;
         }
-        if (payLoad.type >= 560 && payLoad.type <= 569 ) {
-            handleItemEvents(payLoad)
+        if (payLoad.type >= 5500 && payLoad.type <= 5600 ) {
+            // Maps
+            if (payLoad.type === 5511) {
+                handleRightBarCrudHtml(payLoad)
+            }
+            // Items
+            if (payLoad.type === 5541) {
+                handleRightBarCrudHtml(payLoad)
+            }
             return;
+        }
+        if (payLoad.type == 5999) {
+
         }
 
         // Parse Chat-messages
@@ -241,6 +249,9 @@
     }
 
     let fullRefresh = () => {
+        selectedCharDetailsId = "";
+        loadedCharDetailsId = "";
+        document.getElementById("entity-details-holder").innerHTML = "";
         sendEvent(wrapMessage('', 500))
     }
 
@@ -308,12 +319,12 @@
 
     let upsertItem = (id) => {
         stopLoadSpinner();
-        sendEvent(wrapMessage(JSON.stringify(id), 561));
+        sendEvent(wrapMessage(JSON.stringify(id), 5541));
     }
 
     let upsertMap = (id) => {
         stopLoadSpinner();
-        sendEvent(wrapMessage(JSON.stringify(id), 534));
+        sendEvent(wrapMessage(JSON.stringify(id), 5511));
     }
 
     let submitUpsertItem = () => {
@@ -328,7 +339,7 @@
             item.Restore = formData.get('restore');
             item.RangeMin = formData.get('rangeMin');
             item.RangeMax = formData.get('rangeMax');
-            sendEvent(wrapMessage(JSON.stringify(item), 562))
+            sendEvent(wrapMessage(JSON.stringify(item), 5542))
         } else {
             stopLoadSpinner()
         }
@@ -359,14 +370,14 @@
             if (formData.get('image')) {
                 let sendFunction = (image) => {
                     item.Image = image;
-                    sendEvent(wrapMessage(JSON.stringify(item), 536));
+                    sendEvent(wrapMessage(JSON.stringify(item), 5513));
                     stopLoadSpinner()
                 }
                 item.ImageName = formData.get('imageName');
                 parseFormFileToBase64(formData.get('image'), sendFunction);
             } else {
                 // Send without image
-                sendEvent(wrapMessage(JSON.stringify(item), 536));
+                sendEvent(wrapMessage(JSON.stringify(item), 5513));
             }
         } else {
             stopLoadSpinner()
@@ -424,12 +435,6 @@
                 button.title= "Undo Removal of Image";
                 button.innerHTML = '<b>-</b>';
             }
-        }
-    }
-
-    let handleItemEvents = (data) => {
-        if (data.type === 561) {
-            handleRightBarCrudHtml(data)
         }
     }
 

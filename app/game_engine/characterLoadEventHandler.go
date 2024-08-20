@@ -5,6 +5,7 @@ import (
 	"github.com/hielkefellinger/go-dnd/app/ecs"
 	"github.com/hielkefellinger/go-dnd/app/ecs_components"
 	"github.com/hielkefellinger/go-dnd/app/ecs_model_translation"
+	"github.com/hielkefellinger/go-dnd/app/helpers"
 	"github.com/hielkefellinger/go-dnd/app/models"
 	"log"
 	"slices"
@@ -31,7 +32,7 @@ func (e *baseEventMessageHandler) loadCharactersDetails(message EventMessage, po
 	isLead := message.Source == pool.GetLeadId()
 
 	// Validate UUID Filter form message
-	uuidCharFilter, err := parseStingToUuid(message.Body)
+	uuidCharFilter, err := helpers.ParseStringToUuid(message.Body)
 	if err != nil {
 		return err
 	}

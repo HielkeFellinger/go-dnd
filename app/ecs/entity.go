@@ -10,8 +10,10 @@ import (
 type Entity interface {
 	GetId() uuid.UUID
 	GetName() string
+	SetName(name string)
 	GetVersion() uint
 	GetDescription() string
+	SetDescription(description string)
 	HasComponentType(ct uint64) bool
 	HasComponentByUuid(uuid uuid.UUID) bool
 	GetComponentByUuid(uuid uuid.UUID) (Component, bool)
@@ -58,8 +60,16 @@ func (e *BaseEntity) GetName() string {
 	return e.Name
 }
 
+func (e *BaseEntity) SetName(name string) {
+	e.Name = name
+}
+
 func (e *BaseEntity) GetDescription() string {
 	return e.Description
+}
+
+func (e *BaseEntity) SetDescription(description string) {
+	e.Description = description
 }
 
 func (e *BaseEntity) LoadFromRawEntity(raw RawEntity) error {

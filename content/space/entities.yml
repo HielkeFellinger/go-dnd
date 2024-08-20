@@ -119,7 +119,7 @@ base_maps:
           name: background_plane_1_A
           url: /campaign_data/11/images/map_33x27B.png
 base_factions:
-  - id: 0f450536-bd22-419e-bd80-b3eec3fb6f3e
+  - id: 0f4505513-bd22-419e-bd80-b3eec3fb6f3e
     name: United Earth
     description: ""
     components:

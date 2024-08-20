@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
 	"github.com/hielkefellinger/go-dnd/app/ecs_components"
+	"github.com/hielkefellinger/go-dnd/app/helpers"
 	"github.com/hielkefellinger/go-dnd/app/models"
 	"golang.org/x/net/html"
 	"log"
@@ -36,7 +37,7 @@ func (e *baseEventMessageHandler) typeUpdateCharacterUsers(message EventMessage,
 	}
 
 	// Validate UUID Filter form message
-	uuidCharFilter, err := parseStingToUuid(characterToPlayerLink.Id)
+	uuidCharFilter, err := helpers.ParseStringToUuid(characterToPlayerLink.Id)
 	if err != nil {
 		return err
 	}
@@ -134,7 +135,7 @@ func (e *baseEventMessageHandler) typeUpdateCharacterHealth(message EventMessage
 	}
 
 	// Validate UUID Filter form message
-	uuidCharFilter, err := parseStingToUuid(characterHealth.Id)
+	uuidCharFilter, err := helpers.ParseStringToUuid(characterHealth.Id)
 	if err != nil {
 		return err
 	}

@@ -1,9 +1,10 @@
 {{define "campaignManageMapSelectionBox"}}
     <div class="border" style="display: flex; flex-flow: row nowrap; min-height: 6em;">
-        <div style="flex: 1 1 0; background-image: url('{{ .ActiveImage.Url }}'); width: 100%; background-size: 75%;background-repeat: no-repeat; cursor: pointer;"
+        <div style="flex: 1 1 0; background-image: url('{{ .ActiveImage.Url }}'); width: 100%; background-size: 100%;
+                background-repeat: no-repeat; cursor: pointer; background-color: #495057"
              onclick="requestMapLoadFromServer('{{.Id}}')">
         </div>
-        <div style="flex: 3 3 0;">
+        <div style="flex: 3 3 0; padding-left: 1em">
             <h5>{{ .Name }} </h5>
             <h5>{{ .Description }}&nbsp</h5>
             <p>Active: {{ .Active }}</p>

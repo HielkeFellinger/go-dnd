@@ -31,9 +31,6 @@ const (
 	TypeLoadMap         EventType = 531
 	TypeLoadMapEntities EventType = 532
 	TypeLoadMapEntity   EventType = 533
-	TypeLoadUpsertMap   EventType = 534
-	TypeRemoveMap       EventType = 535
-	TypeUpsertMap       EventType = 536
 
 	TypeUpdateMapEntity          EventType = 543
 	TypeUpdateMapVisibility      EventType = 544
@@ -43,17 +40,25 @@ const (
 	TypeChangeMapBackgroundImage EventType = 548
 
 	// Management Events
+	TypeManagementOverviewStart EventType = 550
+	TypeManageMaps              EventType = 551
+	TypeManageCharacters        EventType = 552
+	TypeManageInventory         EventType = 553
+	TypeManageItems             EventType = 554
+	TypeManageCampaign          EventType = 555
+	TypeManageImages            EventType = 556
+	TypeManagementOverviewEnd   EventType = 560
 
-	TypeManageMaps       EventType = 551
-	TypeManageCharacters EventType = 552
-	TypeManageInventory  EventType = 553
-	TypeManageItems      EventType = 554
-	TypeManageCampaign   EventType = 555
+	TypeManagementCrudStart EventType = 5500
+	TypeLoadUpsertMap       EventType = 5511
+	TypeRemoveMap           EventType = 5512
+	TypeUpsertMap           EventType = 5513
 
-	TypeLoadUpsertItem EventType = 561
-	TypeUpsertItem     EventType = 562
+	TypeLoadUpsertItem    EventType = 5541
+	TypeUpsertItem        EventType = 5542
+	TypeManagementCrudEnd EventType = 5600
 
-	TypeManagementError EventType = 599
+	TypeManagementError EventType = 5999
 
 	// Set attention to a specific tab
 

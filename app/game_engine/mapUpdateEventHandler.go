@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
 	"github.com/hielkefellinger/go-dnd/app/ecs_components"
+	"github.com/hielkefellinger/go-dnd/app/helpers"
 	"github.com/hielkefellinger/go-dnd/app/models"
 	"golang.org/x/net/html"
 	"log"
@@ -69,11 +70,11 @@ func (e *baseEventMessageHandler) typeChangeMapBackgroundImage(message EventMess
 		return err
 	}
 
-	componentUuid, err := parseStingToUuid(activeMapBackground.ImageId)
+	componentUuid, err := helpers.ParseStringToUuid(activeMapBackground.ImageId)
 	if err != nil {
 		return err
 	}
-	mapUuid, err := parseStingToUuid(activeMapBackground.MapId)
+	mapUuid, err := helpers.ParseStringToUuid(activeMapBackground.MapId)
 	if err != nil {
 		return err
 	}
@@ -133,7 +134,7 @@ func (e *baseEventMessageHandler) typeSignalMapItem(message EventMessage, pool C
 	}
 
 	// Get the map and its MapItemRelationComponent and remove it
-	mapUuid, err := parseStingToUuid(sendSignal.Id)
+	mapUuid, err := helpers.ParseStringToUuid(sendSignal.Id)
 	if err != nil {
 		return err
 	}
@@ -183,11 +184,11 @@ func (e *baseEventMessageHandler) typeRemoveMapItem(message EventMessage, pool C
 	if err := json.Unmarshal([]byte(clearedBody), &removeMapItem); err != nil {
 		return err
 	}
-	mapUuid, err := parseStingToUuid(removeMapItem.MapId)
+	mapUuid, err := helpers.ParseStringToUuid(removeMapItem.MapId)
 	if err != nil {
 		return err
 	}
-	mapItemUuid, err := parseStingToUuid(removeMapItem.MapItemId)
+	mapItemUuid, err := helpers.ParseStringToUuid(removeMapItem.MapItemId)
 	if err != nil {
 		return err
 	}
@@ -230,11 +231,11 @@ func (e *baseEventMessageHandler) typeAddMapItem(message EventMessage, pool Camp
 		return err
 	}
 
-	entityUuid, err := parseStingToUuid(newMapEntity.EntityId)
+	entityUuid, err := helpers.ParseStringToUuid(newMapEntity.EntityId)
 	if err != nil {
 		return err
 	}
-	mapUuid, err := parseStingToUuid(newMapEntity.MapId)
+	mapUuid, err := helpers.ParseStringToUuid(newMapEntity.MapId)
 	if err != nil {
 		return err
 	}
@@ -319,7 +320,7 @@ func (e *baseEventMessageHandler) typeUpdateMapVisibility(message EventMessage, 
 		return err
 	}
 
-	mapUuid, err := parseStingToUuid(mapActivity.Id)
+	mapUuid, err := helpers.ParseStringToUuid(mapActivity.Id)
 	if err != nil {
 		return err
 	}
@@ -363,11 +364,11 @@ func (e *baseEventMessageHandler) typeUpdateMapEntity(message EventMessage, pool
 		return err
 	}
 
-	mapUuid, err := parseStingToUuid(messageMapItem.MapId)
+	mapUuid, err := helpers.ParseStringToUuid(messageMapItem.MapId)
 	if err != nil {
 		return err
 	}
-	mapItemUuid, err := parseStingToUuid(messageMapItem.Id)
+	mapItemUuid, err := helpers.ParseStringToUuid(messageMapItem.Id)
 	if err != nil {
 		return err
 	}

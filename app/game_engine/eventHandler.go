@@ -31,7 +31,7 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 		}
 	}
 
-	if message.Type == TypeLoadFullGame || (message.Type >= TypeLoadMap && message.Type <= TypeUpsertMap) {
+	if message.Type == TypeLoadFullGame || (message.Type >= TypeLoadMap && message.Type <= TypeLoadMapEntity) {
 		err := e.handleMapLoadEvents(message, pool)
 		if err != nil {
 			return err
@@ -52,15 +52,16 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 		}
 	}
 
-	if message.Type >= TypeManageMaps && message.Type <= TypeManageCampaign {
+	// Management (Overview)
+	if message.Type >= TypeManagementOverviewStart && message.Type <= TypeManagementOverviewEnd {
 		err := e.handleManagementEvents(message, pool)
 		if err != nil {
 			return err
 		}
 	}
-
-	if message.Type >= TypeLoadUpsertItem && message.Type <= TypeUpsertItem {
-		err := e.handleItemEvents(message, pool)
+	// Management (CRUD)
+	if message.Type > TypeManagementCrudStart && message.Type < TypeManagementCrudEnd {
+		err := e.handleManagementCrudEvents(message, pool)
 		if err != nil {
 			return err
 		}
