@@ -7,3 +7,4 @@ tmp
 
 # Do not sync campaign data
 /campaign_data/**
+/bin
