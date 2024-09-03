@@ -49,6 +49,11 @@ func parseEntityIntoRawEntity(entities []ecs.Entity) []ecs.RawEntity {
 	rawEntities := make([]ecs.RawEntity, len(entities))
 
 	for index, entity := range entities {
+		// Skip nil entity; may be a leftover of slices.delete not reducing the total size of the underlying array.
+		if entity == nil {
+			continue
+		}
+
 		rawEntity := ecs.RawEntity{
 			Id:          entity.GetId().String(),
 			Name:        entity.GetName(),
@@ -63,6 +68,11 @@ func parseEntityIntoRawEntity(entities []ecs.Entity) []ecs.RawEntity {
 func parseComponentsToRawComponents(components []ecs.Component) []ecs.RawComponent {
 	rawComponents := make([]ecs.RawComponent, len(components))
 	for index, component := range components {
+		// Skip nil components; may be a leftover of slices.delete not reducing the total size of the underlying array.
+		if component == nil {
+			continue
+		}
+
 		if rawComponent, err := component.ParseToRawComponent(); err == nil {
 			rawComponents[index] = rawComponent
 		}

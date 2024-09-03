@@ -47,5 +47,5 @@ func HandleStaticContent(router *gin.Engine) {
 }
 
 func HandleTemplates(router *gin.Engine) {
-	router.LoadHTMLGlob("web/templates/*")
+	router.LoadHTMLGlob(os.Getenv("CAMPAIGN_WEB_DIR") + "/templates/*")
 }

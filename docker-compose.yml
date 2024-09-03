@@ -1,0 +1,42 @@
+services:
+  db:
+    image: postgres:15.3-alpine3.18
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=go-dnd
+    ports:
+      - "5432:5432"
+    volumes:
+      - db:/var/lib/postgresql/data
+      - ./configs/init.sql:/docker-entrypoint-initdb.d/create_tables.sql
+
+  go-dnd:
+    build:
+      context: .
+      dockerfile: build/docker/Dockerfile
+    restart: unless-stopped
+    environment:
+      - HOST=
+      - PORT=8000
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASS=postgres
+      - POSTGRES_DB=go-dnd
+      - GIN_MODE=debug
+      - CRYPT_COST=16
+      - CAMPAIGN_DATA_DIR=/campaign_data
+      - CAMPAIGN_WEB_DIR=/web
+      - JWT_SECRET=4g85f6134i78rbc12oi343615tcfpb9
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./campaign_data:/campaign_data
+
+volumes:
+  db:
+    driver: local
