@@ -3,6 +3,7 @@ package game_engine
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
 	"github.com/hielkefellinger/go-dnd/app/ecs_components"
 	"github.com/hielkefellinger/go-dnd/app/ecs_model_translation"
@@ -27,7 +28,7 @@ func (e *baseEventMessageHandler) handleManagementEvents(message EventMessage, p
 		return e.typeManageCampaign(message, pool)
 	}
 
-	return nil
+	return errors.New(fmt.Sprintf("message of type '%d' is not recognised by 'handleManagementEvents()'", message.Type))
 }
 
 func (e *baseEventMessageHandler) typeManageItems(message EventMessage, pool CampaignPool) error {

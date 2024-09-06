@@ -2,6 +2,7 @@ package game_engine
 
 import (
 	"errors"
+	"fmt"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
 	"github.com/hielkefellinger/go-dnd/app/ecs_components"
 	"github.com/hielkefellinger/go-dnd/app/ecs_model_translation"
@@ -14,13 +15,19 @@ import (
 
 func (e *baseEventMessageHandler) handleLoadCharacterEvents(message EventMessage, pool CampaignPool) error {
 	log.Printf("- Char. Load Event Type: '%d' Message: '%s'", message.Type, message.Id)
+	var handled = false
+
 	if message.Type == TypeLoadCharacters || message.Type == TypeLoadFullGame {
 		e.loadCharacters(message, pool)
+		handled = true
 	}
 	if message.Type == TypeLoadCharactersDetails {
 		return e.loadCharactersDetails(message, pool)
 	}
 
+	if !handled {
+		return errors.New(fmt.Sprintf("message of type '%d' is not recognised by 'handleLoadCharacterEvents()'", message.Type))
+	}
 	return nil
 }
 

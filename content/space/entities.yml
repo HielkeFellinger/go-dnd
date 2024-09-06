@@ -117,7 +117,7 @@ base_maps:
           active: "true"
           base64: ""
           name: background_plane_1_B
-          url: /campaign_data/11/images/map_33x27B.png
+          url: /images/space/map_33x27B.png
 base_factions:
   - id: 0f4505513-bd22-419e-bd80-b3eec3fb6f3e
     name: United Earth

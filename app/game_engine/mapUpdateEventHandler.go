@@ -15,44 +15,54 @@ import (
 
 func (e *baseEventMessageHandler) handleMapUpdateEvents(message EventMessage, pool CampaignPool) error {
 	log.Printf("- Map Update Event Type: '%d' Message: '%s'", message.Type, message.Id)
+	var handled = false
 
 	if message.Type == TypeUpdateMapEntity {
 		err := e.typeUpdateMapEntity(message, pool)
 		if err != nil {
 			return err
 		}
+		handled = true
 	}
 	if message.Type == TypeUpdateMapVisibility {
 		err := e.typeUpdateMapVisibility(message, pool)
 		if err != nil {
 			return err
 		}
+		handled = true
 	}
 	if message.Type == TypeAddMapItem {
 		err := e.typeAddMapItem(message, pool)
 		if err != nil {
 			return err
 		}
+		handled = true
 	}
 	if message.Type == TypeRemoveMapItem {
 		err := e.typeRemoveMapItem(message, pool)
 		if err != nil {
 			return err
 		}
+		handled = true
 	}
 	if message.Type == TypeSignalMapItem {
 		err := e.typeSignalMapItem(message, pool)
 		if err != nil {
 			return err
 		}
+		handled = true
 	}
 	if message.Type == TypeChangeMapBackgroundImage {
 		err := e.typeChangeMapBackgroundImage(message, pool)
 		if err != nil {
 			return err
 		}
+		handled = true
 	}
 
+	if !handled {
+		return errors.New(fmt.Sprintf("message of type '%d' is not recognised by 'handleMapUpdateEvents()'", message.Type))
+	}
 	return nil
 }
 

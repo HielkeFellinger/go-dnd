@@ -3,6 +3,7 @@ package game_engine
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
 	"github.com/hielkefellinger/go-dnd/app/ecs_model_translation"
 	"github.com/hielkefellinger/go-dnd/app/helpers"
@@ -12,6 +13,7 @@ import (
 
 func (e *baseEventMessageHandler) handleManagementCrudEvents(message EventMessage, pool CampaignPool) error {
 	log.Printf("- Game Management CRUD Events Type: '%d' Message: '%s'", message.Type, message.Id)
+	var handled = false
 
 	// Maps
 	if message.Type == TypeLoadUpsertMap {
@@ -19,11 +21,13 @@ func (e *baseEventMessageHandler) handleManagementCrudEvents(message EventMessag
 		if err != nil {
 			return err
 		}
+		handled = true
 	} else if message.Type == TypeUpsertMap {
 		err := e.typeUpsertMap(message, pool)
 		if err != nil {
 			return err
 		}
+		handled = true
 	}
 
 	// Items
@@ -32,13 +36,18 @@ func (e *baseEventMessageHandler) handleManagementCrudEvents(message EventMessag
 		if err != nil {
 			return err
 		}
+		handled = true
 	} else if message.Type == TypeUpsertItem {
 		err := e.typeUpsertItem(message, pool)
 		if err != nil {
 			return err
 		}
+		handled = true
 	}
 
+	if !handled {
+		return errors.New(fmt.Sprintf("message of type '%d' is not recognised by 'handleManagementCrudEvents()'", message.Type))
+	}
 	return nil
 }
 

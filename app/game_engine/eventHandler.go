@@ -2,8 +2,10 @@ package game_engine
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"log"
+	"os"
 	"text/template"
 )
 
@@ -16,12 +18,14 @@ type baseEventMessageHandler struct {
 
 func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool CampaignPool) error {
 	log.Printf("Message Handler Parsing ID: '%+v' of Type: '%d' \n", message.Id, message.Type)
+	var handled = false
 
 	if message.Type == TypeGameSave {
 		err := e.handlePersistDataEvents(message, pool)
 		if err != nil {
 			return err
 		}
+		handled = true
 	}
 
 	if message.Type == TypeLoadFullGame || (message.Type >= TypeLoadCharacters && message.Type <= TypeLoadCharactersDetails) {
@@ -29,6 +33,7 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 		if err != nil {
 			return err
 		}
+		handled = true
 	}
 
 	if message.Type == TypeLoadFullGame || (message.Type >= TypeLoadMap && message.Type <= TypeLoadMapEntity) {
@@ -36,6 +41,7 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 		if err != nil {
 			return err
 		}
+		handled = true
 	}
 
 	if message.Type >= TypeUpdateCharacterHealth && message.Type <= TypeUpdateCharacterUsers {
@@ -43,6 +49,7 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 		if err != nil {
 			return err
 		}
+		handled = true
 	}
 
 	if message.Type >= TypeUpdateMapEntity && message.Type <= TypeChangeMapBackgroundImage {
@@ -50,6 +57,7 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 		if err != nil {
 			return err
 		}
+		handled = true
 	}
 
 	// Management (Overview)
@@ -58,6 +66,7 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 		if err != nil {
 			return err
 		}
+		handled = true
 	}
 	// Management (CRUD)
 	if message.Type > TypeManagementCrudStart && message.Type < TypeManagementCrudEnd {
@@ -65,6 +74,7 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 		if err != nil {
 			return err
 		}
+		handled = true
 	}
 
 	if message.Type >= TypeChatBroadcast && message.Type <= TypeChatWhisper {
@@ -72,15 +82,19 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 		if err != nil {
 			return err
 		}
+		handled = true
 	}
 
+	if !handled {
+		return errors.New(fmt.Sprintf("message of type '%d' is not recognised by server", message.Type))
+	}
 	return nil
 }
 
 func (e *baseEventMessageHandler) handleLoadHtmlBodyMultipleTemplateFiles(fileNames []string, templateName string, data map[string]any) string {
 	files := make([]string, 0)
 	for _, fileName := range fileNames {
-		files = append(files, fmt.Sprintf("web/templates/%s", fileName))
+		files = append(files, fmt.Sprintf(os.Getenv("TEMPLATE_DIR")+"%s", fileName))
 	}
 
 	var buf bytes.Buffer
@@ -94,7 +108,7 @@ func (e *baseEventMessageHandler) handleLoadHtmlBodyMultipleTemplateFiles(fileNa
 
 func (e *baseEventMessageHandler) handleLoadHtmlBody(fileName string, templateName string, data map[string]any) string {
 	var buf bytes.Buffer
-	tmpl := template.Must(template.ParseFiles(fmt.Sprintf("web/templates/%s", fileName)))
+	tmpl := template.Must(template.ParseFiles(fmt.Sprintf(os.Getenv("TEMPLATE_DIR")+"%s", fileName)))
 	err := tmpl.ExecuteTemplate(&buf, templateName, data)
 	if err != nil {
 		log.Printf("Error parsing %s `%s`", fileName, err.Error())

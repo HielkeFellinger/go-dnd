@@ -188,92 +188,104 @@
 
         // Parse Character Events
         if (payLoad.type >= 500 && payLoad.type < 510) {
-            handleCharacterEvents(payLoad)
-            return
+            handleCharacterEvents(payLoad);
+            return;
         }
 
         // Parse Map Events
         if (payLoad.type >= 530 && payLoad.type < 549) {
             if (payLoad.type === 531) {
-                handleCampaignContentMapEvents(payLoad)
+                handleCampaignContentMapEvents(payLoad);
             } else if (payLoad.type === 532) {
-                handleCampaignContentMapItemsEvents(payLoad)
+                handleCampaignContentMapItemsEvents(payLoad);
             } else if (payLoad.type === 533) {
-                handleCampaignContentMapItemEvents(payLoad)
+                handleCampaignContentMapItemEvents(payLoad);
             }
             else if (payLoad.type === 544) {
-                handleCampaignContentMapVisibility(payLoad)
+                handleCampaignContentMapVisibility(payLoad);
             } else if (payLoad.type === 546) {
-                handleMapItemRemoval(payLoad)
+                handleMapItemRemoval(payLoad);
             } else if (payLoad.type === 547) {
-                handleSignal(payLoad)
+                handleSignal(payLoad);
             } else if (payLoad.type === 548) {
-                handleNewMapBackground(payLoad)
+                handleNewMapBackground(payLoad);
             }
-            return
+            return;
         }
 
         // Parse Manage Events
         if (payLoad.type >= 550 && payLoad.type <= 559) {
-            handleManagePage(payLoad)
+            handleManagePage(payLoad);
             return;
         }
         if (payLoad.type >= 5500 && payLoad.type <= 5600 ) {
+            // Reset Error-box
+            let element = document.getElementById("managementCrudError");
+            if (element) {
+                element["style"].visibility = "hidden";
+            }
+
             // Maps
             if (payLoad.type === 5511) {
-                handleRightBarCrudHtml(payLoad)
+                handleRightBarCrudHtml(payLoad);
             }
             // Items
             if (payLoad.type === 5541) {
-                handleRightBarCrudHtml(payLoad)
+                handleRightBarCrudHtml(payLoad);
             }
             return;
         }
-        if (payLoad.type == 5999) {
-
+        if (payLoad.type === 5999) {
+            stopLoadSpinner();
+            let element = document.getElementById("managementCrudError");
+            if (element) {
+                let body = JSON.parse(payLoad.body)
+                element.textContent = body.title + ': ' + body.message;
+                element["style"].visibility = "visible";
+            }
         }
 
         // Parse Chat-messages
         if ((payLoad.type >= 400 && payLoad.type < 410) || (payLoad.type >= 800 && payLoad.type < 900)) {
-            handleChatEvents(payLoad)
-            return
+            handleChatEvents(payLoad);
+            return;
         }
 
         {{ if .campaign.UserIsLead }}
-        document.getElementById("event-content").innerHTML += evt.data;
+        document.getElementById("event-content").innerHTML += payLoad;
         {{ end }}
     }
 
     let saveGame = () => {
-        sendEvent(wrapMessage('', 2))
+        sendEvent(wrapMessage('', 2));
     }
 
     let fullRefresh = () => {
         selectedCharDetailsId = "";
         loadedCharDetailsId = "";
         document.getElementById("entity-details-holder").innerHTML = "";
-        sendEvent(wrapMessage('', 500))
+        sendEvent(wrapMessage('', 500));
     }
 
     let wrapMessage = (body, type) => {
-        return {body: body, type: type}
+        return {body: body, type: type};
     }
 
     let sendEvent = (event) => {
-        console.log("Sending event to server: ", event)
-        socket.send(JSON.stringify(event))
+        console.log("Sending event to server: ", event);
+        socket.send(JSON.stringify(event));
     }
 
     let updateCharacterList = () => {
-        let body = ''
-        sendEvent(wrapMessage(body, 501))
+        let body = '';
+        sendEvent(wrapMessage(body, 501));
     }
 
     let sendChatMessage = () => {
-        let body = '' + document.getElementById("message").value
-        document.getElementById("message").value = ''
+        let body = '' + document.getElementById("message")["value"];
+        document.getElementById("message")["value"] = '';
         if (body && body.trim()) {
-            sendEvent(wrapMessage(body, 800))
+            sendEvent(wrapMessage(body, 800));
         }
     }
 
@@ -339,9 +351,9 @@
             item.Restore = formData.get('restore');
             item.RangeMin = formData.get('rangeMin');
             item.RangeMax = formData.get('rangeMax');
-            sendEvent(wrapMessage(JSON.stringify(item), 5542))
+            sendEvent(wrapMessage(JSON.stringify(item), 5542));
         } else {
-            stopLoadSpinner()
+            stopLoadSpinner();
         }
     }
 
@@ -356,13 +368,13 @@
             item.Description = formData.get('description');
             item.X = formData.get('area_x');
             item.Y = formData.get('area_y');
-            item.RemoveImages = []
-            if (document.getElementById("removeImages") && document.getElementById("removeImages").value) {
-                let images = document.getElementById("removeImages").value
-                let splited = images.split('_');
-                for (const key in splited) {
-                    if (splited[key]) {
-                        item.RemoveImages.push(splited[key])
+            item.RemoveImages = [];
+            if (document.getElementById("removeImages") && document.getElementById("removeImages")["value"]) {
+                let images = document.getElementById("removeImages")["value"];
+                let split = images.split('_');
+                for (const key in split) {
+                    if (split[key]) {
+                        item.RemoveImages.push(split[key]);
                     }
                 }
             }
@@ -371,7 +383,7 @@
                 let sendFunction = (image) => {
                     item.Image = image;
                     sendEvent(wrapMessage(JSON.stringify(item), 5513));
-                    stopLoadSpinner()
+                    stopLoadSpinner();
                 }
                 item.ImageName = formData.get('imageName');
                 parseFormFileToBase64(formData.get('image'), sendFunction);
@@ -380,7 +392,7 @@
                 sendEvent(wrapMessage(JSON.stringify(item), 5513));
             }
         } else {
-            stopLoadSpinner()
+            stopLoadSpinner();
         }
     }
 
@@ -407,30 +419,30 @@
                 reader.readAsArrayBuffer(file);
             } catch (e) {
                 // ignore; send empty
-                stopLoadSpinner()
+                stopLoadSpinner();
             }
         } else {
-            stopLoadSpinner()
+            stopLoadSpinner();
         }
     }
 
     let handleRemovalOfImagesRequest = (id) => {
         if (document.getElementById("removeImages")) {
-            console.log(document.getElementById("removeImages").value)
+            console.log(document.getElementById("removeImages")["value"]);
             // Check if to be removed or needs to be recovered
-            if (document.getElementById("removeImages").value &&
-                document.getElementById("removeImages").value.indexOf(id) > 0) {
-                document.getElementById("image_title_" + id).style.textDecoration = '';
-                document.getElementById("image_" + id).style.opacity = '100%';
+            if (document.getElementById("removeImages")["value"] &&
+                document.getElementById("removeImages")["value"].indexOf(id) > 0) {
+                document.getElementById("image_title_" + id)["style"].textDecoration = '';
+                document.getElementById("image_" + id)["style"].opacity = '100%';
                 let button = document.getElementById("btn_remove_" + id);
                 button.title = "Remove Image";
                 button.innerHTML = '<b>x</b>';
-                document.getElementById("removeImages").value =
-                    document.getElementById("removeImages").value.replace('_' + id, '');
+                document.getElementById("removeImages")["value"] =
+                    document.getElementById("removeImages")["value"].replace('_' + id, '');
             } else {
-                document.getElementById("removeImages").value += '_' + id;
-                document.getElementById("image_title_" + id).style.textDecoration = 'line-through';
-                document.getElementById("image_" + id).style.opacity = '30%';
+                document.getElementById("removeImages")["value"] += '_' + id;
+                document.getElementById("image_title_" + id)["style"].textDecoration = 'line-through';
+                document.getElementById("image_" + id)["style"].opacity = '30%';
                 let button = document.getElementById('btn_remove_' + id);
                 button.title= "Undo Removal of Image";
                 button.innerHTML = '<b>-</b>';
@@ -439,14 +451,14 @@
     }
 
     let handleRightBarCrudHtml = (data) => {
-        let body = JSON.parse(data.body)
+        let body = JSON.parse(data.body);
         // Reset possible Char links
-        selectedCharDetailsId = ""
-        loadedCharDetailsId = ""
+        selectedCharDetailsId = "";
+        loadedCharDetailsId = "";
         if (!rightBarVisible) {
-            toggleVisibilityRightBar()
+            toggleVisibilityRightBar();
         }
-        document.getElementById("entity-details-holder").innerHTML = body
+        document.getElementById("entity-details-holder").innerHTML = body;
     }
 
     let campaignMapTabIds = [];
@@ -456,45 +468,45 @@
         let contentData = body.Content;
 
         for (let index in contentData) {
-            let oldContent = document.getElementById(contentData[index].Id)
+            let oldContent = document.getElementById(contentData[index].Id);
             if (oldContent) {
-                oldContent.remove()
+                oldContent.remove();
             }
-            document.getElementById("campaign-content").innerHTML += contentData[index].Html
+            document.getElementById("campaign-content").innerHTML += contentData[index].Html;
         }
 
         let lastId;
         for (let index in tabs) {
-            lastId = tabs[index].Id
-            let oldTab = document.getElementById(tabs[index].Id + "List")
+            lastId = tabs[index].Id;
+            let oldTab = document.getElementById(tabs[index].Id + "List");
             if (oldTab) {
-                oldTab.remove()
+                oldTab.remove();
             }
-            if (!campaignMapTabIds.includes(tabs[index].Id)) campaignMapTabIds.push(tabs[index].Id)
-            document.getElementById("campaign-tabs").innerHTML += tabs[index].Html
+            if (!campaignMapTabIds.includes(tabs[index].Id)) campaignMapTabIds.push(tabs[index].Id);
+            document.getElementById("campaign-tabs").innerHTML += tabs[index].Html;
         }
         // Open a map (or the last if multiple maps are send)
         if (lastId) {
-            openTab(lastId)
+            openTab(lastId);
         }
     }
 
-    let rightBarVisible = false
+    let rightBarVisible = false;
     let toggleVisibilityRightBar = () => {
         rightBarVisible = !rightBarVisible
-        let element = document.getElementById('toggle-right-bar-visibility')
+        let element = document.getElementById('toggle-right-bar-visibility');
 
         if (rightBarVisible) {
-            element.innerHTML = '<b><i class="bi bi-chevron-double-right"></i></b>'
-            document.getElementById('right-bar-inner-content').style.display = "inherit";
-            document.getElementById('right-bar-inner-content').style.width = "543px";
-            document.getElementById('ui-right-bar').style.width = "calc(553px + 3em)";
+            element.innerHTML = '<b><i class="bi bi-chevron-double-right"></i></b>';
+            document.getElementById('right-bar-inner-content')["style"].display = "inherit";
+            document.getElementById('right-bar-inner-content')["style"].width = "543px";
+            document.getElementById('ui-right-bar')["style"].width = "calc(553px + 3em)";
         } else {
-            element.innerHTML = '<b><i class="bi bi-chevron-double-left"></i></b>'
-            document.getElementById('right-bar-inner-content').style.display = "none";
-            document.getElementById('right-bar-inner-content').style.width = "0";
-            document.getElementById('ui-right-bar').style.width = "3em";
-            element.style.visibility = "visible";
+            element.innerHTML = '<b><i class="bi bi-chevron-double-left"></i></b>';
+            document.getElementById('right-bar-inner-content')["style"].display = "none";
+            document.getElementById('right-bar-inner-content')["style"].width = "0";
+            document.getElementById('ui-right-bar')["style"].width = "3em";
+            element["style"].visibility = "visible";
         }
     }
 
@@ -502,40 +514,40 @@
     let mapItemIdToEntityId = new Map();
     let mapItemHtmlIdToMapItem = new Map();
     let handleCampaignContentMapItemsEvents = (data) => {
-        let body = JSON.parse(data.body)
-        let MapId = body.MapId
-        let MapElements = body.Elements
+        let body = JSON.parse(data.body);
+        let MapId = body.MapId;
+        let MapElements = body.Elements;
 
         // Remove or create empty
         if (mapItems.has(MapId)) {
             for (let [elemId, mapItem] of mapItems.get(MapId)) {
                 if (MapElements && !Object.hasOwn(MapElements, elemId)) {
-                    let mapItemHtmlId = MapId + "-" + mapItem.Id + "-cell-element"
-                    document.getElementById(mapItemHtmlId)?.remove()
-                    mapItemIdToEntityId.delete(mapItem.Id)
-                    mapItemHtmlIdToMapItem.delete(mapItemHtmlId)
+                    let mapItemHtmlId = MapId + "-" + mapItem.Id + "-cell-element";
+                    document.getElementById(mapItemHtmlId)?.remove();
+                    mapItemIdToEntityId.delete(mapItem.Id);
+                    mapItemHtmlIdToMapItem.delete(mapItemHtmlId);
                 }
             }
         } else {
-            mapItems.set(MapId, new Map())
+            mapItems.set(MapId, new Map());
         }
 
         // Add/Modify
         for (let elemId in MapElements) {
-            let mapItem = MapElements[elemId]
+            let mapItem = MapElements[elemId];
 
             // Get the Cell
-            let cell = document.getElementById(MapId + "-cell-y" + mapItem.Position.Y + "-x" + mapItem.Position.X + '-content')
-            let mapItemHtmlId = MapId + "-" + mapItem.Id + "-cell-element"
+            let cell = document.getElementById(MapId + "-cell-y" + mapItem.Position.Y + "-x" + mapItem.Position.X + '-content');
+            let mapItemHtmlId = MapId + "-" + mapItem.Id + "-cell-element";
 
             if (cell != null) {
-                cell.innerHTML = mapItem.Html
-                mapItems.get(MapId).set(elemId, mapItem)
-                mapItemIdToEntityId.set(elemId, mapItem.EntityId)
-                mapItemHtmlIdToMapItem.set(mapItemHtmlId, mapItem)
+                cell.innerHTML = mapItem.Html;
+                mapItems.get(MapId).set(elemId, mapItem);
+                mapItemIdToEntityId.set(elemId, mapItem.EntityId);
+                mapItemHtmlIdToMapItem.set(mapItemHtmlId, mapItem);
 
                 // Add the event handlers
-                document.getElementById(mapItemHtmlId).oncontextmenu = showContextMenuOfMapItem
+                document.getElementById(mapItemHtmlId).oncontextmenu = showContextMenuOfMapItem;
             }
         }
     }
@@ -544,51 +556,51 @@
         if (campaignMap) {
             let menus = campaignMap.getElementsByClassName("context-menu active");
             for (let i = 0; i < menus.length; i++) {
-                menus[i].style.marginTop = (0 - campaignMap.scrollTop) + 'px';
-                menus[i].style.marginLeft = (0 - campaignMap.scrollLeft - 375) + 'px';
+                menus[i]["style"].marginTop = (0 - campaignMap.scrollTop) + 'px';
+                menus[i]["style"].marginLeft = (0 - campaignMap.scrollLeft - 375) + 'px';
             }
         }
     }
 
     let handleManagePage = (data) => {
-        let html = JSON.parse(data.body)
+        let html = JSON.parse(data.body);
         if (data.type === 551 ) {
-            document.getElementById('manageMapsContent').innerHTML = html
+            document.getElementById('manageMapsContent').innerHTML = html;
         }
         if (data.type === 552) {
-            document.getElementById('manageCharactersContent').innerHTML = html
+            document.getElementById('manageCharactersContent').innerHTML = html;
         }
         if (data.type === 553) {
-            document.getElementById('manageInventoryContent').innerHTML = html
+            document.getElementById('manageInventoryContent').innerHTML = html;
         }
         if (data.type === 554) {
-            document.getElementById('manageItemsContent').innerHTML = html
+            document.getElementById('manageItemsContent').innerHTML = html;
         }
         if (data.type === 555) {
-            document.getElementById('manageCampaignContent').innerHTML = html
+            document.getElementById('manageCampaignContent').innerHTML = html;
         }
     }
 
     let handleMapItemRemoval = (data) => {
-        let mapItemId = data.body
+        let mapItemId = data.body;
         for (let [mapId, mapItemsOnMap] of mapItems) {
             if (mapItemsOnMap.has(mapItemId)) {
-                let mapItemHtmlId = mapId + "-" + mapItemId + "-cell-element"
-                document.getElementById(mapItemHtmlId).remove()
-                mapItemIdToEntityId.delete(mapItemId)
-                mapItemHtmlIdToMapItem.delete(mapItemHtmlId)
-                mapItemsOnMap.delete(mapItemId)
+                let mapItemHtmlId = mapId + "-" + mapItemId + "-cell-element";
+                document.getElementById(mapItemHtmlId).remove();
+                mapItemIdToEntityId.delete(mapItemId);
+                mapItemHtmlIdToMapItem.delete(mapItemHtmlId);
+                mapItemsOnMap.delete(mapItemId);
             }
         }
     }
 
     let handleSignal = (data) => {
-        let body = JSON.parse(data.body)
-        let id = body.Id
-        let x = body.X
-        let y = body.Y
+        let body = JSON.parse(data.body);
+        let id = body.Id;
+        let x = body.X;
+        let y = body.Y;
 
-        let cell = document.getElementById(id + '-cell-y' + y + '-x' + x + '-content')
+        let cell = document.getElementById(id + '-cell-y' + y + '-x' + x + '-content');
         if (cell && body.Html) {
             // Check if it has a character
             let hasMapItem = false;
@@ -600,11 +612,11 @@
             }
 
             // remove old signals
-            removeSignal('signal-' + id + '-y' + y + '-x' + x)
-            cell.innerHTML = cell.innerHTML + body.Html
+            removeSignal('signal-' + id + '-y' + y + '-x' + x);
+            cell.innerHTML = cell.innerHTML + body.Html;
 
             if (hasMapItem) {
-                document.getElementById('signal-' + id + '-y' + y + '-x' + x).style.transform = 'translateY(-100%)'
+                document.getElementById('signal-' + id + '-y' + y + '-x' + x)["style"].transform = 'translateY(-100%)';
             }
         }
     }
@@ -618,7 +630,7 @@
 
         console.error(mapGrid);
         if (mapGrid) {
-            mapGrid.style.backgroundImage = "url('" + url + "')";
+            mapGrid["style"].backgroundImage = "url('" + url + "')";
         }
     }
 
@@ -630,35 +642,35 @@
     }
 
     let handleCampaignContentMapVisibility = (data) => {
-        let body = JSON.parse(data.body)
-        let id = body.Id
-        let active = body.Active
+        let body = JSON.parse(data.body);
+        let id = body.Id;
+        let active = body.Active;
 
         // Clean-up or request the new active map
         if (!active) {
-            closeTab(id)
+            closeTab(id);
         } else {
-            sendEvent(wrapMessage(id, 531))
-            sendEvent(wrapMessage(id, 532))
+            sendEvent(wrapMessage(id, 531));
+            sendEvent(wrapMessage(id, 532));
         }
     }
 
     let requestMapLoadFromServer = (id) => {
         if (!campaignMapTabIds.includes(id)) {
-            sendEvent(wrapMessage(id, 531))
-            sendEvent(wrapMessage(id, 532))
+            sendEvent(wrapMessage(id, 531));
+            sendEvent(wrapMessage(id, 532));
         } else {
-            openTab(id)
+            openTab(id);
         }
     }
 
     let handleCampaignContentMapItemEvents = (data) => {
-        let mapItem = JSON.parse(data.body)
-        let MapId = mapItem.MapId
+        let mapItem = JSON.parse(data.body);
+        let MapId = mapItem.MapId;
 
         // Get the Cell
-        let cell = document.getElementById(MapId + "-cell-y" + mapItem.Position.Y + "-x" + mapItem.Position.X + '-content')
-        let mapItemHtmlId = MapId + "-" + mapItem.Id + "-cell-element"
+        let cell = document.getElementById(MapId + "-cell-y" + mapItem.Position.Y + "-x" + mapItem.Position.X + '-content');
+        let mapItemHtmlId = MapId + "-" + mapItem.Id + "-cell-element";
 
         // Delete old
         if (document.getElementById(mapItemHtmlId)) {
@@ -678,15 +690,15 @@
 
     let showContextMenuOfMapItem = (event) => {
         let cell = findParentWithSpecificClass(event.target, 'cell');
-        let parent = findParentWithSpecificClass(event.target, 'element')
-        let map = findParentWithSpecificClass(event.target, 'campaign-map')
+        let parent = findParentWithSpecificClass(event.target, 'element');
+        let map = findParentWithSpecificClass(event.target, 'campaign-map');
         if (parent && map ) {
             for (const child of parent.children) {
                 if (child.classList.contains('context-menu')) {
-                    clearAllMenus()
-                    setContextMenuToActive(child, map, event)
+                    clearAllMenus();
+                    setContextMenuToActive(child, map, event);
                     if (cell) {
-                        cell.style.border = 'solid #991c2c'
+                        cell["style"].border = 'solid #991c2c';
                     }
                     break;
                 }
@@ -718,7 +730,7 @@
                             if (child.classList.contains('context-menu')) {
                                 clearAllMenus()
                                 setContextMenuToActive(child, map, event);
-                                parent.style.border = 'solid #991c2c';
+                                parent["style"].border = 'solid #991c2c';
                                 event.preventDefault();
                                 event.stopPropagation();
                                 return;
@@ -730,25 +742,25 @@
 
             for (const child of parent.children) {
                 if (child.classList.contains('context-menu')) {
-                    clearAllMenus()
-                    setContextMenuToActive(child, map, event)
+                    clearAllMenus();
+                    setContextMenuToActive(child, map, event);
                     break;
                 }
             }
-            parent.style.border = 'solid #991c2c'
+            parent["style"].border = 'solid #991c2c';
         }
         event.preventDefault();
         event.stopPropagation();
     }
 
     let setContextMenuToActive = (target, scrollParent, ev) => {
-        target.classList.add('active')
-        target.style.display = 'block';
-        target.style.marginTop = '' + (0 - scrollParent.scrollTop) + 'px';
-        target.style.marginLeft = '' + (0 - scrollParent.scrollLeft - 375) + 'px';
+        target.classList.add('active');
+        target["style"].display = 'block';
+        target["style"].marginTop = '' + (0 - scrollParent.scrollTop) + 'px';
+        target["style"].marginLeft = '' + (0 - scrollParent.scrollLeft - 375) + 'px';
         // @todo fix offscreen possibility
-        target.style.top = 'calc('+(ev.clientY+scrollParent.scrollTop)+'px - ' + (cellSizeInHalfEms*8) + 'px)';
-        target.style.left = (ev.clientX+scrollParent.scrollLeft)+'px';
+        target["style"].top = 'calc('+(ev.clientY+scrollParent.scrollTop)+'px - ' + (cellSizeInHalfEms*8) + 'px)';
+        target["style"].left = (ev.clientX+scrollParent.scrollLeft)+'px';
     }
 
     let sendSignal = (mapId, y, x, type) => {
@@ -765,12 +777,12 @@
     let hideCellContextMenu = (event) => {
         let cell = findParentWithSpecificClass(event.target, 'cell');
         if (cell) {
-            cell.style.border = null;
+            cell["style"].border = null;
         }
         let parent = findParentWithSpecificClass(event.target, 'context-menu');
         if (parent) {
             parent.classList.remove('active');
-            parent.style.display = 'none';
+            parent["style"].display = 'none';
         }
         event.preventDefault();
         event.stopPropagation();
@@ -798,17 +810,17 @@
             return;
         }
 
-        let mapItem = {}
-        mapItem.MapId = mapId
-        mapItem.Id = mapItemId
+        let mapItem = {};
+        mapItem.MapId = mapId;
+        mapItem.Id = mapItemId;
 
-        sendEvent(wrapMessage(JSON.stringify(mapItem), 546))
+        sendEvent(wrapMessage(JSON.stringify(mapItem), 546));
     }
 
     let findParentWithSpecificClass = (target, className) => {
         if (target) {
             if (target.classList.contains(className)) {
-                return target
+                return target;
             }
             return findParentWithSpecificClass(target.parentElement, className);
         }
@@ -817,37 +829,37 @@
 
     let updateMapVisibility = (id) => {
         // Send to back
-        let mapVisibility = {}
-        mapVisibility.Id = id
+        let mapVisibility = {};
+        mapVisibility.Id = id;
 
-        mapVisibility.Active = !document.getElementById("is" + id + "Active").checked
-        document.getElementById("is" + id + "Active").checked = mapVisibility.Active
+        mapVisibility.Active = !document.getElementById("is" + id + "Active").checked;
+        document.getElementById("is" + id + "Active").checked = mapVisibility.Active;
 
         if (mapVisibility.Active) {
-            document.getElementById("is" + id + "Icon").className = 'bi bi-eye'
+            document.getElementById("is" + id + "Icon").className = 'bi bi-eye';
         } else {
-            document.getElementById("is" + id + "Icon").className = 'bi bi-eye-slash'
+            document.getElementById("is" + id + "Icon").className = 'bi bi-eye-slash';
         }
 
-        sendEvent(wrapMessage(JSON.stringify(mapVisibility), 544))
+        sendEvent(wrapMessage(JSON.stringify(mapVisibility), 544));
     }
 
     let addCharacterToMap = (mapId) => {
-        let mapItemAdd = {}
-        mapItemAdd.EntityId = document.getElementById("charToMap" + mapId + "Select").value
-        mapItemAdd.MapId = mapId
+        let mapItemAdd = {};
+        mapItemAdd.EntityId = document.getElementById("charToMap" + mapId + "Select")["value"];
+        mapItemAdd.MapId = mapId;
 
         if (mapItemAdd.EntityId !== 'none') {
-            sendEvent(wrapMessage(JSON.stringify(mapItemAdd), 545))
+            sendEvent(wrapMessage(JSON.stringify(mapItemAdd), 545));
         }
     }
 
     let changeActiveMapBackground = (mapId) => {
-        let mapItemAdd = {}
-        mapItemAdd.ImageId = document.getElementById("imageAsActive" + mapId + "Select").value
-        mapItemAdd.MapId = mapId
+        let mapItemAdd = {};
+        mapItemAdd.ImageId = document.getElementById("imageAsActive" + mapId + "Select")["value"];
+        mapItemAdd.MapId = mapId;
 
-        sendEvent(wrapMessage(JSON.stringify(mapItemAdd), 548))
+        sendEvent(wrapMessage(JSON.stringify(mapItemAdd), 548));
     }
 
     let lastMessageSender = ''
@@ -855,24 +867,24 @@
     let handleChatEvents = (data) => {
         let chatMessage = '';
         if (data.source === currentUser) {
-            chatMessage += '<div class="chat-box chat-box-me">'
+            chatMessage += '<div class="chat-box chat-box-me">';
         } else if (data.source.toLowerCase() === "server") {
-            chatMessage += '<div class="chat-box chat-box-server">'
+            chatMessage += '<div class="chat-box chat-box-server">';
         } else {
-            chatMessage += '<div class="chat-box chat-box-other">'
+            chatMessage += '<div class="chat-box chat-box-other">';
         }
 
         if (lastMessageSender !== data.source) {
-            lastMessageSender = data.source
-            chatMessage += '<p style="margin: 0"><i><b>' + data.source + '</b> @ ' + data.dateTime + '</i></p>'
+            lastMessageSender = data.source;
+            chatMessage += '<p style="margin: 0"><i><b>' + data.source + '</b> @ ' + data.dateTime + '</i></p>';
         }
 
-        chatMessage += '<p style="margin: 0">'
+        chatMessage += '<p style="margin: 0">';
         if (data.type === 802) {
-            chatMessage += '<i class="bi bi-dice-6-fill spin-inline-4"></i>&nbsp;'
+            chatMessage += '<i class="bi bi-dice-6-fill spin-inline-4"></i>&nbsp;';
         }
-        chatMessage += data.body
-        chatMessage += '</p></div>'
+        chatMessage += data.body;
+        chatMessage += '</p></div>';
 
         // Set content and scroll to bottom of chat
         let chatContent = document.getElementById("chat-content");
@@ -887,7 +899,7 @@
         // Hide all
         let tabContent = document.getElementsByClassName("tab-content");
         for (i = 0; i < tabContent.length; i++) {
-            tabContent[i].style.display = "none";
+            tabContent[i]["style"].display = "none";
         }
         let navLinks = document.getElementsByClassName("nav-link");
         for (i = 0; i < navLinks.length; i++) {
@@ -896,8 +908,8 @@
 
         // Show the current tab, and add an "active" class to the button that opened the tab
         if (document.getElementById(targetId)) {
-            document.getElementById(targetId).style.display = "block";
-            document.getElementById(targetId).style.display = "block";
+            document.getElementById(targetId)["style"].display = "block";
+            document.getElementById(targetId)["style"].display = "block";
         }
         if (document.getElementById(targetId + 'Link')) {
             document.getElementById(targetId + 'Link').className += " active";
@@ -905,19 +917,19 @@
 
         {{ if .campaign.UserIsLead }}
         if (targetId === 'manageMaps') {
-            sendEvent(wrapMessage('', 551))
+            sendEvent(wrapMessage('', 551));
         }
         if (targetId === 'manageCharacters') {
-            sendEvent(wrapMessage('', 552))
+            sendEvent(wrapMessage('', 552));
         }
         if (targetId === 'manageInventory') {
-            sendEvent(wrapMessage('', 553))
+            sendEvent(wrapMessage('', 553));
         }
         if (targetId === 'manageItems') {
-            sendEvent(wrapMessage('', 554))
+            sendEvent(wrapMessage('', 554));
         }
         if (targetId === 'manageCampaign') {
-            sendEvent(wrapMessage('', 555))
+            sendEvent(wrapMessage('', 555));
         }
         {{ end }}
     }
@@ -925,33 +937,33 @@
     let closeTab = (targetId) => {
         if (document.getElementById(targetId + 'Link') &&
             document.getElementById(targetId + 'Link').className.indexOf("active") !== -1) {
-            openTab('current')
+            openTab('current');
         }
 
-        document.getElementById(targetId)?.remove()
-        document.getElementById(targetId + 'Link')?.remove()
-        campaignMapTabIds = campaignMapTabIds.filter(id => id !== targetId)
+        document.getElementById(targetId)?.remove();
+        document.getElementById(targetId + 'Link')?.remove();
+        campaignMapTabIds = campaignMapTabIds.filter(id => id !== targetId);
     }
 
     let cellSizeInHalfEms = 8
     let makeMapsSmaller = () => {
         if (cellSizeInHalfEms > 4) {
-            cellSizeInHalfEms--
-            applyMapZoom()
+            cellSizeInHalfEms--;
+            applyMapZoom();
         }
     }
 
     let makeMapsBigger = () => {
         if (cellSizeInHalfEms < 20) {
-            cellSizeInHalfEms++
-            applyMapZoom()
+            cellSizeInHalfEms++;
+            applyMapZoom();
         }
     }
 
     let clearAllSignals = () => {
         let signals = document.querySelectorAll(".signal");
         for (let i = 0; i < signals.length; i++) {
-            removeSignal(signals[i].id)
+            removeSignal(signals[i].id);
         }
     }
 
@@ -960,9 +972,9 @@
         for (let i = 0; i < menus.length; i++) {
             if (menus[i].classList.contains('context-menu')) {
                 let parent = findParentWithSpecificClass(menus[i], 'cell');
-                parent.style.border = null;
-                menus[i].style.display = 'none'
-                menus[i].classList.remove('active')
+                parent["style"].border = null;
+                menus[i]["style"].display = 'none';
+                menus[i].classList.remove('active');
             }
         }
     }
@@ -986,10 +998,10 @@
         clearAllMenus()
 
         // modifying the rule in the stylesheet
-        elementRules.style.setProperty('max-height', '' + (cellSizeInHalfEms/2) + 'em' );
-        elementRules.style.setProperty('max-width', '' + (cellSizeInHalfEms/2) + 'em' );
-        elementRules.style.setProperty('min-height', '' + (cellSizeInHalfEms/2) + 'em' );
-        elementRules.style.setProperty('min-width', '' + (cellSizeInHalfEms/2) + 'em' );
+        elementRules["style"].setProperty('max-height', '' + (cellSizeInHalfEms/2) + 'em' );
+        elementRules["style"].setProperty('max-width', '' + (cellSizeInHalfEms/2) + 'em' );
+        elementRules["style"].setProperty('min-height', '' + (cellSizeInHalfEms/2) + 'em' );
+        elementRules["style"].setProperty('min-width', '' + (cellSizeInHalfEms/2) + 'em' );
     }
 
     let allowDrop = (ev) => {
@@ -1005,42 +1017,42 @@
         let data = ev.dataTransfer.getData("cell-element");
 
         // Get the map item
-        let mapItem = mapItemHtmlIdToMapItem.get(data)
+        let mapItem = mapItemHtmlIdToMapItem.get(data);
         if (!mapItem) {
-            return
+            return;
         }
 
         // Parse cell to X and Y
         let cellId = ev.target.id
-        let y = cellId.substring(cellId.indexOf('-y') + 2, cellId.indexOf('-x'))
-        let x = cellId.substring(cellId.indexOf('-x') + 2, cellId.indexOf('-content'))
+        let y = cellId.substring(cellId.indexOf('-y') + 2, cellId.indexOf('-x'));
+        let x = cellId.substring(cellId.indexOf('-x') + 2, cellId.indexOf('-content'));
 
         // Update MapItem (position)
-        mapItem.Position.Y = y
-        mapItem.Position.X = x
+        mapItem.Position.Y = y;
+        mapItem.Position.X = x;
 
         // Add to the right parent; skipping content
-        let sendOk = false
+        let sendOk = false;
         if (ev.target.classList.contains('content')) {
             ev.target.appendChild(document.getElementById(data));
-            sendOk = true
+            sendOk = true;
         } else {
             let parent = findParentWithSpecificClass(ev.target, 'content');
             if (parent) {
-                let alreadyHasElement = false
+                let alreadyHasElement = false;
                 for (const child of parent.children) {
                     if (child.classList.contains('signal')) {
                         // Close the possible signal
-                        removeSignal(child.id)
+                        removeSignal(child.id);
                     } else if (child.classList.contains('element')) {
                         // Already occupied
-                        alreadyHasElement = true
+                        alreadyHasElement = true;
                         break;
                     }
                 }
                 if (!alreadyHasElement) {
                     parent.appendChild(document.getElementById(data));
-                    sendOk = true
+                    sendOk = true;
                 }
             }
         }
@@ -1048,49 +1060,49 @@
         if (sendOk) {
             // Send Updated MapItem
             // -  Remove Html before sending
-            mapItem.Html = ''
-            sendEvent(wrapMessage(JSON.stringify(mapItem), 543))
+            mapItem.Html = '';
+            sendEvent(wrapMessage(JSON.stringify(mapItem), 543));
         }
     }
 
     let updateCharacterHealth = (id) => {
-        let charHealth = {}
-        charHealth.id = id
-        charHealth.damage = document.getElementById("healthDamage").value
-        charHealth.temp = document.getElementById("healthTmp").value
-        charHealth.max = document.getElementById("healthMax").value
+        let charHealth = {};
+        charHealth.id = id;
+        charHealth.damage = document.getElementById("healthDamage")["value"];
+        charHealth.temp = document.getElementById("healthTmp")["value"];
+        charHealth.max = document.getElementById("healthMax")["value"];
 
-        sendEvent(wrapMessage(JSON.stringify(charHealth), 511))
+        sendEvent(wrapMessage(JSON.stringify(charHealth), 511));
     }
 
     let linkCharacterToPlayer = (elementId, id, playerName) => {
-        let charToPlayer = {}
-        charToPlayer.id = id
-        charToPlayer.playerName = playerName
+        let charToPlayer = {};
+        charToPlayer.id = id;
+        charToPlayer.playerName = playerName;
 
-        let element = document.getElementById(elementId)
+        let element = document.getElementById(elementId);
         if (element) {
             if (element.classList.contains('btn-success')){
-                element.classList.remove('btn-success')
-                charToPlayer.connect = false
+                element.classList.remove('btn-success');
+                charToPlayer.connect = false;
             } else {
-                element.classList.add('btn-success')
-                charToPlayer.connect = true
+                element.classList.add('btn-success');
+                charToPlayer.connect = true;
             }
         }
 
-        sendEvent(wrapMessage(JSON.stringify(charToPlayer), 512))
+        sendEvent(wrapMessage(JSON.stringify(charToPlayer), 512));
     }
 
     let loadSpinner = () => {
-        document.getElementById("spinner").style.display = "block";
+        document.getElementById("spinner")["style"].display = "block";
     }
 
     let stopLoadSpinner = () => {
         let spinner = document.getElementById("spinner");
 
         if (spinner) {
-            document.getElementById("spinner").style.display = "none";
+            document.getElementById("spinner")["style"].display = "none";
         }
     }
 

@@ -3,6 +3,7 @@ package game_engine
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
 	"github.com/hielkefellinger/go-dnd/app/ecs_components"
@@ -22,7 +23,7 @@ func (e *baseEventMessageHandler) handleUpdateCharacterEvents(message EventMessa
 		return e.typeUpdateCharacterUsers(message, pool)
 	}
 
-	return nil
+	return errors.New(fmt.Sprintf("message of type '%d' is not recognised by 'handleUpdateCharacterEvents()'", message.Type))
 }
 
 func (e *baseEventMessageHandler) typeUpdateCharacterUsers(message EventMessage, pool CampaignPool) error {

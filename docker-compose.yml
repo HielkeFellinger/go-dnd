@@ -29,6 +29,7 @@ services:
       - CRYPT_COST=16
       - CAMPAIGN_DATA_DIR=/campaign_data
       - CAMPAIGN_WEB_DIR=/web
+      - TEMPLATE_DIR=web/templates/
       - JWT_SECRET=4g85f6134i78rbc12oi343615tcfpb9
     depends_on:
       - db

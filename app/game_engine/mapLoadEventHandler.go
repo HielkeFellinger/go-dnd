@@ -3,6 +3,7 @@ package game_engine
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
 	"github.com/hielkefellinger/go-dnd/app/ecs_model_translation"
 	"github.com/hielkefellinger/go-dnd/app/helpers"
@@ -14,16 +15,23 @@ import (
 
 func (e *baseEventMessageHandler) handleMapLoadEvents(message EventMessage, pool CampaignPool) error {
 	log.Printf("- Map. Event Type: '%d' Message: '%s'", message.Type, message.Id)
+	var handled = false
+
 	if message.Type == TypeLoadMap || message.Type == TypeLoadFullGame {
 		e.typeLoadMap(message, pool)
+		handled = true
 	}
 	if message.Type == TypeLoadMapEntities || message.Type == TypeLoadFullGame {
 		e.typeLoadMapEntities(message, pool)
+		handled = true
 	}
 	if message.Type == TypeLoadMapEntity {
 		return e.typeLoadMapEntity(message, pool)
 	}
 
+	if !handled {
+		return errors.New(fmt.Sprintf("message of type '%d' is not recognised by 'handleMapLoadEvents()'", message.Type))
+	}
 	return nil
 }
 

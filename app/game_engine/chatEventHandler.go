@@ -1,6 +1,8 @@
 package game_engine
 
 import (
+	"errors"
+	"fmt"
 	"golang.org/x/net/html"
 	"log"
 	"strings"
@@ -27,10 +29,11 @@ func (e *baseEventMessageHandler) handleChatEventMessage(message EventMessage, p
 		if justPassTroughMessage {
 			// Just pass message trough
 			pool.TransmitEventMessage(message)
+			return nil
 		}
 	}
 
-	return nil
+	return errors.New(fmt.Sprintf("message of type '%d' is not recognised by 'handleChatEventMessage()'", message.Type))
 }
 
 func getChatMessage(message string) EventMessage {

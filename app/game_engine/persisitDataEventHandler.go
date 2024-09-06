@@ -2,6 +2,7 @@ package game_engine
 
 import (
 	"errors"
+	"fmt"
 	"log"
 )
 
@@ -12,7 +13,7 @@ func (e *baseEventMessageHandler) handlePersistDataEvents(message EventMessage, 
 		return e.typeGameSave(message, pool)
 	}
 
-	return nil
+	return errors.New(fmt.Sprintf("message of type '%d' is not recognised by 'handlePersistDataEvents()'", message.Type))
 }
 
 func (e *baseEventMessageHandler) typeGameSave(message EventMessage, pool CampaignPool) error {
