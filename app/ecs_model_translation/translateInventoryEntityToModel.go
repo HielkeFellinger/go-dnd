@@ -64,6 +64,12 @@ func ItemEntityToCampaignInventoryItem(rawItemEntity ecs.Entity, count uint) *mo
 		inventoryItem.Damage = damageComponents[0].(*ecs_components.DamageComponent).Amount
 	}
 
+	// Check Weight
+	weightComponents := rawItemEntity.GetAllComponentsOfType(ecs.WeightComponentType)
+	if len(weightComponents) >= 1 {
+		inventoryItem.Weight = weightComponents[0].(*ecs_components.WeightComponent).Amount
+	}
+
 	// Check Range
 	rangeComponents := rawItemEntity.GetAllComponentsOfType(ecs.RangeComponentType)
 	if len(rangeComponents) >= 1 {

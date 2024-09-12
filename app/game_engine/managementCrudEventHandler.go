@@ -89,22 +89,21 @@ func (e *baseEventMessageHandler) typeLoadUpsertMap(message EventMessage, pool C
 }
 
 func (e *baseEventMessageHandler) typeUpsertMap(message EventMessage, pool CampaignPool) error {
-	// Undo escaping
-	clearedBody := html.UnescapeString(message.Body)
-
 	// Check if user is lead
 	if message.Source != pool.GetLeadId() {
 		return errors.New("modifying items is not allowed as non-lead")
 	}
 
-	var mapUpdateRequest MapUpsertRequest
+	// Undo escaping
+	clearedBody := html.UnescapeString(message.Body)
+
+	var mapUpdateRequest mapUpsertRequest
 	err := json.Unmarshal([]byte(clearedBody), &mapUpdateRequest)
 	if err != nil {
 		return err
 	}
 
-	// @TODO: Split after this part
-	// Check if it needs to be updated; or inserted
+	// Upsert
 	mapEntity, upsertError := upsertMap(mapUpdateRequest, pool)
 	if upsertError != nil {
 		return upsertError
@@ -124,20 +123,20 @@ func (e *baseEventMessageHandler) typeUpsertMap(message EventMessage, pool Campa
 }
 
 func (e *baseEventMessageHandler) typeLoadUpsertItem(message EventMessage, pool CampaignPool) error {
-	// Undo escaping
-	clearedBody := html.UnescapeString(message.Body)
-
 	// Check if user is lead
 	if message.Source != pool.GetLeadId() {
 		return errors.New("modifying items is not allowed as non-lead")
 	}
+
+	// Undo escaping
+	clearedBody := html.UnescapeString(message.Body)
 
 	data := make(map[string]any)
 
 	// Check if there is an existing item with the supplied uuid
 	uuidItemFilter, err := helpers.ParseStringToUuid(clearedBody)
 	if err == nil {
-		itemCandidate, match := pool.GetEngine().GetWorld().GetEntityByUuid(uuidItemFilter)
+		itemCandidate, match := pool.GetEngine().GetWorld().GetItemEntityByUuid(uuidItemFilter)
 		if match && itemCandidate.HasComponentType(ecs.ItemComponentType) {
 			data["Item"] = ecs_model_translation.ItemEntityToCampaignInventoryItem(itemCandidate, 0)
 		}
@@ -161,22 +160,57 @@ func (e *baseEventMessageHandler) typeLoadUpsertItem(message EventMessage, pool 
 }
 
 func (e *baseEventMessageHandler) typeUpsertItem(message EventMessage, pool CampaignPool) error {
-	// Undo escaping
-	clearedBody := html.UnescapeString(message.Body)
-
 	// Check if user is lead
 	if message.Source != pool.GetLeadId() {
 		return errors.New("modifying items is not allowed as non-lead")
 	}
 
-	// @TODO translate to object and update
+	// Undo escaping
+	clearedBody := html.UnescapeString(message.Body)
 
-	log.Printf("- Item ID: '%v'", clearedBody)
+	var itemUpsertRequest itemUpsertRequest
+	err := json.Unmarshal([]byte(clearedBody), &itemUpsertRequest)
+	if err != nil {
+		return err
+	}
 
-	// Check if it needs to be updated; or inserted
+	// Upsert
+	itemEntity, upsertError := upsertItem(itemUpsertRequest, pool)
+	if upsertError != nil {
+		return upsertError
+	}
 
-	loadItemMessage := NewEventMessage()
-	loadItemMessage.Source = pool.GetLeadId()
-	loadItemMessage.Body = ""
-	return e.typeLoadUpsertItem(loadItemMessage, pool)
+	// Update the CRUD box AND the "Manage Maps screen"
+	loadUpsertItemMessage := NewEventMessage()
+	loadUpsertItemMessage.Source = pool.GetLeadId()
+	loadUpsertItemMessage.Body = itemEntity.GetId().String()
+	if typeLoadUpsertMapErr := e.typeLoadUpsertItem(loadUpsertItemMessage, pool); typeLoadUpsertMapErr != nil {
+		return e.sendManagementError("Error", typeLoadUpsertMapErr.Error(), pool)
+	}
+	if typeManageMapsErr := e.typeManageItems(loadUpsertItemMessage, pool); typeManageMapsErr != nil {
+		return e.sendManagementError("Error", typeManageMapsErr.Error(), pool)
+	}
+	return nil
+}
+
+type mapUpsertRequest struct {
+	Id           string             `json:"Id"`
+	Name         string             `json:"Name"`
+	Description  string             `json:"Description"`
+	X            string             `json:"X"`
+	Y            string             `json:"Y"`
+	ImageName    string             `json:"ImageName"`
+	RemoveImages []string           `json:"RemoveImages"`
+	Image        helpers.FileUpload `json:"Image"`
+}
+
+type itemUpsertRequest struct {
+	Id          string `json:"Id"`
+	Name        string `json:"Name"`
+	Description string `json:"Description"`
+	Damage      string `json:"Damage"`
+	Restore     string `json:"Restore"`
+	RangeMin    string `json:"RangeMin"`
+	RangeMax    string `json:"RangeMax"`
+	Weight      string `json:"Weight"`
 }

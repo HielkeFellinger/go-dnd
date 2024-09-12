@@ -268,14 +268,3 @@ func (e *baseEventMessageHandler) buildMapData(model models.CampaignMap, isLead 
 	data["y"] = yVal
 	return data
 }
-
-type MapUpsertRequest struct {
-	Id           string             `json:"Id"`
-	Name         string             `json:"Name"`
-	Description  string             `json:"Description"`
-	X            string             `json:"X"`
-	Y            string             `json:"Y"`
-	ImageName    string             `json:"ImageName"`
-	RemoveImages []string           `json:"RemoveImages"`
-	Image        helpers.FileUpload `json:"Image"`
-}

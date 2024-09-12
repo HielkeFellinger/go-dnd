@@ -13,6 +13,7 @@ type CampaignInventoryItem struct {
 	Damage      string
 	Restore     string
 	Range       CampaignInventoryItemRange
+	Weight      string
 }
 
 type CampaignInventoryItemRange struct {

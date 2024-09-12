@@ -16,6 +16,7 @@ type World interface {
 	GetInventoryEntities() []Entity
 	GetEntityByUuid(uuid uuid.UUID) (Entity, bool)
 	GetMapEntityByUuid(uuid uuid.UUID) (Entity, bool)
+	GetItemEntityByUuid(uuid uuid.UUID) (Entity, bool)
 	GetCharacterEntityByUuid(uuid uuid.UUID) (Entity, bool)
 }
 
@@ -107,6 +108,11 @@ func (w *BaseWorld) GetEntityByUuid(uuid uuid.UUID) (Entity, bool) {
 
 func (w *BaseWorld) GetMapEntityByUuid(uuid uuid.UUID) (Entity, bool) {
 	entity, ok := w.UuidToMapEntity[uuid]
+	return entity, ok
+}
+
+func (w *BaseWorld) GetItemEntityByUuid(uuid uuid.UUID) (Entity, bool) {
+	entity, ok := w.UuidToItemEntity[uuid]
 	return entity, ok
 }
 

@@ -19,7 +19,7 @@
             <b><i id="is{{.id}}Icon" class="bi {{ if .active }} bi-eye {{ else }} bi-eye-slash {{end}}"></i></b>
             <input hidden id="is{{.id}}Active" type="checkbox" {{ if .active }} checked {{end}}>
         </button>
-        <button class="btn" onclick="" style="height: 2.5em; width: 2.5em">
+        <button class="btn" onclick="fullRefreshMapLoadFromServer('{{.id}}')" style="height: 2.5em; width: 2.5em" title="Full Map Refresh">
             <b><i class="bi bi-arrow-clockwise"></i></b>
         </button>
         <b style="margin-left: 0.25em; margin-right: 0.25em;">|</b>

@@ -243,6 +243,7 @@
                 element.textContent = body.title + ': ' + body.message;
                 element["style"].visibility = "visible";
             }
+            return;
         }
 
         // Parse Chat-messages
@@ -252,7 +253,7 @@
         }
 
         {{ if .campaign.UserIsLead }}
-        document.getElementById("event-content").innerHTML += payLoad;
+        document.getElementById("event-content").innerHTML += payLoad.body;
         {{ end }}
     }
 
@@ -351,6 +352,7 @@
             item.Restore = formData.get('restore');
             item.RangeMin = formData.get('rangeMin');
             item.RangeMax = formData.get('rangeMax');
+            item.Weight = formData.get('weight');
             sendEvent(wrapMessage(JSON.stringify(item), 5542));
         } else {
             stopLoadSpinner();
@@ -653,6 +655,11 @@
             sendEvent(wrapMessage(id, 531));
             sendEvent(wrapMessage(id, 532));
         }
+    }
+
+    let fullRefreshMapLoadFromServer = (id) => {
+        sendEvent(wrapMessage(id, 531));
+        sendEvent(wrapMessage(id, 532));
     }
 
     let requestMapLoadFromServer = (id) => {
