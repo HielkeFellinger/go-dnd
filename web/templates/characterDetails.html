@@ -29,16 +29,23 @@
     </div>
 
     <!-- Stats -->
-    <div>
-        ...
-    </div>
+    <details open="" style="padding-top: 1em;">
+        <summary style="font-size: 1.5em;">Stats</summary>
+        <div>
+            ...
+        </div>
+    </details>
+
 
     <!-- Just Dump inventory  -->
-    {{ range .character.Inventories }}
-    <div style="display: flex; flex-flow: row nowrap; align-content: center; width: 100%;">
-        {{ template "inventory" . }}
-    </div>
-    {{ end }}
+    <details open="" style="padding-top: 1em;">
+        <summary style="font-size: 1.5em;">Inventory</summary>
+        {{ range .character.Inventories }}
+        <div style="display: flex; flex-flow: row nowrap; align-content: center; width: 100%;">
+            {{ template "inventory" . }}
+        </div>
+        {{ end }}
+    </details>
 
 </div>
 

@@ -50,12 +50,17 @@ const (
 	TypeManagementOverviewEnd   EventType = 560
 
 	TypeManagementCrudStart EventType = 5500
-	TypeLoadUpsertMap       EventType = 5511
-	TypeRemoveMap           EventType = 5512
-	TypeUpsertMap           EventType = 5513
 
-	TypeLoadUpsertItem    EventType = 5541
-	TypeUpsertItem        EventType = 5542
+	TypeLoadUpsertMap EventType = 5511
+	TypeRemoveMap     EventType = 5512
+	TypeUpsertMap     EventType = 5513
+
+	TypeLoadUpsertItem EventType = 5541
+	TypeUpsertItem     EventType = 5542
+
+	TypeLoadUpsertCharacter EventType = 5521
+	TypeUpsertCharacter     EventType = 5522
+
 	TypeManagementCrudEnd EventType = 5600
 
 	TypeManagementError EventType = 5999

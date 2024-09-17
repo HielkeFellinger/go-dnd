@@ -233,6 +233,10 @@
             if (payLoad.type === 5541) {
                 handleRightBarCrudHtml(payLoad);
             }
+            // Character
+            if (payLoad.type === 5521) {
+                handleRightBarCrudHtml(payLoad);
+            }
             return;
         }
         if (payLoad.type === 5999) {
@@ -335,6 +339,11 @@
         sendEvent(wrapMessage(JSON.stringify(id), 5541));
     }
 
+    let upsertCharacter = (id) => {
+        stopLoadSpinner();
+        sendEvent(wrapMessage(JSON.stringify(id), 5521));
+    }
+
     let upsertMap = (id) => {
         stopLoadSpinner();
         sendEvent(wrapMessage(JSON.stringify(id), 5511));
@@ -354,6 +363,19 @@
             item.RangeMax = formData.get('rangeMax');
             item.Weight = formData.get('weight');
             sendEvent(wrapMessage(JSON.stringify(item), 5542));
+        } else {
+            stopLoadSpinner();
+        }
+    }
+
+    let submitUpsertCharacter = () => {
+        let formElement = document.forms['upsertCharacterForm'];
+        if (formElement && formElement.reportValidity()) {
+            let formData = new FormData(formElement);
+            // TODO
+            console.warn(formData)
+            let item = {}
+            sendEvent(wrapMessage(JSON.stringify(item), 5522));
         } else {
             stopLoadSpinner();
         }

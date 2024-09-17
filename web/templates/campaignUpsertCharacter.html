@@ -1,0 +1,68 @@
+{{define "campaignUpsertCharacter"}}
+
+<h2>{{ if and .Character .Character.Id }}Update{{else}}Add{{end}} Character</h2>
+<div style="width: 100%;">
+    <form class="form" onsubmit="return false" style="width: 100%;" id="upsertCharacterForm">
+
+        <!-- If there's an error, display -->
+        <p class="bg-danger" id="managementCrudError" style="visibility: hidden">
+
+        </p>
+
+        {{ if and .Character .Character.Id }}
+        <div class="form-group">
+            <label for="id">Id</label>
+            <input type="text" name="id" class="form-control" id="id" placeholder="Id" required readonly value="{{.Character.Id}}">
+        </div>
+        {{end}}
+        <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" name="name" class="form-control" id="name" placeholder="Name" required
+                   value="{{ if and .Character .Character.Name }}{{.Character.Name}}{{end}}">
+        </div>
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea name="description" class="form-control" id="description" placeholder="Description">{{ if and .Character .Character.Description }}{{.Character.Description}}{{end}}</textarea>
+        </div>
+
+        <div style="display: flex; flex-flow: row nowrap; align-content: center; width: 100%;">
+            <div style="flex: 1 1 0;">
+                <label for="healthDamage">Current Damage</label>
+                <input id="healthDamage" type="number" style="font-size: 2em; max-width: 4em"
+                    value="{{ if and .Character .Character.Health }}{{ .character.Health.Damage }}{{end}}" />
+            </div>
+            <div style="flex: 1 1 0;">
+                <label for="healthTmp">Temp HP</label>
+                <input id="healthTmp" type="number" style="font-size: 2em; max-width: 4em"
+                    value="{{ if and .Character .Character.Health }}{{ .character.Health.TemporaryHitPoints }}{{end}}" />
+            </div>
+            <div style="flex: 1 1 0;">
+                <label for="healthMax">Max HP</label>
+                <input id="healthMax" type="number" style="font-size: 2em; max-width: 4em"
+                    value="{{ if and .Character .Character.Health }}{{ .character.Health.MaximumHitPoints }}{{end}}" />
+            </div>
+        </div>
+        <div style="display: flex; flex-direction: row; flex-grow: 2;  flex-wrap: wrap; padding-top: 1em;">
+            <div class="form-group" style="margin-right: 2em;">
+                <label for="level">Level</label>
+                <input type="text" name="level" class="form-control" id="level" placeholder="Level"
+                       value="{{ if and .Character .Character.Damage }}{{.Character.Damage}}{{end}}">
+            </div>
+            <div class="form-group">
+                <label for="playerPlayable">Player Playable</label>
+                <input type="checkbox" name="playerPlayable" class="form-control" id="playerPlayable" placeholder="playerPlayable"
+                       value="{{ if and .Character .Character.PlayerPlayable }}{{.Character.PlayerPlayable}}{{end}}">
+            </div>
+        </div>
+        <div style="min-height: 4em; width: 12em; display: flex; flex-flow: row;">
+            <div style="flex: 1 1 0;">
+                <button id="CharacterUpsertSubmit" type="submit" class="btn btn-primary" onclick="loadSpinner();submitUpsertCharacter()">Save</button>
+            </div>
+            <div id="spinner" style="flex: 1 1 0; display: none">
+                {{ template "diceSpinnerSvg.html" .}}
+            </div>
+        </div>
+    </form>
+</div>
+
+{{ end }}

@@ -45,10 +45,76 @@ func (e *baseEventMessageHandler) handleManagementCrudEvents(message EventMessag
 		handled = true
 	}
 
+	// Characters
+	if message.Type == TypeLoadUpsertCharacter {
+		err := e.typeLoadUpsertCharacter(message, pool)
+		if err != nil {
+			return err
+		}
+		handled = true
+	} else if message.Type == TypeUpsertCharacter {
+		err := e.typeUpsertCharacter(message, pool)
+		if err != nil {
+			return err
+		}
+		handled = true
+	}
+
 	if !handled {
 		return errors.New(fmt.Sprintf("message of type '%d' is not recognised by 'handleManagementCrudEvents()'", message.Type))
 	}
 	return nil
+}
+
+func (e *baseEventMessageHandler) typeLoadUpsertCharacter(message EventMessage, pool CampaignPool) error {
+	// Undo escaping
+	clearedBody := html.UnescapeString(message.Body)
+
+	// Check if user is lead
+	if message.Source != pool.GetLeadId() {
+		return errors.New("modifying characters is not allowed as non-lead")
+	}
+
+	data := make(map[string]any)
+
+	// Check if there is an existing map with the supplied uuid
+	uuidItemFilter, err := helpers.ParseStringToUuid(clearedBody)
+	if err == nil {
+		mapCandidate, match := pool.GetEngine().GetWorld().GetEntityByUuid(uuidItemFilter)
+		if match && mapCandidate.HasComponentType(ecs.CharacterComponentType) {
+			// data["Character"] = {}
+		}
+	}
+
+	rawJsonBytes, err := json.Marshal(
+		e.handleLoadHtmlBodyMultipleTemplateFiles([]string{"campaignUpsertCharacter.html", "diceSpinnerSvg.html"},
+			"campaignUpsertCharacter", data))
+	if err != nil {
+		return err
+	}
+
+	loadItemMessage := NewEventMessage()
+	loadItemMessage.Source = message.Source
+	loadItemMessage.Type = TypeLoadUpsertCharacter
+	loadItemMessage.Body = string(rawJsonBytes)
+	loadItemMessage.Destinations = append(loadItemMessage.Destinations, pool.GetLeadId())
+	pool.TransmitEventMessage(loadItemMessage)
+
+	return nil
+}
+
+func (e *baseEventMessageHandler) typeUpsertCharacter(message EventMessage, pool CampaignPool) error {
+	// Check if user is lead
+	if message.Source != pool.GetLeadId() {
+		return errors.New("modifying characters is not allowed as non-lead")
+	}
+
+	// Undo escaping
+	clearedBody := html.UnescapeString(message.Body)
+
+	log.Printf("- Game Management CRUD Events typeUpsertCharacter content: '%v'", clearedBody)
+
+	return errors.New("NOT IMPLEMENTED!")
 }
 
 func (e *baseEventMessageHandler) typeLoadUpsertMap(message EventMessage, pool CampaignPool) error {
