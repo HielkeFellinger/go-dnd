@@ -2,6 +2,7 @@ package models
 
 type CampaignInventory struct {
 	Id    string
+	Name  string
 	Items []CampaignInventoryItem
 }
 

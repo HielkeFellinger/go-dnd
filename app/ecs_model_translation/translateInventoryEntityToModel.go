@@ -10,6 +10,7 @@ import (
 func InventoryEntityToCampaignInventoryModel(rawInventoryEntity ecs.Entity) models.CampaignInventory {
 
 	inventory := &models.CampaignInventory{
+		Name:  rawInventoryEntity.GetName(),
 		Items: make([]models.CampaignInventoryItem, 0),
 	}
 

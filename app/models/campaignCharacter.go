@@ -4,6 +4,8 @@ type CampaignCharacter struct {
 	Id          string
 	Name        string
 	Description string
+	Level       string
+	Hidden      bool
 	Image       CampaignImage
 	Health      CampaignCharacterHealth
 	Inventories []CampaignInventory

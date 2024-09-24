@@ -80,9 +80,11 @@ func (e *baseEventMessageHandler) typeLoadUpsertCharacter(message EventMessage, 
 	// Check if there is an existing map with the supplied uuid
 	uuidItemFilter, err := helpers.ParseStringToUuid(clearedBody)
 	if err == nil {
-		mapCandidate, match := pool.GetEngine().GetWorld().GetEntityByUuid(uuidItemFilter)
-		if match && mapCandidate.HasComponentType(ecs.CharacterComponentType) {
-			// data["Character"] = {}
+		charCandidate, match := pool.GetEngine().GetWorld().GetEntityByUuid(uuidItemFilter)
+		if match && charCandidate.HasComponentType(ecs.CharacterComponentType) {
+			data["Character"] = ecs_model_translation.CharacterEntityToCampaignCharacterModel(charCandidate)
+		} else {
+			return errors.New("no characters found with matching identifier")
 		}
 	}
 
@@ -111,6 +113,8 @@ func (e *baseEventMessageHandler) typeUpsertCharacter(message EventMessage, pool
 
 	// Undo escaping
 	clearedBody := html.UnescapeString(message.Body)
+
+	// @TODO
 
 	log.Printf("- Game Management CRUD Events typeUpsertCharacter content: '%v'", clearedBody)
 
@@ -257,6 +261,17 @@ func (e *baseEventMessageHandler) typeUpsertItem(message EventMessage, pool Camp
 		return e.sendManagementError("Error", typeManageMapsErr.Error(), pool)
 	}
 	return nil
+}
+
+type characterUpsertRequest struct {
+	Id           string             `json:"Id"`
+	Name         string             `json:"Name"`
+	Description  string             `json:"Description"`
+	X            string             `json:"X"`
+	Y            string             `json:"Y"`
+	ImageName    string             `json:"ImageName"`
+	RemoveImages []string           `json:"RemoveImages"`
+	Image        helpers.FileUpload `json:"Image"`
 }
 
 type mapUpsertRequest struct {

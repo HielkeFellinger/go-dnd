@@ -21,8 +21,6 @@ const (
 	TypeLoadFullGame EventType = 500
 
 	TypeLoadCharacters        EventType = 501
-	TypeAddCharacter          EventType = 502
-	TypeRemoveCharacter       EventType = 503
 	TypeLoadCharactersDetails EventType = 504
 
 	TypeUpdateCharacterHealth EventType = 511
@@ -60,6 +58,8 @@ const (
 
 	TypeLoadUpsertCharacter EventType = 5521
 	TypeUpsertCharacter     EventType = 5522
+	TypeRemoveCharacter     EventType = 5523
+	TypeCloneCharacter      EventType = 5524
 
 	TypeManagementCrudEnd EventType = 5600
 

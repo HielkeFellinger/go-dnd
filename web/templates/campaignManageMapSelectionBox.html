@@ -13,7 +13,7 @@
         <div style="flex: 1 1 0; align-content: flex-start">
             <button class="btn" style="height: 2.5em; width: 2.5em; margin-top: 0.3em;
             margin-right: 0.35em; float: right" {{ if .Active }} disabled title="Editing is blocked due to Map is set as active"
-            {{else}} onclick="upsertMap('{{ .Id }}')"{{end}}>
+            {{else}} title="Edit map '{{ .Name }}'" onclick="upsertMap('{{ .Id }}')"{{end}}>
                 <b><i class="bi bi-pencil"></i></b>
             </button>
         </div>

@@ -59,6 +59,8 @@ func (c *campaignClient) Read() {
 		parsedMessage.Destinations = rawMessage.Destinations
 
 		// Update with user credentials and send to channel
-		c.Pool.Receive <- parsedMessage
+		if c.Pool != nil {
+			c.Pool.Receive <- parsedMessage
+		}
 	}
 }

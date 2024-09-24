@@ -1,12 +1,21 @@
 {{define "campaignManageCharacterSelectionBox"}}
     <div class="border" style="display: flex; flex-flow: row nowrap; min-height: 6em;">
-        <div style="flex: 1 1 0; background-image: url('{{ .Image.Url }}'); width: 100%; background-size: 75%; background-repeat: no-repeat; cursor: pointer"
-             onclick="loadCharDetails('{{.Id}}')">
-
+        <div style="flex: 1 1 0; background-image: url('{{ .Image.Url }}'); width: 100%; background-size: 75%;
+                background-repeat: no-repeat; cursor: pointer; background-color: #495057" onclick="loadCharDetails('{{.Id}}')">
         </div>
-        <div style="flex: 3 3 0;">
+        <div style="flex: 3 3 0; padding-left: 1em;">
             <h4>{{ .Name }}</h4>
-            <h5>{{ .Description }} </h5>
+            <p>{{ .Description }} </p>
+        </div>
+        <div style="flex: 1 1 0; align-content: flex-start">
+            <button class="btn" style="height: 2.5em; width: 2.5em; margin-top: 0.3em; margin-right: 0.35em;
+            float: right" title="Edit Character '{{ .Name }}'" onclick="upsertCharacter('{{ .Id }}')">
+                <b><i class="bi bi-pencil"></i></b>
+            </button>
+            <button class="btn" style="height: 2.5em; width: 2.5em; margin-top: 0.3em; margin-right: 0.35em;
+            float: right" title="Clone Character '{{ .Name }}'" onclick="cloneCharacter('{{ .Id }}')">
+                <b><i class="bi bi-copy"></i></b>
+            </button>
         </div>
     </div>
 {{end}}

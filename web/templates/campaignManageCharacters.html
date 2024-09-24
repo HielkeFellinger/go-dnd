@@ -8,12 +8,26 @@
             </button>
             <input type="text" placeholder="filter" style="margin-left: 0.5em; height: 2.4em; border-radius:.25rem;">
         </div>
-        <div style="display: flex; flex-flow: row; flex-wrap: wrap; align-content: center; width: 100%;">
-            {{ range .chars }}
+
+        <details open="">
+            <summary>Player Characters</summary>
+            <div style="display: flex; flex-flow: row; flex-wrap: wrap; align-content: center; width: 100%;">
+                {{ range .pc_chars }}
+                    <div style="flex: 0 0 24%; margin-bottom: 0.25em; margin-right: 0.25em;">
+                        {{ template "campaignManageCharacterSelectionBox" . }}
+                    </div>
+                {{ end }}
+            </div>
+        </details>
+        <details open="" style="padding-top: 1em">
+            <summary>Non Player Characters</summary>
+            <div style="display: flex; flex-flow: row; flex-wrap: wrap; align-content: center; width: 100%;">
+            {{ range .npc_chars }}
                 <div style="flex: 0 0 24%; margin-bottom: 0.25em; margin-right: 0.25em;">
                     {{ template "campaignManageCharacterSelectionBox" . }}
                 </div>
             {{ end }}
-        </div>
+            </div>
+        </details>
     </div>
 {{end}}

@@ -24,39 +24,85 @@
             <label for="description">Description</label>
             <textarea name="description" class="form-control" id="description" placeholder="Description">{{ if and .Character .Character.Description }}{{.Character.Description}}{{end}}</textarea>
         </div>
-
+        <div class="form-group">
+            <label for="image">{{ if not .Character }}Set{{else}}Update{{end}} Character Image</label>
+            <input type="file" name="image" accept="image/svg+xml,image/png,image/gif,image/jpeg" class="form-control"
+                   id="image" placeholder="Image" {{ if not .Character }}required{{end}}>
+        </div>
+        <div class="form-group">
+            <label for="imageName">Character Image Name</label>
+            <input type="text" name="imageName" class="form-control" id="imageName" placeholder="Image Name"
+                   {{ if not .Character }}required{{end}}>
+        </div>
+        <div class="form-group" style="margin-right: 2em;">
+            <label for="level">Level</label>
+            <input type="text" name="level" class="form-control" id="level" placeholder="Level"
+                   value="{{ if and .Character .Character.Level }}{{.Character.Level}}{{end}}">
+        </div>
         <div style="display: flex; flex-flow: row nowrap; align-content: center; width: 100%;">
             <div style="flex: 1 1 0;">
                 <label for="healthDamage">Current Damage</label>
                 <input id="healthDamage" type="number" style="font-size: 2em; max-width: 4em"
-                    value="{{ if and .Character .Character.Health }}{{ .character.Health.Damage }}{{end}}" />
+                    value="{{ if and .Character .Character.Health }}{{ .Character.Health.Damage }}{{end}}" />
             </div>
             <div style="flex: 1 1 0;">
                 <label for="healthTmp">Temp HP</label>
                 <input id="healthTmp" type="number" style="font-size: 2em; max-width: 4em"
-                    value="{{ if and .Character .Character.Health }}{{ .character.Health.TemporaryHitPoints }}{{end}}" />
+                    value="{{ if and .Character .Character.Health }}{{ .Character.Health.TemporaryHitPoints }}{{end}}" />
             </div>
             <div style="flex: 1 1 0;">
                 <label for="healthMax">Max HP</label>
                 <input id="healthMax" type="number" style="font-size: 2em; max-width: 4em"
-                    value="{{ if and .Character .Character.Health }}{{ .character.Health.MaximumHitPoints }}{{end}}" />
+                    value="{{ if and .Character .Character.Health }}{{ .Character.Health.MaximumHitPoints }}{{end}}" />
             </div>
         </div>
         <div style="display: flex; flex-direction: row; flex-grow: 2;  flex-wrap: wrap; padding-top: 1em;">
-            <div class="form-group" style="margin-right: 2em;">
-                <label for="level">Level</label>
-                <input type="text" name="level" class="form-control" id="level" placeholder="Level"
-                       value="{{ if and .Character .Character.Damage }}{{.Character.Damage}}{{end}}">
-            </div>
             <div class="form-group">
-                <label for="playerPlayable">Player Playable</label>
-                <input type="checkbox" name="playerPlayable" class="form-control" id="playerPlayable" placeholder="playerPlayable"
-                       value="{{ if and .Character .Character.PlayerPlayable }}{{.Character.PlayerPlayable}}{{end}}">
+                <label for="playerPlayable"> Player Playable </label>
+                <input type="checkbox" name="playerPlayable" class="form-control" id="playerPlayable" style="transform: scale(2);"
+                       {{ if and .Character .Character.Controllers }}checked{{end}} >
+            </div>
+            <div class="form-group" style="padding-left: 1em">
+                <label for="hidden"> Character Hidden </label>
+                <input type="checkbox" name="hidden" class="form-control" id="hidden" style="transform: scale(2);"
+                       {{ if or (not .Character) .Character.Hidden }}checked{{end}} >
+            </div>
+            <div class="form-group" style="padding-left: 1em">
+                <label for="addInventory"> Add Inventory </label>
+                <input type="checkbox" name="addInventory" class="form-control" id="addInventory" style="transform: scale(2);">
             </div>
         </div>
-        <div style="min-height: 4em; width: 12em; display: flex; flex-flow: row;">
+        {{ if and .Character .Character.Inventories }}
+        <details>
+            <summary>Inventories</summary>
+            <table style="width: 100%;">
+                <caption>{{ .Id }}</caption>
+                <thead>
+                    <tr>
+                        <th> Name </th>
+                        <th> Unique Item Count </th>
+                        <th> Edit </th>
+                    </tr>
+                </thead>
+                <tbody>
+                {{ range $inventory := .Character.Inventories }}
+                    <tr>
+                        <td>{{ $inventory.Name }}</td>
+                        <td>{{ len $inventory.Items }}</td>
+                        <td>
+                            <button class="btn" onclick="upsertInventory('{{ $inventory.Id }}')" style="height: 2.5em; width: 2.5em">
+                                <b><i class="bi bi-pencil"></i></b>
+                            </button>
+                        </td>
+                    </tr>
+                {{ end }}
+                </tbody>
+            </table>
+        </details>
+        {{ end }}
+        <div style="min-height: 4em; width: 12em; display: flex; flex-flow: row; padding-top: 1em;">
             <div style="flex: 1 1 0;">
-                <button id="CharacterUpsertSubmit" type="submit" class="btn btn-primary" onclick="loadSpinner();submitUpsertCharacter()">Save</button>
+                <button id="CharacterUpsertSubmit" type="submit" class="btn btn-primary" disabled onclick="loadSpinner();submitUpsertCharacter()">Save</button>
             </div>
             <div id="spinner" style="flex: 1 1 0; display: none">
                 {{ template "diceSpinnerSvg.html" .}}

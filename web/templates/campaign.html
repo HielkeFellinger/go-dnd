@@ -344,6 +344,11 @@
         sendEvent(wrapMessage(JSON.stringify(id), 5521));
     }
 
+    let cloneCharacter = (id) => {
+        stopLoadSpinner();
+        sendEvent(wrapMessage(JSON.stringify(id), 5524));
+    }
+
     let upsertMap = (id) => {
         stopLoadSpinner();
         sendEvent(wrapMessage(JSON.stringify(id), 5511));
@@ -372,10 +377,28 @@
         let formElement = document.forms['upsertCharacterForm'];
         if (formElement && formElement.reportValidity()) {
             let formData = new FormData(formElement);
-            // TODO
-            console.warn(formData)
             let item = {}
-            sendEvent(wrapMessage(JSON.stringify(item), 5522));
+            item.Id = formData.get('id');
+            item.Name = formData.get('name');
+            item.Description = formData.get('description');
+            item.HealthDamage = formData.get('healthDamage');
+            item.HealthTmp = formData.get('healthTmp');
+            item.HealthMax = formData.get('healthMax');
+            item.Level = formData.get('level');
+            item.PlayerPlayable = formData.get('playerPlayable');
+            item.AddInventory = formData.get('addInventory');
+            if (formData.get('image')) {
+                item.ImageName = formData.get('imageName');
+                let sendFunction = (image) => {
+                    item.Image = image;
+                    sendEvent(wrapMessage(JSON.stringify(item), 5522));
+                    stopLoadSpinner();
+                }
+                parseFormFileToBase64(formData.get('image'), sendFunction);
+            } else {
+                // Send without image
+                sendEvent(wrapMessage(JSON.stringify(item), 5522));
+            }
         } else {
             stopLoadSpinner();
         }
@@ -404,12 +427,12 @@
             }
 
             if (formData.get('image')) {
+                item.ImageName = formData.get('imageName');
                 let sendFunction = (image) => {
                     item.Image = image;
                     sendEvent(wrapMessage(JSON.stringify(item), 5513));
                     stopLoadSpinner();
                 }
-                item.ImageName = formData.get('imageName');
                 parseFormFileToBase64(formData.get('image'), sendFunction);
             } else {
                 // Send without image

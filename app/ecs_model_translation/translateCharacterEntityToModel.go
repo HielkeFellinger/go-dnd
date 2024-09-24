@@ -52,6 +52,18 @@ func CharacterEntityToCampaignCharacterModel(rawCharacterEntity ecs.Entity) mode
 			character.Controllers = append(character.Controllers, playerComponent.Name)
 		}
 
+		// Check Total Level
+		for _, rawLevelComponent := range rawCharacterEntity.GetAllComponentsOfType(ecs.LevelComponentType) {
+			levelComponent := rawLevelComponent.(*ecs_components.LevelComponent)
+			character.Level = strconv.Itoa(int(levelComponent.Level))
+		}
+
+		// Check Total Visibility
+		for _, rawVisibilityComponent := range rawCharacterEntity.GetAllComponentsOfType(ecs.VisibilityComponentType) {
+			visibilityComponent := rawVisibilityComponent.(*ecs_components.VisibilityComponent)
+			character.Hidden = visibilityComponent.Hidden
+		}
+
 		// Check for hasRelation to InventoryEntity
 		hasRelationComponents := rawCharacterEntity.GetAllComponentsOfType(ecs.HasRelationComponentType)
 		for _, rawHasRelationComponent := range hasRelationComponents {

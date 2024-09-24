@@ -183,7 +183,8 @@ func (e *baseEventMessageHandler) typeManageCharacters(message EventMessage, poo
 	charEntities := pool.GetEngine().GetWorld().GetCharacterEntities()
 	allPlayers := pool.GetAllClientIds()
 
-	var characters models.Characters
+	var playerChars models.Characters
+	var nonPlayerChars models.Characters
 	for _, charEntity := range charEntities {
 
 		charModel := models.Character{
@@ -193,7 +194,9 @@ func (e *baseEventMessageHandler) typeManageCharacters(message EventMessage, poo
 		}
 
 		// Check if (one of n of controlling) player(s) is online
+		isPC := false
 		for _, rawPlayerComponent := range charEntity.GetAllComponentsOfType(ecs.PlayerComponentType) {
+			isPC = true
 			playerComponent := rawPlayerComponent.(*ecs_components.PlayerComponent)
 			charModel.Online = charModel.Online || slices.Contains(allPlayers, playerComponent.Name)
 		}
@@ -219,14 +222,20 @@ func (e *baseEventMessageHandler) typeManageCharacters(message EventMessage, poo
 			Url:  image.Url,
 		}
 
-		characters = append(characters, charModel)
+		if isPC {
+			playerChars = append(playerChars, charModel)
+		} else {
+			nonPlayerChars = append(nonPlayerChars, charModel)
+		}
 	}
 
 	// Sort the list to always show the same order
-	sort.Sort(characters)
+	sort.Sort(nonPlayerChars)
+	sort.Sort(playerChars)
 
 	data := make(map[string]any)
-	data["chars"] = characters
+	data["pc_chars"] = playerChars
+	data["npc_chars"] = nonPlayerChars
 
 	rawJsonBytes, err := json.Marshal(
 		e.handleLoadHtmlBodyMultipleTemplateFiles(
