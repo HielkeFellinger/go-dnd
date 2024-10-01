@@ -40,19 +40,19 @@
                    value="{{ if and .Character .Character.Level }}{{.Character.Level}}{{end}}">
         </div>
         <div style="display: flex; flex-flow: row nowrap; align-content: center; width: 100%;">
-            <div style="flex: 1 1 0;">
+            <div class="form-group" style="flex: 1 1 0;">
                 <label for="healthDamage">Current Damage</label>
-                <input id="healthDamage" type="number" style="font-size: 2em; max-width: 4em"
+                <input id="healthDamage" name="healthDamage" type="number" style="font-size: 2em; max-width: 4em"
                     value="{{ if and .Character .Character.Health }}{{ .Character.Health.Damage }}{{end}}" />
             </div>
-            <div style="flex: 1 1 0;">
+            <div class="form-group" style="flex: 1 1 0;">
                 <label for="healthTmp">Temp HP</label>
-                <input id="healthTmp" type="number" style="font-size: 2em; max-width: 4em"
+                <input id="healthTmp" name="healthTmp" type="number" style="font-size: 2em; max-width: 4em"
                     value="{{ if and .Character .Character.Health }}{{ .Character.Health.TemporaryHitPoints }}{{end}}" />
             </div>
-            <div style="flex: 1 1 0;">
+            <div class="form-group" style="flex: 1 1 0;">
                 <label for="healthMax">Max HP</label>
-                <input id="healthMax" type="number" style="font-size: 2em; max-width: 4em"
+                <input id="healthMax" name="healthMax" type="number" style="font-size: 2em; max-width: 4em"
                     value="{{ if and .Character .Character.Health }}{{ .Character.Health.MaximumHitPoints }}{{end}}" />
             </div>
         </div>
@@ -102,7 +102,7 @@
         {{ end }}
         <div style="min-height: 4em; width: 12em; display: flex; flex-flow: row; padding-top: 1em;">
             <div style="flex: 1 1 0;">
-                <button id="CharacterUpsertSubmit" type="submit" class="btn btn-primary" disabled onclick="loadSpinner();submitUpsertCharacter()">Save</button>
+                <button id="CharacterUpsertSubmit" type="submit" class="btn btn-primary" onclick="loadSpinner();submitUpsertCharacter()">Save</button>
             </div>
             <div id="spinner" style="flex: 1 1 0; display: none">
                 {{ template "diceSpinnerSvg.html" .}}

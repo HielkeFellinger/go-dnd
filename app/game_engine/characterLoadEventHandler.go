@@ -113,7 +113,7 @@ func (e *baseEventMessageHandler) loadCharacters(message EventMessage, pool Camp
 
 		var image *ecs_components.ImageComponent
 		var imageDetails = charEntity.GetAllComponentsOfType(ecs.ImageComponentType)
-		if imageDetails != nil && len(imageDetails) == 1 {
+		if imageDetails != nil && len(imageDetails) > 0 {
 			image = imageDetails[0].(*ecs_components.ImageComponent)
 		} else {
 			// Set default

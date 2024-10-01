@@ -4,9 +4,166 @@ import (
 	"github.com/hielkefellinger/go-dnd/app/ecs"
 	"github.com/hielkefellinger/go-dnd/app/ecs_components"
 	"github.com/hielkefellinger/go-dnd/app/helpers"
-	"log"
 	"slices"
 )
+
+func upsertCharacter(charUpdateRequest characterUpsertRequest, pool CampaignPool) (ecs.BaseEntity, error) {
+	var isNewEntry = charUpdateRequest.Id == ""
+	var charEntity ecs.BaseEntity
+
+	if !isNewEntry {
+		charUuid, err := helpers.ParseStringToUuid(charUpdateRequest.Id)
+		if err != nil {
+			return ecs.BaseEntity{}, err
+		}
+		charEntityFromWorld, match := pool.GetEngine().GetWorld().GetCharacterEntityByUuid(charUuid)
+		if !match || charEntityFromWorld == nil {
+			return ecs.BaseEntity{}, SendManagementError("Error", "failure of loading Char by UUID", pool)
+		}
+		charEntityFromWorld.SetName(charUpdateRequest.Name)
+		charEntityFromWorld.SetDescription(charUpdateRequest.Description)
+		charEntity = *charEntityFromWorld.(*ecs.BaseEntity)
+	} else {
+		charEntity = ecs.NewEntity()
+		charEntity.Name = charUpdateRequest.Name
+		charEntity.Description = charUpdateRequest.Description
+		if addErr := charEntity.AddComponent(ecs_components.NewCharacterComponent()); addErr != nil {
+			return ecs.BaseEntity{}, SendManagementError("Error", addErr.Error(), pool)
+		}
+	}
+
+	// Update Character Details
+	if charDetails := charEntity.GetAllComponentsOfType(ecs.CharacterComponentType); len(charDetails) > 0 {
+		charDetail := charDetails[0].(*ecs_components.CharacterComponent)
+		if charDetail.Name != charUpdateRequest.Name {
+			charDetail.Name = charUpdateRequest.Name
+		}
+		if charDetail.Description != charUpdateRequest.Description {
+			charDetail.Description = charUpdateRequest.Description
+		}
+	}
+
+	// Add Health
+	if charUpdateRequest.HealthDamage != "" && charUpdateRequest.HealthTmp != "" && charUpdateRequest.HealthMax != "" {
+		health := charEntity.GetAllComponentsOfType(ecs.HealthComponentType)
+		if isNewEntry || len(health) == 0 {
+			if addErr := charEntity.AddComponent(ecs_components.NewHealthComponent()); addErr != nil {
+				return ecs.BaseEntity{}, SendManagementError("Error", addErr.Error(), pool)
+			}
+			health = charEntity.GetAllComponentsOfType(ecs.HealthComponentType)
+		}
+		if len(health) > 0 {
+			if charUpdateRequest.HealthDamage == "" {
+				charUpdateRequest.HealthDamage = "0"
+			}
+			if charUpdateRequest.HealthTmp == "" {
+				charUpdateRequest.HealthTmp = "0"
+			}
+			if charUpdateRequest.HealthMax == "" {
+				charUpdateRequest.HealthMax = "0"
+			}
+			healthComponent := health[0].(*ecs_components.HealthComponent)
+			if updateErr := healthComponent.MaximumFromString(charUpdateRequest.HealthDamage); updateErr != nil {
+				return ecs.BaseEntity{}, SendManagementError("Error", updateErr.Error(), pool)
+			}
+			if updateErr := healthComponent.MaximumFromString(charUpdateRequest.HealthTmp); updateErr != nil {
+				return ecs.BaseEntity{}, SendManagementError("Error", updateErr.Error(), pool)
+			}
+			if updateErr := healthComponent.MaximumFromString(charUpdateRequest.HealthMax); updateErr != nil {
+				return ecs.BaseEntity{}, SendManagementError("Error", updateErr.Error(), pool)
+			}
+		}
+	} else {
+		if health := charEntity.GetAllComponentsOfType(ecs.HealthComponentType); len(health) > 0 {
+			for _, healthComponent := range health {
+				charEntity.RemoveComponentByUuid(healthComponent.GetId())
+			}
+		}
+	}
+
+	// Update Level
+	if charUpdateRequest.Level != "" {
+		levels := charEntity.GetAllComponentsOfType(ecs.LevelComponentType)
+		if isNewEntry || len(levels) == 0 {
+			if addErr := charEntity.AddComponent(ecs_components.NewLevelComponent()); addErr != nil {
+				return ecs.BaseEntity{}, SendManagementError("Error", addErr.Error(), pool)
+			}
+			levels = charEntity.GetAllComponentsOfType(ecs.LevelComponentType)
+		}
+		if len(levels) > 0 {
+			level := levels[0].(*ecs_components.LevelComponent)
+			if updateErr := level.LevelFromString(charUpdateRequest.Level); updateErr != nil {
+				return ecs.BaseEntity{}, SendManagementError("Error", updateErr.Error(), pool)
+			}
+		}
+	} else {
+		if levels := charEntity.GetAllComponentsOfType(ecs.LevelComponentType); len(levels) > 0 {
+			for _, level := range levels {
+				charEntity.RemoveComponentByUuid(level.GetId())
+			}
+		}
+	}
+
+	// Player Playable
+	if charUpdateRequest.PlayerPlayable {
+		if playerRelations := charEntity.GetAllComponentsOfType(ecs.PlayerComponentType); isNewEntry || len(playerRelations) == 0 {
+			if addErr := charEntity.AddComponent(ecs_components.NewPlayerComponent()); addErr != nil {
+				return ecs.BaseEntity{}, SendManagementError("Error", addErr.Error(), pool)
+			}
+		}
+	} else {
+		if playerRelations := charEntity.GetAllComponentsOfType(ecs.PlayerComponentType); len(playerRelations) > 0 {
+			for _, playerRelation := range playerRelations {
+				charEntity.RemoveComponentByUuid(playerRelation.GetId())
+			}
+		}
+	}
+
+	// Player Hidden
+	hidden := charEntity.GetAllComponentsOfType(ecs.VisibilityComponentType)
+	if charUpdateRequest.Hidden {
+		if len(hidden) > 0 {
+			visibility := hidden[0].(*ecs_components.VisibilityComponent)
+			visibility.Hidden = true
+		} else {
+			visibility := ecs_components.NewVisibilityComponent().(*ecs_components.VisibilityComponent)
+			visibility.Hidden = true
+			if addErr := charEntity.AddComponent(visibility); addErr != nil {
+				return ecs.BaseEntity{}, SendManagementError("Error", addErr.Error(), pool)
+			}
+		}
+	} else {
+		for _, hiddenComponent := range hidden {
+			charEntity.RemoveComponentByUuid(hiddenComponent.GetId())
+		}
+	}
+
+	// Update Image if needed
+	if charUpdateRequest.Image != (helpers.FileUpload{}) && charUpdateRequest.ImageName != "" {
+		// Handle file-upload
+		link, imageErr := helpers.SaveImageToCampaign(charUpdateRequest.Image, pool.GetId(), charUpdateRequest.ImageName)
+		if imageErr != nil {
+			return ecs.BaseEntity{}, SendManagementError("Error", imageErr.Error(), pool)
+		}
+		imageComponent := ecs_components.NewImageComponent().(*ecs_components.ImageComponent)
+		imageComponent.Name = charUpdateRequest.ImageName
+		imageComponent.Active = isNewEntry
+		imageComponent.Url = link
+		imageComponent.Version = 1
+		if addErr := charEntity.AddComponent(imageComponent); addErr != nil {
+			return ecs.BaseEntity{}, SendManagementError("Error", addErr.Error(), pool)
+		}
+	}
+
+	// Add Char Entity
+	if isNewEntry {
+		if addErr := pool.GetEngine().GetWorld().AddEntity(&charEntity); addErr != nil {
+			return ecs.BaseEntity{}, SendManagementError("Error", addErr.Error(), pool)
+		}
+	}
+
+	return charEntity, nil
+}
 
 func upsertMap(mapUpdateRequest mapUpsertRequest, pool CampaignPool) (ecs.BaseEntity, error) {
 	var isNewEntry = mapUpdateRequest.Id == ""
@@ -116,7 +273,6 @@ func upsertMap(mapUpdateRequest mapUpsertRequest, pool CampaignPool) (ecs.BaseEn
 
 	// Update Basis Entity Properties
 	if mapUpdateRequest.Name != "" && mapUpdateRequest.Name != mapEntity.Name {
-		log.Printf("Update Name")
 		mapEntity.SetName(mapUpdateRequest.Name)
 		if !isNewEntry && rawMapEntity != nil {
 			rawMapEntity.SetName(mapUpdateRequest.Name)
@@ -125,7 +281,6 @@ func upsertMap(mapUpdateRequest mapUpsertRequest, pool CampaignPool) (ecs.BaseEn
 		return ecs.BaseEntity{}, SendManagementError("Error", "Map should have a name", pool)
 	}
 	if mapUpdateRequest.Description != "" && mapUpdateRequest.Description != mapEntity.Description {
-		log.Printf("Update Description")
 		mapEntity.SetDescription(mapUpdateRequest.Description)
 		if !isNewEntry && rawMapEntity != nil {
 			rawMapEntity.SetDescription(mapUpdateRequest.Description)

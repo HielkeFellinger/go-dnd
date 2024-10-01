@@ -377,27 +377,28 @@
         let formElement = document.forms['upsertCharacterForm'];
         if (formElement && formElement.reportValidity()) {
             let formData = new FormData(formElement);
-            let item = {}
-            item.Id = formData.get('id');
-            item.Name = formData.get('name');
-            item.Description = formData.get('description');
-            item.HealthDamage = formData.get('healthDamage');
-            item.HealthTmp = formData.get('healthTmp');
-            item.HealthMax = formData.get('healthMax');
-            item.Level = formData.get('level');
-            item.PlayerPlayable = formData.get('playerPlayable');
-            item.AddInventory = formData.get('addInventory');
+            let char = {}
+            char.Id = formData.get('id');
+            char.Name = formData.get('name');
+            char.Description = formData.get('description');
+            char.HealthDamage = formData.get('healthDamage');
+            char.HealthTmp = formData.get('healthTmp');
+            char.HealthMax = formData.get('healthMax');
+            char.Level = formData.get('level');
+            char.Hidden = "on" === formData.get('hidden');
+            char.PlayerPlayable = "on" === formData.get('playerPlayable');
+            char.AddInventory = "on" === formData.get('addInventory');
             if (formData.get('image')) {
-                item.ImageName = formData.get('imageName');
+                char.ImageName = formData.get('imageName');
                 let sendFunction = (image) => {
-                    item.Image = image;
-                    sendEvent(wrapMessage(JSON.stringify(item), 5522));
+                    char.Image = image;
+                    sendEvent(wrapMessage(JSON.stringify(char), 5522));
                     stopLoadSpinner();
                 }
                 parseFormFileToBase64(formData.get('image'), sendFunction);
             } else {
                 // Send without image
-                sendEvent(wrapMessage(JSON.stringify(item), 5522));
+                sendEvent(wrapMessage(JSON.stringify(char), 5522));
             }
         } else {
             stopLoadSpinner();
@@ -409,34 +410,34 @@
         if (formElement && formElement.reportValidity()) {
             let formData = new FormData(formElement);
             console.warn(formData);
-            let item = {};
-            item.Id = formData.get('id');
-            item.Name = formData.get('name');
-            item.Description = formData.get('description');
-            item.X = formData.get('area_x');
-            item.Y = formData.get('area_y');
-            item.RemoveImages = [];
+            let map = {};
+            map.Id = formData.get('id');
+            map.Name = formData.get('name');
+            map.Description = formData.get('description');
+            map.X = formData.get('area_x');
+            map.Y = formData.get('area_y');
+            map.RemoveImages = [];
             if (document.getElementById("removeImages") && document.getElementById("removeImages")["value"]) {
                 let images = document.getElementById("removeImages")["value"];
                 let split = images.split('_');
                 for (const key in split) {
                     if (split[key]) {
-                        item.RemoveImages.push(split[key]);
+                        map.RemoveImages.push(split[key]);
                     }
                 }
             }
 
             if (formData.get('image')) {
-                item.ImageName = formData.get('imageName');
+                map.ImageName = formData.get('imageName');
                 let sendFunction = (image) => {
-                    item.Image = image;
-                    sendEvent(wrapMessage(JSON.stringify(item), 5513));
+                    map.Image = image;
+                    sendEvent(wrapMessage(JSON.stringify(map), 5513));
                     stopLoadSpinner();
                 }
                 parseFormFileToBase64(formData.get('image'), sendFunction);
             } else {
                 // Send without image
-                sendEvent(wrapMessage(JSON.stringify(item), 5513));
+                sendEvent(wrapMessage(JSON.stringify(map), 5513));
             }
         } else {
             stopLoadSpinner();

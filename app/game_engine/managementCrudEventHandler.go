@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
+	"github.com/hielkefellinger/go-dnd/app/ecs_components"
 	"github.com/hielkefellinger/go-dnd/app/ecs_model_translation"
 	"github.com/hielkefellinger/go-dnd/app/helpers"
 	"golang.org/x/net/html"
@@ -114,11 +115,89 @@ func (e *baseEventMessageHandler) typeUpsertCharacter(message EventMessage, pool
 	// Undo escaping
 	clearedBody := html.UnescapeString(message.Body)
 
-	// @TODO
+	var charUpsertRequest characterUpsertRequest
+	err := json.Unmarshal([]byte(clearedBody), &charUpsertRequest)
+	if err != nil {
+		return err
+	}
 
-	log.Printf("- Game Management CRUD Events typeUpsertCharacter content: '%v'", clearedBody)
+	// Upsert
+	charEntity, upsertError := upsertCharacter(charUpsertRequest, pool)
+	if upsertError != nil {
+		return upsertError
+	}
 
-	return errors.New("NOT IMPLEMENTED!")
+	// Add an Inventory
+	if charUpsertRequest.AddInventory {
+		newInventory := ecs.NewEntity()
+		// Set Entity to SlotType
+		if addErr := newInventory.AddComponent(ecs_components.NewSlotsComponent()); addErr != nil {
+			return SendManagementError("Error", addErr.Error(), pool)
+		}
+		// Add to world
+		if addErr := pool.GetEngine().GetWorld().AddEntity(&newInventory); addErr != nil {
+			return SendManagementError("Error", addErr.Error(), pool)
+		}
+
+		// Build relation and add
+		hasRelation := ecs_components.NewHasRelationComponent().(*ecs_components.HasRelationComponent)
+		hasRelation.Count = 1
+		hasRelation.Entity = &newInventory
+		if addErr := charEntity.AddComponent(hasRelation); addErr != nil {
+			return SendManagementError("Error", addErr.Error(), pool)
+		}
+	}
+
+	// Refresh Character Ribbon
+	loadUpsertCharMessage := NewEventMessage()
+	loadUpsertCharMessage.Source = pool.GetLeadId()
+	loadUpsertCharMessage.Body = charEntity.GetId().String()
+	if typeLoadUpsertMapErr := e.typeLoadUpsertCharacter(loadUpsertCharMessage, pool); typeLoadUpsertMapErr != nil {
+		return e.sendManagementError("Error", typeLoadUpsertMapErr.Error(), pool)
+	}
+	if typeManageMapsErr := e.typeManageCharacters(loadUpsertCharMessage, pool); typeManageMapsErr != nil {
+		return e.sendManagementError("Error", typeManageMapsErr.Error(), pool)
+	}
+
+	// Update Char info
+	var reloadCharRibbon = NewEventMessage()
+	reloadCharRibbon.Source = ServerUser
+	reloadCharRibbon.Type = TypeLoadCharacters
+	e.loadCharacters(reloadCharRibbon, pool)
+
+	var closeCharDetailMessage = NewEventMessage()
+	closeCharDetailMessage.Source = ServerUser
+	closeCharDetailMessage.Type = TypeLoadCharactersDetails
+	closeCharDetailMessage.Body = charEntity.GetId().String()
+	if err := e.loadCharactersDetails(closeCharDetailMessage, pool); err != nil {
+		return err
+	}
+
+	// Reload Map info
+	// Update possible Map Entities
+	mapEntities := pool.GetEngine().GetWorld().GetMapEntities()
+	for _, mapEntity := range mapEntities {
+
+		// Only get the map with the relevant relation to entity
+		if !mapEntity.HasRelationWithEntityByUuid(charEntity.GetId()) {
+			continue
+		}
+
+		for _, mapItem := range mapEntity.GetAllComponentsOfType(ecs.MapItemRelationComponentType) {
+			mapItemRelComponent := mapItem.(*ecs_components.MapItemRelationComponent)
+
+			if mapItemRelComponent.Entity.GetId() == charEntity.GetId() {
+				reloadMapItemMessage := NewEventMessage()
+				reloadMapItemMessage.Source = ServerUser
+				reloadMapItemMessage.Body = mapItemRelComponent.Id.String()
+				reloadMapItemErr := e.typeLoadMapEntity(reloadMapItemMessage, pool)
+				if reloadMapItemErr != nil {
+					return reloadMapItemErr
+				}
+			}
+		}
+	}
+	return nil
 }
 
 func (e *baseEventMessageHandler) typeLoadUpsertMap(message EventMessage, pool CampaignPool) error {
@@ -161,7 +240,7 @@ func (e *baseEventMessageHandler) typeLoadUpsertMap(message EventMessage, pool C
 func (e *baseEventMessageHandler) typeUpsertMap(message EventMessage, pool CampaignPool) error {
 	// Check if user is lead
 	if message.Source != pool.GetLeadId() {
-		return errors.New("modifying items is not allowed as non-lead")
+		return errors.New("modifying maps is not allowed as non-lead")
 	}
 
 	// Undo escaping
@@ -264,14 +343,18 @@ func (e *baseEventMessageHandler) typeUpsertItem(message EventMessage, pool Camp
 }
 
 type characterUpsertRequest struct {
-	Id           string             `json:"Id"`
-	Name         string             `json:"Name"`
-	Description  string             `json:"Description"`
-	X            string             `json:"X"`
-	Y            string             `json:"Y"`
-	ImageName    string             `json:"ImageName"`
-	RemoveImages []string           `json:"RemoveImages"`
-	Image        helpers.FileUpload `json:"Image"`
+	Id             string             `json:"Id"`
+	Name           string             `json:"Name"`
+	Description    string             `json:"Description"`
+	HealthDamage   string             `json:"HealthDamage"`
+	HealthTmp      string             `json:"HealthTmp"`
+	HealthMax      string             `json:"HealthMax"`
+	Level          string             `json:"Level"`
+	Image          helpers.FileUpload `json:"Image"`
+	ImageName      string             `json:"ImageName"`
+	PlayerPlayable bool               `json:"PlayerPlayable"`
+	AddInventory   bool               `json:"AddInventory"`
+	Hidden         bool               `json:"Hidden"`
 }
 
 type mapUpsertRequest struct {

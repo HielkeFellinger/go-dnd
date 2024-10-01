@@ -142,7 +142,7 @@ func (e *baseEventMessageHandler) typeManageCampaign(message EventMessage, pool 
 
 			var image *ecs_components.ImageComponent
 			var imageDetails = character.GetAllComponentsOfType(ecs.ImageComponentType)
-			if imageDetails != nil && len(imageDetails) == 1 {
+			if imageDetails != nil && len(imageDetails) > 0 {
 				image = imageDetails[0].(*ecs_components.ImageComponent)
 			} else {
 				// Set default
@@ -210,7 +210,7 @@ func (e *baseEventMessageHandler) typeManageCharacters(message EventMessage, poo
 
 		var image *ecs_components.ImageComponent
 		var imageDetails = charEntity.GetAllComponentsOfType(ecs.ImageComponentType)
-		if imageDetails != nil && len(imageDetails) == 1 {
+		if imageDetails != nil && len(imageDetails) > 0 {
 			image = imageDetails[0].(*ecs_components.ImageComponent)
 		} else {
 			// Set default
