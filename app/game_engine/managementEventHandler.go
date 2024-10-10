@@ -74,7 +74,7 @@ func (e *baseEventMessageHandler) typeManageInventory(message EventMessage, pool
 
 	data := make(map[string]any)
 
-	// Load the inventories
+	//@TODO Load the inventories
 
 	rawJsonBytes, err := json.Marshal(
 		e.handleLoadHtmlBody("campaignManageInventories.html", "campaignManageInventories", data))
