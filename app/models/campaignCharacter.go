@@ -12,6 +12,20 @@ type CampaignCharacter struct {
 	Controllers []string
 }
 
+type CampaignCharacters []CampaignCharacter
+
+func (c CampaignCharacters) Len() int {
+	return len(c)
+}
+
+func (c CampaignCharacters) Less(i, j int) bool {
+	return c[i].Name < c[j].Name // Compare names for ordering
+}
+
+func (c CampaignCharacters) Swap(i, j int) {
+	c[i], c[j] = c[j], c[i]
+}
+
 func GetNewCampaignCharacter() CampaignCharacter {
 	return CampaignCharacter{
 		Inventories: make([]CampaignInventory, 0),

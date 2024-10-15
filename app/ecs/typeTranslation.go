@@ -25,6 +25,7 @@ const (
 	MapComponentType          uint64 = 1 << 20
 	ImageComponentType        uint64 = 1 << 21
 	PlayerComponentType       uint64 = 1 << 22
+	LootComponentType         uint64 = 1 << 23
 
 	/* Relational ComponentTypes */
 
@@ -61,6 +62,7 @@ var TypeNameToNthBit = map[uint64]TypeTranslationStruct{
 	MapComponentType:          newTypeTranslation("Map", 20),
 	ImageComponentType:        newTypeTranslation("Image", 21),
 	PlayerComponentType:       newTypeTranslation("Player", 22),
+	LootComponentType:         newTypeTranslation("Loot", 23),
 
 	/* Relational ComponentTypes */
 

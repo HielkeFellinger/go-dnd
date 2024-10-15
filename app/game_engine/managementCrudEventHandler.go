@@ -18,14 +18,12 @@ func (e *baseEventMessageHandler) handleManagementCrudEvents(message EventMessag
 
 	// Maps
 	if message.Type == TypeLoadUpsertMap {
-		err := e.typeLoadUpsertMap(message, pool)
-		if err != nil {
+		if err := e.typeLoadUpsertMap(message, pool); err == nil {
 			return err
 		}
 		handled = true
 	} else if message.Type == TypeUpsertMap {
-		err := e.typeUpsertMap(message, pool)
-		if err != nil {
+		if err := e.typeUpsertMap(message, pool); err == nil {
 			return err
 		}
 		handled = true
@@ -33,14 +31,12 @@ func (e *baseEventMessageHandler) handleManagementCrudEvents(message EventMessag
 
 	// Items
 	if message.Type == TypeLoadUpsertItem {
-		err := e.typeLoadUpsertItem(message, pool)
-		if err != nil {
+		if err := e.typeLoadUpsertItem(message, pool); err == nil {
 			return err
 		}
 		handled = true
 	} else if message.Type == TypeUpsertItem {
-		err := e.typeUpsertItem(message, pool)
-		if err != nil {
+		if err := e.typeUpsertItem(message, pool); err == nil {
 			return err
 		}
 		handled = true
@@ -48,14 +44,25 @@ func (e *baseEventMessageHandler) handleManagementCrudEvents(message EventMessag
 
 	// Characters
 	if message.Type == TypeLoadUpsertCharacter {
-		err := e.typeLoadUpsertCharacter(message, pool)
-		if err != nil {
+		if err := e.typeLoadUpsertCharacter(message, pool); err == nil {
 			return err
 		}
 		handled = true
 	} else if message.Type == TypeUpsertCharacter {
-		err := e.typeUpsertCharacter(message, pool)
-		if err != nil {
+		if err := e.typeUpsertCharacter(message, pool); err == nil {
+			return err
+		}
+		handled = true
+	}
+
+	// Inventories
+	if message.Type == TypeLoadUpsertInventory {
+		if err := e.typeLoadUpsertInventory(message, pool); err == nil {
+			return err
+		}
+		handled = true
+	} else if message.Type == TypeUpsertInventory {
+		if err := e.typeUpsertInventory(message, pool); err == nil {
 			return err
 		}
 		handled = true
@@ -64,6 +71,45 @@ func (e *baseEventMessageHandler) handleManagementCrudEvents(message EventMessag
 	if !handled {
 		return errors.New(fmt.Sprintf("message of type '%d' is not recognised by 'handleManagementCrudEvents()'", message.Type))
 	}
+	return nil
+}
+
+func (e *baseEventMessageHandler) typeLoadUpsertInventory(message EventMessage, pool CampaignPool) error {
+	//// Undo escaping
+	//clearedBody := html.UnescapeString(message.Body)
+	//
+	//// Check if user is lead
+	//if message.Source != pool.GetLeadId() {
+	//	return errors.New("modifying characters is not allowed as non-lead")
+	//}
+	//
+	//data := make(map[string]any)
+
+	return nil
+}
+
+func (e *baseEventMessageHandler) typeUpsertInventory(message EventMessage, pool CampaignPool) error {
+	//// Undo escaping
+	//clearedBody := html.UnescapeString(message.Body)
+	//
+	//// Check if user is lead
+	//if message.Source != pool.GetLeadId() {
+	//	return errors.New("modifying characters is not allowed as non-lead")
+	//}
+	//
+	//data := make(map[string]any)
+	//
+	//// Check if there is an existing map with the supplied uuid
+	//uuidItemFilter, err := helpers.ParseStringToUuid(clearedBody)
+	//if err == nil {
+	//	inventoryCandidate, match := pool.GetEngine().GetWorld().GetEntityByUuid(uuidItemFilter)
+	//	if match && inventoryCandidate.HasComponentType(ecs.SlotsComponentType) {
+	//		//data["Inventory"] = ecs_model_translation.CharacterEntityToCampaignCharacterModel(inventoryCandidate)
+	//	} else {
+	//		return errors.New("no characters found with matching identifier")
+	//	}
+	//}
+
 	return nil
 }
 
@@ -78,7 +124,7 @@ func (e *baseEventMessageHandler) typeLoadUpsertCharacter(message EventMessage, 
 
 	data := make(map[string]any)
 
-	// Check if there is an existing map with the supplied uuid
+	// Check if there is an existing character with the supplied uuid
 	uuidItemFilter, err := helpers.ParseStringToUuid(clearedBody)
 	if err == nil {
 		charCandidate, match := pool.GetEngine().GetWorld().GetEntityByUuid(uuidItemFilter)

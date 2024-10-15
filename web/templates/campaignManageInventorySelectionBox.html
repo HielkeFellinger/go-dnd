@@ -1,9 +1,8 @@
 {{define "campaignManageInventorySelectionBox"}}
     <div class="border" style="display: flex; flex-flow: row nowrap; min-height: 6em;">
-        <div style="flex: 3 3 0; padding-left: 1em;">
-            <h4>{{ .Name }}</h4>
-            <p>{{ .Description }} </p>
-            <p>items </p>
+        <div style="flex: 2 2 0; padding-left: 1em;">
+            <h4>{{ or .Name "{empty}" }} </h4>
+            <p>Size: {{ .Size}}</p>
         </div>
         <div style="flex: 1 1 0; align-content: flex-start">
             <button class="btn" style="height: 2.5em; width: 2.5em; margin-top: 0.3em; margin-right: 0.35em;
@@ -14,10 +13,19 @@
             float: right" title="Clone Inventory '{{ .Name }}'" onclick="cloneInventory('{{ .Id }}')" disabled>
                 <b><i class="bi bi-copy"></i></b>
             </button>
+            <br>
+            <br>
             <button class="btn" style="height: 2.5em; width: 2.5em; margin-top: 0.3em; margin-right: 0.35em;
-            float: right" title="Linked Owner '{{ .Name }}'" onclick="goToChar('{{ .Id }}')" disabled>
-                <b><i class="bi bi-copy"></i></b>
+            float: right; margin-bottom: 0.3em;" title="Linked Owner '{{ .Name }}'"
+            onclick="goToChar('charToMap{{.Id}}Select')" {{if not .Characters}}disabled{{end}}>
+                <b><i class="bi bi-person-lines-fill"></i></b>
             </button>
+            <select id="charToMap{{.Id}}Select" style="height: 2.5em; margin-top: 0.3em; margin-right: 0.35em;
+            float: right; margin-bottom: 0.3em;" {{if not .Characters}}disabled{{end}}>
+                {{ range $character := .Characters}}
+                    <option value="{{$character.Id}}">{{$character.Name}}</option>
+                {{ end }}
+            </select>
         </div>
     </div>
 {{end}}

@@ -74,10 +74,27 @@ func (e *baseEventMessageHandler) typeManageInventory(message EventMessage, pool
 
 	data := make(map[string]any)
 
-	//@TODO Load the inventories
+	inventories := pool.GetEngine().GetWorld().GetInventoryEntities()
+	characters := pool.GetEngine().GetWorld().GetCharacterEntities()
+	parsedItems := make([]models.CampaignInventory, 0)
+	for _, inventoryEntity := range inventories {
+		inventoryModel := ecs_model_translation.InventoryEntityToCampaignInventoryModel(inventoryEntity)
+
+		// Link to characters
+		for _, characterEntity := range characters {
+			if characterEntity.HasRelationWithEntityByUuid(inventoryEntity.GetId()) {
+				inventoryModel.Characters = append(inventoryModel.Characters,
+					ecs_model_translation.CharacterEntityToCampaignCharacterModel(characterEntity))
+			}
+		}
+		sort.Sort(inventoryModel.Characters)
+		parsedItems = append(parsedItems, inventoryModel)
+	}
+	data["Inventories"] = parsedItems
 
 	rawJsonBytes, err := json.Marshal(
-		e.handleLoadHtmlBody("campaignManageInventories.html", "campaignManageInventories", data))
+		e.handleLoadHtmlBodyMultipleTemplateFiles([]string{"campaignManageInventories.html",
+			"campaignManageInventorySelectionBox.html", "diceSpinnerSvg.html"}, "campaignManageInventories", data))
 	if err != nil {
 		return err
 	}

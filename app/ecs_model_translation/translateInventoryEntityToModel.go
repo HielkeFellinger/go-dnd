@@ -11,6 +11,7 @@ func InventoryEntityToCampaignInventoryModel(rawInventoryEntity ecs.Entity) mode
 
 	inventory := &models.CampaignInventory{
 		Name:  rawInventoryEntity.GetName(),
+		Size:  0,
 		Items: make([]models.CampaignInventoryItem, 0),
 	}
 
@@ -23,14 +24,12 @@ func InventoryEntityToCampaignInventoryModel(rawInventoryEntity ecs.Entity) mode
 		// Loop over all the hasRelations and get the items
 		rawHasRelations := rawInventoryEntity.GetAllComponentsOfType(ecs.HasRelationComponentType)
 		for _, rawHasRelation := range rawHasRelations {
-
 			hasRelation := rawHasRelation.(*ecs_components.HasRelationComponent)
 
 			// Check if containing entity is an Item
 			if hasRelation.Entity != nil && hasRelation.Entity.HasComponentType(ecs.ItemComponentType) {
-
 				inventoryItem := ItemEntityToCampaignInventoryItem(hasRelation.Entity, hasRelation.Count)
-
+				inventory.Size += inventoryItem.Count
 				inventory.Items = append(inventory.Items, *inventoryItem)
 			}
 		}
