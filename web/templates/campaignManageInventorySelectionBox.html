@@ -1,12 +1,13 @@
 {{define "campaignManageInventorySelectionBox"}}
     <div class="border" style="display: flex; flex-flow: row nowrap; min-height: 6em;">
         <div style="flex: 2 2 0; padding-left: 1em;">
-            <h4>{{ or .Name "{empty}" }} </h4>
+            <h5>{{ or .Name "{empty}" }} </h5>
             <p>Size: {{ .Size}}</p>
+            <p>Owners: {{ len .Characters}}</p>
         </div>
-        <div style="flex: 1 1 0; align-content: flex-start">
+        <div style="flex: 2 2 0; align-content: flex-start; min-width: 10em">
             <button class="btn" style="height: 2.5em; width: 2.5em; margin-top: 0.3em; margin-right: 0.35em;
-            float: right" title="Edit Inventory '{{ .Name }}'" onclick="upsertInventory('{{ .Id }}')" disabled>
+            float: right" title="Edit Inventory '{{ .Name }}'" onclick="upsertInventory('{{ .Id }}')">
                 <b><i class="bi bi-pencil"></i></b>
             </button>
             <button class="btn" style="height: 2.5em; width: 2.5em; margin-top: 0.3em; margin-right: 0.35em;

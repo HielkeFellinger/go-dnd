@@ -229,14 +229,19 @@
             if (payLoad.type === 5511) {
                 handleRightBarCrudHtml(payLoad);
             }
-            // Items
-            if (payLoad.type === 5541) {
-                handleRightBarCrudHtml(payLoad);
-            }
             // Character
             if (payLoad.type === 5521) {
                 handleRightBarCrudHtml(payLoad);
             }
+            // Character
+            if (payLoad.type === 5531) {
+                handleRightBarCrudHtml(payLoad);
+            }
+            // Items
+            if (payLoad.type === 5541) {
+                handleRightBarCrudHtml(payLoad);
+            }
+
             return;
         }
         if (payLoad.type === 5999) {
@@ -334,9 +339,9 @@
         }
     }
 
-    let upsertItem = (id) => {
+    let upsertMap = (id) => {
         stopLoadSpinner();
-        sendEvent(wrapMessage(JSON.stringify(id), 5541));
+        sendEvent(wrapMessage(JSON.stringify(id), 5511));
     }
 
     let upsertCharacter = (id) => {
@@ -349,9 +354,14 @@
         sendEvent(wrapMessage(JSON.stringify(id), 5524));
     }
 
-    let upsertMap = (id) => {
+    let upsertInventory = (id) => {
         stopLoadSpinner();
-        sendEvent(wrapMessage(JSON.stringify(id), 5511));
+        sendEvent(wrapMessage(JSON.stringify(id), 5531));
+    }
+
+    let upsertItem = (id) => {
+        stopLoadSpinner();
+        sendEvent(wrapMessage(JSON.stringify(id), 5541));
     }
 
     let submitUpsertItem = () => {

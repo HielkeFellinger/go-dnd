@@ -10,6 +10,7 @@ import (
 	"github.com/hielkefellinger/go-dnd/app/helpers"
 	"golang.org/x/net/html"
 	"log"
+	"sort"
 )
 
 func (e *baseEventMessageHandler) handleManagementCrudEvents(message EventMessage, pool CampaignPool) error {
@@ -75,15 +76,51 @@ func (e *baseEventMessageHandler) handleManagementCrudEvents(message EventMessag
 }
 
 func (e *baseEventMessageHandler) typeLoadUpsertInventory(message EventMessage, pool CampaignPool) error {
-	//// Undo escaping
-	//clearedBody := html.UnescapeString(message.Body)
-	//
-	//// Check if user is lead
-	//if message.Source != pool.GetLeadId() {
-	//	return errors.New("modifying characters is not allowed as non-lead")
-	//}
-	//
-	//data := make(map[string]any)
+	// Undo escaping
+	clearedBody := html.UnescapeString(message.Body)
+
+	// Check if user is lead
+	if message.Source != pool.GetLeadId() {
+		return errors.New("modifying inventories is not allowed as non-lead")
+	}
+
+	data := make(map[string]any)
+
+	// Check if there is an existing character with the supplied uuid
+	uuidInventoryFilter, err := helpers.ParseStringToUuid(clearedBody)
+	if err == nil {
+		inventoryEntity, match := pool.GetEngine().GetWorld().GetEntityByUuid(uuidInventoryFilter)
+		if match && inventoryEntity.HasComponentType(ecs.SlotsComponentType) {
+			inventoryModel := ecs_model_translation.InventoryEntityToCampaignInventoryModel(inventoryEntity)
+
+			// Link to characters
+			for _, characterEntity := range pool.GetEngine().GetWorld().GetCharacterEntities() {
+				if characterEntity.HasRelationWithEntityByUuid(inventoryEntity.GetId()) {
+					inventoryModel.Characters = append(inventoryModel.Characters,
+						ecs_model_translation.CharacterEntityToCampaignCharacterModel(characterEntity))
+				}
+				sort.Sort(inventoryModel.Characters)
+			}
+
+			data["Inventory"] = inventoryModel
+		} else {
+			return errors.New("no inventories found with matching identifier")
+		}
+	}
+
+	rawJsonBytes, err := json.Marshal(
+		e.handleLoadHtmlBodyMultipleTemplateFiles([]string{"campaignUpsertInventory.html", "diceSpinnerSvg.html"},
+			"campaignUpsertInventory", data))
+	if err != nil {
+		return err
+	}
+
+	loadItemMessage := NewEventMessage()
+	loadItemMessage.Source = message.Source
+	loadItemMessage.Type = TypeLoadUpsertInventory
+	loadItemMessage.Body = string(rawJsonBytes)
+	loadItemMessage.Destinations = append(loadItemMessage.Destinations, pool.GetLeadId())
+	pool.TransmitEventMessage(loadItemMessage)
 
 	return nil
 }
@@ -142,12 +179,12 @@ func (e *baseEventMessageHandler) typeLoadUpsertCharacter(message EventMessage, 
 		return err
 	}
 
-	loadItemMessage := NewEventMessage()
-	loadItemMessage.Source = message.Source
-	loadItemMessage.Type = TypeLoadUpsertCharacter
-	loadItemMessage.Body = string(rawJsonBytes)
-	loadItemMessage.Destinations = append(loadItemMessage.Destinations, pool.GetLeadId())
-	pool.TransmitEventMessage(loadItemMessage)
+	loadItemCharacter := NewEventMessage()
+	loadItemCharacter.Source = message.Source
+	loadItemCharacter.Type = TypeLoadUpsertCharacter
+	loadItemCharacter.Body = string(rawJsonBytes)
+	loadItemCharacter.Destinations = append(loadItemCharacter.Destinations, pool.GetLeadId())
+	pool.TransmitEventMessage(loadItemCharacter)
 
 	return nil
 }
@@ -273,12 +310,12 @@ func (e *baseEventMessageHandler) typeLoadUpsertMap(message EventMessage, pool C
 		return err
 	}
 
-	loadItemMessage := NewEventMessage()
-	loadItemMessage.Source = message.Source
-	loadItemMessage.Type = TypeLoadUpsertMap
-	loadItemMessage.Body = string(rawJsonBytes)
-	loadItemMessage.Destinations = append(loadItemMessage.Destinations, pool.GetLeadId())
-	pool.TransmitEventMessage(loadItemMessage)
+	loadMapMessage := NewEventMessage()
+	loadMapMessage.Source = message.Source
+	loadMapMessage.Type = TypeLoadUpsertMap
+	loadMapMessage.Body = string(rawJsonBytes)
+	loadMapMessage.Destinations = append(loadMapMessage.Destinations, pool.GetLeadId())
+	pool.TransmitEventMessage(loadMapMessage)
 
 	return nil
 }
