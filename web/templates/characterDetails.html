@@ -13,17 +13,17 @@
     </div>
 
     <!-- Health  -->
-    <div style="display: flex; flex-flow: row nowrap; align-content: center; width: 100%;">
+    <div style="display: flex; flex-flow: row nowrap; align-content: center; width: 100%; padding-top: 0.5em;">
         <div style="flex: 1 1 0;">
-            <label for="healthDamage">Current Damage</label>
+            <label for="healthDamage">Current Damage</label><br>
             <input id="healthDamage" type="number" style="font-size: 2em; max-width: 4em" value="{{ .character.Health.Damage }}" onchange="updateCharacterHealth('{{ .character.Id }}')" />
         </div>
         <div style="flex: 1 1 0;">
-            <label for="healthTmp">Temp HP</label>
+            <label for="healthTmp">Temp HP</label><br>
             <input id="healthTmp" type="number" style="font-size: 2em; max-width: 4em" value="{{ .character.Health.TemporaryHitPoints }}" onchange="updateCharacterHealth('{{ .character.Id }}')" />
         </div>
         <div style="flex: 1 1 0;">
-            <label for="healthMax">Max HP</label>
+            <label for="healthMax">Max HP</label><br>
             <input id="healthMax" type="number" style="font-size: 2em; max-width: 4em" value="{{ .character.Health.MaximumHitPoints }}" onchange="updateCharacterHealth('{{ .character.Id }}')" />
         </div>
     </div>
@@ -37,15 +37,15 @@
     </details>
 
 
-    <!-- Just Dump inventory  -->
+    <!-- Just Dump inventories  -->
+    {{ range .character.Inventories }}
     <details open="" style="padding-top: 1em;">
-        <summary style="font-size: 1.5em;">Inventory</summary>
-        {{ range .character.Inventories }}
+        <summary style="font-size: 1.5em;">Inventory: {{ .Name }}</summary>
         <div style="display: flex; flex-flow: row nowrap; align-content: center; width: 100%;">
             {{ template "inventory" . }}
         </div>
-        {{ end }}
     </details>
+    {{ end }}
 
 </div>
 

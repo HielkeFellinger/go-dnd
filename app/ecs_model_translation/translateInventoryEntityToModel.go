@@ -10,9 +10,10 @@ import (
 func InventoryEntityToCampaignInventoryModel(rawInventoryEntity ecs.Entity) models.CampaignInventory {
 
 	inventory := &models.CampaignInventory{
-		Name:  rawInventoryEntity.GetName(),
-		Size:  0,
-		Items: make([]models.CampaignInventoryItem, 0),
+		Name:              rawInventoryEntity.GetName(),
+		Size:              0,
+		ShowDetailButtons: true,
+		Items:             make([]models.CampaignInventoryItem, 0),
 	}
 
 	// Check if valid

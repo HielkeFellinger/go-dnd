@@ -1,11 +1,13 @@
 package models
 
 type CampaignInventory struct {
-	Id         string
-	Name       string
-	Size       uint
-	Items      []CampaignInventoryItem
-	Characters CampaignCharacters
+	Id                string
+	Name              string
+	Size              uint
+	ReadOnly          bool
+	ShowDetailButtons bool
+	Items             []CampaignInventoryItem
+	Characters        CampaignCharacters
 }
 
 type CampaignInventoryItem struct {

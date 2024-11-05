@@ -1,6 +1,6 @@
 {{define "campaignUpsertInventory"}}
 
-<h2>{{ if and .Inventory .Inventory.Id }}Update{{else}}Add{{end}} Character</h2>
+<h2>{{ if and .Inventory .Inventory.Id }}Update{{else}}Add{{end}} Inventory</h2>
 <div style="width: 100%;">
     <form class="form" onsubmit="return false" style="width: 100%;" id="upsertInventoryForm">
 
@@ -28,38 +28,9 @@
                 {{ template "diceSpinnerSvg.html" .}}
             </div>
         </div>
-        <div style="width: 100%;">
-            <table style="width: 100%;">
-                <thead>
-                <tr>
-                    <th> Name </th>
-                    <th> Description </th>
-                    <th> Damage </th>
-                    <th> Restore </th>
-                    <th> Range </th>
-                    <th> Edit </th>
-                    <th style="display: none;"> ID </th>
-                </tr>
-                </thead>
-                <tbody>
-                {{ range $item := .Inventory.Items }}
-                    <tr>
-                        <td> {{ $item.Name }} </td>
-                        <td> {{ $item.Description }} </td>
-                        <td> {{ $item.Damage }} </td>
-                        <td> {{ $item.Restore }} </td>
-                        <td> {{ if $item.Range.Min }} Min: {{ $item.Range.Min }} {{ end }} {{ if $item.Range.Max }} Max: {{ $item.Range.Max }} {{ end }}</td>
-                        <td>
-                            <button class="btn" onclick="removeInventoryItem('{{ .Id }}', '{{ $item.Id }}')" style="height: 2.5em; width: 2.5em" disabled>
-                                <b><i class="bi bi-minus"></i></b>
-                            </button>
-                        </td>
-                        <td style="display: none;"> {{ $item.Id }} </td>
-                    </tr>
-                {{ end }}
-                </tbody>
-            </table>
-        </div>
+
+        {{ template "inventory" .Inventory }}
+
     </form>
 </div>
 

@@ -109,7 +109,7 @@ func (e *baseEventMessageHandler) typeLoadUpsertInventory(message EventMessage, 
 	}
 
 	rawJsonBytes, err := json.Marshal(
-		e.handleLoadHtmlBodyMultipleTemplateFiles([]string{"campaignUpsertInventory.html", "diceSpinnerSvg.html"},
+		e.handleLoadHtmlBodyMultipleTemplateFiles([]string{"campaignUpsertInventory.html", "diceSpinnerSvg.html", "inventory.html"},
 			"campaignUpsertInventory", data))
 	if err != nil {
 		return err

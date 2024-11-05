@@ -2,28 +2,56 @@
 
 <div style="width: 100%;">
     <table style="width: 100%;">
-        <caption>{{ .Id }}</caption>
         <thead>
         <tr>
+            {{ if not .ReadOnly }}
             <th> Count </th>
+            {{ end }}
             <th> Name </th>
             <th> Description </th>
-            <th> Damage </th>
-            <th> Restore </th>
-            <th> Range </th>
+            <th> Special </th>
+            {{ if .ShowDetailButtons }}
+                <th> </th>
+            {{ end }}
             <th style="display: none;"> ID </th>
         </tr>
         </thead>
         <tbody>
-        {{ range .Items }}
+        {{ range $item := .Items }}
         <tr>
-            <td> <input type="number" value="{{ .Count }}" style="max-width: 4em;"> </td>
-            <td> {{ .Name }} </td>
-            <td> {{ .Description }} </td>
-            <td> {{ .Damage }} </td>
-            <td> {{ .Restore }} </td>
-            <td> {{ if .Range.Min }} Min: {{ .Range.Min }} {{ end }} {{ if .Range.Max }} Max: {{ .Range.Max }} {{ end }}</td>
-            <td style="display: none;"> {{ .Id }} </td>
+            {{ if not $.ReadOnly }}
+            <td> <input type="number" value="{{ $item.Count }}" style="max-width: 4em;"> </td>
+            {{ end }}
+            <td> {{ $item.Name }} </td>
+            <td> {{ $item.Description }} </td>
+            <td>
+                {{ if $item.Damage }}
+                <button class="btn" title="Damage: {{ $item.Damage }}"  style="height: 2.5em; width: 2.5em">
+                    <b><i class="bi bi-lightning-fill"></i></b>
+                </button>
+                {{ end }}
+                {{ if $item.Restore }}
+                    <button class="btn" title="Restore: {{ $item.Restore }}"  style="height: 2.5em; width: 2.5em">
+                        <b><i class="bi bi-heart-fill"></i></b>
+                    </button>
+                {{ end }}
+                {{ if or $item.Range.Min $item.Range.Max }}
+                    <button class="btn" title="{{ if $item.Range.Min }} Min: {{ $item.Range.Min }} {{ end }} {{ if $item.Range.Max }} Max: {{ $item.Range.Max }} {{ end }}"  style="height: 2.5em; width: 2.5em">
+                        <b><i class="bi bi-crosshair"></i></b>
+                    </button>
+                {{ end }}
+            </td>
+            {{ if $.ShowDetailButtons }}
+            <td>
+                <button class="btn" title="Show Details" onclick="showItemDetails('{{ $item.Id }}')" style="height: 2.5em; width: 2.5em" disabled>
+                    <b><i class="bi bi-search"></i></b>
+                </button>
+                <button class="btn" title="Remove Items" onclick="removeInventoryItem('{{ $.Id }}', '{{ $item.Id }}')" style="height: 2.5em; width: 2.5em" disabled>
+                    <b><i class="bi bi-minus"></i></b>
+                </button>
+            </td>
+            {{ end }}
+            <td style="display: none;"> {{ $item.Id }} </td>
         </tr>
         {{ end }}
         </tbody>
