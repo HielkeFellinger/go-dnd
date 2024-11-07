@@ -349,6 +349,13 @@
         sendEvent(wrapMessage(JSON.stringify(id), 5521));
     }
 
+    let goToChar = (id) => {
+        let inputElement = document.getElementById(id);
+        if (inputElement && inputElement.value?.trim()) {
+            upsertCharacter(inputElement.value?.trim());
+        }
+    }
+
     let cloneCharacter = (id) => {
         stopLoadSpinner();
         sendEvent(wrapMessage(JSON.stringify(id), 5524));
