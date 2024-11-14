@@ -141,7 +141,7 @@
 
     var socket;
     let currentUser = "{{.user.Name}}"
-    let backoff = 1
+    let backoff = 1000
 
     let connectWs = () => {
         socket = new WebSocket("ws://" + document.location.host + "/campaign/session/{{.campaign.ID}}/ws")
@@ -149,7 +149,7 @@
         // On Open & Close
         socket.onopen = function (evt) {
             console.log("Connected to Websocket: true");
-            backoff = 1;
+            backoff = 1000;
             fullRefresh();
         }
         socket.onclose = function (evt) {
@@ -169,9 +169,13 @@
             // Attempting reconnect
             setTimeout(() => {
                 console.log("Attempting to re-establish connection");
-                backoff ++;
-                connectWs();
-            }, (backoff * 1000))
+                backoff += Math.floor(Math.random() * 1000);
+                if (backoff < 30000) {
+                    connectWs();
+                } else {
+                    console.error("Could not re-connect")
+                }
+            }, (backoff))
         }
 
         // On message
@@ -186,22 +190,31 @@
 
         // Parse events
 
-        // Parse Character Events
-        if (payLoad.type >= 500 && payLoad.type < 510) {
-            handleCharacterEvents(payLoad);
+        // Parse Chat-messages
+        if ((payLoad.type >= 400 && payLoad.type < 410) || (payLoad.type >= 800 && payLoad.type < 900)) {
+            handleChatEvents(payLoad);
             return;
         }
-
+        // Parse Character Events
+        else if (payLoad.type >= 500 && payLoad.type < 510) {
+            if (payLoad.type === 501) {
+                setCharRibbon(payLoad)
+            } else if (payLoad.type === 504) {
+                setCharDetails(payLoad)
+            } else {
+                console.error("Type '" + payLoad.type + "' not handled by 'Parse Character Events'")
+            }
+            return;
+        }
         // Parse Map Events
-        if (payLoad.type >= 530 && payLoad.type < 549) {
+        else if (payLoad.type >= 530 && payLoad.type < 549) {
             if (payLoad.type === 531) {
                 handleCampaignContentMapEvents(payLoad);
             } else if (payLoad.type === 532) {
                 handleCampaignContentMapItemsEvents(payLoad);
             } else if (payLoad.type === 533) {
                 handleCampaignContentMapItemEvents(payLoad);
-            }
-            else if (payLoad.type === 544) {
+            } else if (payLoad.type === 544) {
                 handleCampaignContentMapVisibility(payLoad);
             } else if (payLoad.type === 546) {
                 handleMapItemRemoval(payLoad);
@@ -209,42 +222,52 @@
                 handleSignal(payLoad);
             } else if (payLoad.type === 548) {
                 handleNewMapBackground(payLoad);
+            } else {
+                console.error("Type '" + payLoad.type + "' not handled by 'Parse Map Events'")
             }
             return;
         }
-
-        // Parse Manage Events
-        if (payLoad.type >= 550 && payLoad.type <= 559) {
-            handleManagePage(payLoad);
+        // Parse Management Overview Events
+        else if (payLoad.type >= 550 && payLoad.type <= 559) {
+            let html = JSON.parse(payLoad.body);
+            if (payLoad.type === 551 ) {
+                document.getElementById('manageMapsContent').innerHTML = html;
+            } else if (payLoad.type === 552) {
+                document.getElementById('manageCharactersContent').innerHTML = html;
+            } else if (payLoad.type === 553) {
+                document.getElementById('manageInventoryContent').innerHTML = html;
+            } else if (payLoad.type === 554) {
+                document.getElementById('manageItemsContent').innerHTML = html;
+            } else if (payLoad.type === 555) {
+                document.getElementById('manageCampaignContent').innerHTML = html;
+            } else {
+                console.error("Type '" + payLoad.type + "' not handled by 'Parse Management Events'")
+            }
             return;
         }
-        if (payLoad.type >= 5500 && payLoad.type <= 5600 ) {
+        // Parse Management CRUD Events
+        else if (payLoad.type >= 5500 && payLoad.type <= 5600 ) {
             // Reset Error-box
             let element = document.getElementById("managementCrudError");
             if (element) {
                 element["style"].visibility = "hidden";
             }
 
-            // Maps
             if (payLoad.type === 5511) {
-                handleRightBarCrudHtml(payLoad);
+                handleRightBarCrudHtml(payLoad); // Maps
+            } else if (payLoad.type === 5521) {
+                handleRightBarCrudHtml(payLoad); // Character
+            } else if (payLoad.type === 5531) {
+                handleRightBarCrudHtml(payLoad); // Inventory
+            } else if (payLoad.type === 5541) {
+                handleRightBarCrudHtml(payLoad); // Items
+            } else {
+                console.error("Type '" + payLoad.type + "' not handled by 'Parse Management Events'")
             }
-            // Character
-            if (payLoad.type === 5521) {
-                handleRightBarCrudHtml(payLoad);
-            }
-            // Character
-            if (payLoad.type === 5531) {
-                handleRightBarCrudHtml(payLoad);
-            }
-            // Items
-            if (payLoad.type === 5541) {
-                handleRightBarCrudHtml(payLoad);
-            }
-
             return;
         }
-        if (payLoad.type === 5999) {
+        // Parse CRUD Management Error
+        else if (payLoad.type === 5999) {
             stopLoadSpinner();
             let element = document.getElementById("managementCrudError");
             if (element) {
@@ -252,12 +275,6 @@
                 element.textContent = body.title + ': ' + body.message;
                 element["style"].visibility = "visible";
             }
-            return;
-        }
-
-        // Parse Chat-messages
-        if ((payLoad.type >= 400 && payLoad.type < 410) || (payLoad.type >= 800 && payLoad.type < 900)) {
-            handleChatEvents(payLoad);
             return;
         }
 
@@ -299,29 +316,32 @@
         }
     }
 
-    let handleCharacterEvents = (data) => {
-        if (data.type === 501) {
-            document.getElementById("char-ribbon-row").innerHTML = data.body;
-        } else if (data.type === 504) {
-            // If empty body, user is not allowed to see details, reset to old state
-            if (!data.body.trim()) {
-                // User may be not allowed to view old state, if so clean-up
-                if (selectedCharDetailsId === loadedCharDetailsId) {
-                    selectedCharDetailsId = "";
-                    loadedCharDetailsId = "";
-                    document.getElementById("entity-details-holder").innerHTML = "";
-                } else {
-                    selectedCharDetailsId = loadedCharDetailsId;
-                }
+    let setCharRibbon = (data) => {
+        let element = document.getElementById("char-ribbon-row");
+        if (element) {
+            element.innerHTML = data.body;
+        }
+    }
+
+    let setCharDetails = (data) => {
+        // If empty body, user is not allowed to see details, reset to old state
+        if (!data.body.trim()) {
+            // User may be not allowed to view old state, if so clean-up
+            if (selectedCharDetailsId === loadedCharDetailsId) {
+                selectedCharDetailsId = "";
+                loadedCharDetailsId = "";
+                document.getElementById("entity-details-holder").innerHTML = "";
             } else {
-                let body = JSON.parse(data.body)
-                if (selectedCharDetailsId === body.Id) {
-                    loadedCharDetailsId = body.Id;
-                    if (!rightBarVisible) {
-                        toggleVisibilityRightBar();
-                    }
-                    document.getElementById("entity-details-holder").innerHTML = body.Html;
+                selectedCharDetailsId = loadedCharDetailsId;
+            }
+        } else {
+            let body = JSON.parse(data.body)
+            if (selectedCharDetailsId === body.Id) {
+                loadedCharDetailsId = body.Id;
+                if (!rightBarVisible) {
+                    toggleVisibilityRightBar();
                 }
+                document.getElementById("entity-details-holder").innerHTML = body.Html;
             }
         }
     }
@@ -624,25 +644,6 @@
                 menus[i]["style"].marginTop = (0 - campaignMap.scrollTop) + 'px';
                 menus[i]["style"].marginLeft = (0 - campaignMap.scrollLeft - 375) + 'px';
             }
-        }
-    }
-
-    let handleManagePage = (data) => {
-        let html = JSON.parse(data.body);
-        if (data.type === 551 ) {
-            document.getElementById('manageMapsContent').innerHTML = html;
-        }
-        if (data.type === 552) {
-            document.getElementById('manageCharactersContent').innerHTML = html;
-        }
-        if (data.type === 553) {
-            document.getElementById('manageInventoryContent').innerHTML = html;
-        }
-        if (data.type === 554) {
-            document.getElementById('manageItemsContent').innerHTML = html;
-        }
-        if (data.type === 555) {
-            document.getElementById('manageCampaignContent').innerHTML = html;
         }
     }
 

@@ -8,12 +8,25 @@
             </button>
             <input type="text" placeholder="filter" style="margin-left: 0.5em; height: 2.4em; border-radius:.25rem;">
         </div>
-        <div style="display: flex; flex-flow: row; flex-wrap: wrap;">
-            {{ range .Inventories  }}
-            <div style="flex: 0 0 24%; margin-bottom: 0.25em; margin-right: 0.25em;">
-                {{ template "campaignManageInventorySelectionBox" . }}
+        <details open="">
+            <summary>Inventories with Player as owner</summary>
+            <div style="display: flex; flex-flow: row; flex-wrap: wrap; align-content: center; width: 100%;">
+                {{ range .PcInventories }}
+                    <div style="flex: 0 0 24%; margin-bottom: 0.25em; margin-right: 0.25em;">
+                        {{ template "campaignManageInventorySelectionBox" . }}
+                    </div>
+                {{ end }}
             </div>
-            {{ end }}
-        </div>
+        </details>
+        <details open="">
+            <summary>Other Inventories</summary>
+            <div style="display: flex; flex-flow: row; flex-wrap: wrap; align-content: center; width: 100%;">
+                {{ range .Inventories }}
+                    <div style="flex: 0 0 24%; margin-bottom: 0.25em; margin-right: 0.25em;">
+                        {{ template "campaignManageInventorySelectionBox" . }}
+                    </div>
+                {{ end }}
+            </div>
+        </details>
     </div>
 {{end}}

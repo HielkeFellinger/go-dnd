@@ -3,33 +3,13 @@ package game_engine
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
 	"github.com/hielkefellinger/go-dnd/app/ecs_components"
 	"github.com/hielkefellinger/go-dnd/app/ecs_model_translation"
 	"github.com/hielkefellinger/go-dnd/app/models"
-	"log"
 	"slices"
 	"sort"
 )
-
-func (e *baseEventMessageHandler) handleManagementEvents(message EventMessage, pool CampaignPool) error {
-	log.Printf("- Game Management Events Type: '%d' Message: '%s'", message.Type, message.Id)
-
-	if message.Type == TypeManageMaps {
-		return e.typeManageMaps(message, pool)
-	} else if message.Type == TypeManageCharacters {
-		return e.typeManageCharacters(message, pool)
-	} else if message.Type == TypeManageInventory {
-		return e.typeManageInventory(message, pool)
-	} else if message.Type == TypeManageItems {
-		return e.typeManageItems(message, pool)
-	} else if message.Type == TypeManageCampaign {
-		return e.typeManageCampaign(message, pool)
-	}
-
-	return errors.New(fmt.Sprintf("message of type '%d' is not recognised by 'handleManagementEvents()'", message.Type))
-}
 
 func (e *baseEventMessageHandler) typeManageItems(message EventMessage, pool CampaignPool) error {
 	if message.Source != pool.GetLeadId() {
@@ -76,21 +56,35 @@ func (e *baseEventMessageHandler) typeManageInventory(message EventMessage, pool
 
 	inventories := pool.GetEngine().GetWorld().GetInventoryEntities()
 	characters := pool.GetEngine().GetWorld().GetCharacterEntities()
-	parsedItems := make([]models.CampaignInventory, 0)
+	parsedInventories := make([]models.CampaignInventory, 0)
+	pcInventories := make([]models.CampaignInventory, 0)
 	for _, inventoryEntity := range inventories {
 		inventoryModel := ecs_model_translation.InventoryEntityToCampaignInventoryModel(inventoryEntity)
+		isOwnedByPc := false
 
 		// Link to characters
 		for _, characterEntity := range characters {
 			if characterEntity.HasRelationWithEntityByUuid(inventoryEntity.GetId()) {
+				isOwnedByPc = isOwnedByPc || characterEntity.HasComponentType(ecs.PlayerComponentType)
 				inventoryModel.Characters = append(inventoryModel.Characters,
 					ecs_model_translation.CharacterEntityToCampaignCharacterModel(characterEntity))
 			}
 		}
 		sort.Sort(inventoryModel.Characters)
-		parsedItems = append(parsedItems, inventoryModel)
+		if isOwnedByPc {
+			pcInventories = append(pcInventories, inventoryModel)
+		} else {
+			parsedInventories = append(parsedInventories, inventoryModel)
+		}
 	}
-	data["Inventories"] = parsedItems
+	sort.Slice(parsedInventories, func(i, j int) bool {
+		return parsedInventories[i].Name < parsedInventories[j].Name
+	})
+	sort.Slice(pcInventories, func(i, j int) bool {
+		return pcInventories[i].Name < pcInventories[j].Name
+	})
+	data["Inventories"] = parsedInventories
+	data["PcInventories"] = pcInventories
 
 	rawJsonBytes, err := json.Marshal(
 		e.handleLoadHtmlBodyMultipleTemplateFiles([]string{"campaignManageInventories.html",
@@ -135,43 +129,41 @@ func (e *baseEventMessageHandler) typeManageCampaign(message EventMessage, pool 
 	data["campaignUsers"] = campaignUsers
 
 	// Get all the player chars and see who controls them
-	characters := pool.GetEngine().GetWorld().GetCharacterEntities()
+	characters := pool.GetEngine().GetWorld().GetPlayerCharacterEntities()
 	charControllers := make([]charUserController, 0)
 	for _, character := range characters {
-		if character.HasComponentType(ecs.PlayerComponentType) {
-			charUserControl := newCharUserController()
-			charUserControl.Id = character.GetId().String()
-			charUserControl.Name = character.GetName()
+		charUserControl := newCharUserController()
+		charUserControl.Id = character.GetId().String()
+		charUserControl.Name = character.GetName()
 
-			// Get list of controlling users
-			listOfControllingUserNames := make([]string, 0)
-			playerComponents := character.GetAllComponentsOfType(ecs.PlayerComponentType)
-			for index := 0; index < len(playerComponents); index++ {
-				playerComponent := playerComponents[index].(*ecs_components.PlayerComponent)
-				listOfControllingUserNames = append(listOfControllingUserNames, playerComponent.Name)
-			}
-
-			for _, user := range campaign.Users {
-				if user.Name != pool.GetLeadId() {
-					charUserControl.ControllingPlayers[user.Name] = slices.Contains(listOfControllingUserNames, user.Name)
-				}
-			}
-
-			var image *ecs_components.ImageComponent
-			var imageDetails = character.GetAllComponentsOfType(ecs.ImageComponentType)
-			if imageDetails != nil && len(imageDetails) > 0 {
-				image = imageDetails[0].(*ecs_components.ImageComponent)
-			} else {
-				// Set default
-				image = ecs_components.NewMissingImageComponent()
-			}
-			charUserControl.Image = models.CampaignImage{
-				Name: image.Name,
-				Url:  image.Url,
-			}
-
-			charControllers = append(charControllers, charUserControl)
+		// Get list of controlling users
+		listOfControllingUserNames := make([]string, 0)
+		playerComponents := character.GetAllComponentsOfType(ecs.PlayerComponentType)
+		for index := 0; index < len(playerComponents); index++ {
+			playerComponent := playerComponents[index].(*ecs_components.PlayerComponent)
+			listOfControllingUserNames = append(listOfControllingUserNames, playerComponent.Name)
 		}
+
+		for _, user := range campaign.Users {
+			if user.Name != pool.GetLeadId() {
+				charUserControl.ControllingPlayers[user.Name] = slices.Contains(listOfControllingUserNames, user.Name)
+			}
+		}
+
+		var image *ecs_components.ImageComponent
+		var imageDetails = character.GetAllComponentsOfType(ecs.ImageComponentType)
+		if imageDetails != nil && len(imageDetails) > 0 {
+			image = imageDetails[0].(*ecs_components.ImageComponent)
+		} else {
+			// Set default
+			image = ecs_components.NewMissingImageComponent()
+		}
+		charUserControl.Image = models.CampaignImage{
+			Name: image.Name,
+			Url:  image.Url,
+		}
+
+		charControllers = append(charControllers, charUserControl)
 	}
 	data["charToPlayers"] = charControllers
 

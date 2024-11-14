@@ -3,77 +3,13 @@ package game_engine
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
 	"github.com/hielkefellinger/go-dnd/app/ecs_components"
 	"github.com/hielkefellinger/go-dnd/app/ecs_model_translation"
 	"github.com/hielkefellinger/go-dnd/app/helpers"
 	"golang.org/x/net/html"
-	"log"
 	"sort"
 )
-
-func (e *baseEventMessageHandler) handleManagementCrudEvents(message EventMessage, pool CampaignPool) error {
-	log.Printf("- Game Management CRUD Events Type: '%d' Message: '%s'", message.Type, message.Id)
-	var handled = false
-
-	// Maps
-	if message.Type == TypeLoadUpsertMap {
-		if err := e.typeLoadUpsertMap(message, pool); err == nil {
-			return err
-		}
-		handled = true
-	} else if message.Type == TypeUpsertMap {
-		if err := e.typeUpsertMap(message, pool); err == nil {
-			return err
-		}
-		handled = true
-	}
-
-	// Items
-	if message.Type == TypeLoadUpsertItem {
-		if err := e.typeLoadUpsertItem(message, pool); err == nil {
-			return err
-		}
-		handled = true
-	} else if message.Type == TypeUpsertItem {
-		if err := e.typeUpsertItem(message, pool); err == nil {
-			return err
-		}
-		handled = true
-	}
-
-	// Characters
-	if message.Type == TypeLoadUpsertCharacter {
-		if err := e.typeLoadUpsertCharacter(message, pool); err == nil {
-			return err
-		}
-		handled = true
-	} else if message.Type == TypeUpsertCharacter {
-		if err := e.typeUpsertCharacter(message, pool); err == nil {
-			return err
-		}
-		handled = true
-	}
-
-	// Inventories
-	if message.Type == TypeLoadUpsertInventory {
-		if err := e.typeLoadUpsertInventory(message, pool); err == nil {
-			return err
-		}
-		handled = true
-	} else if message.Type == TypeUpsertInventory {
-		if err := e.typeUpsertInventory(message, pool); err == nil {
-			return err
-		}
-		handled = true
-	}
-
-	if !handled {
-		return errors.New(fmt.Sprintf("message of type '%d' is not recognised by 'handleManagementCrudEvents()'", message.Type))
-	}
-	return nil
-}
 
 func (e *baseEventMessageHandler) typeLoadUpsertInventory(message EventMessage, pool CampaignPool) error {
 	// Undo escaping

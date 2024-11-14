@@ -10,6 +10,7 @@ type World interface {
 	AddEntity(e Entity) error
 	AddEntities(e []Entity) error
 	GetCharacterEntities() []Entity
+	GetPlayerCharacterEntities() []Entity
 	GetMapEntities() []Entity
 	GetItemEntities() []Entity
 	GetFactionEntities() []Entity
@@ -85,6 +86,11 @@ func (w *BaseWorld) GetCharacterEntities() []Entity {
 	return w.getEntityValuesOfMap(w.UuidToCharacterEntity)
 }
 
+func (w *BaseWorld) GetPlayerCharacterEntities() []Entity {
+	return w.getFilteredEntityValuesOfMap(w.UuidToCharacterEntity,
+		func(entity Entity) bool { return entity.HasComponentType(PlayerComponentType) })
+}
+
 func (w *BaseWorld) GetMapEntities() []Entity {
 	return w.getEntityValuesOfMap(w.UuidToMapEntity)
 }
@@ -128,6 +134,15 @@ func (w *BaseWorld) getEntityValuesOfMap(dict map[uuid.UUID]Entity) []Entity {
 		values[index] = value
 		index++
 	}
+	return values
+}
 
+func (w *BaseWorld) getFilteredEntityValuesOfMap(dict map[uuid.UUID]Entity, filter func(entity Entity) bool) []Entity {
+	values := make([]Entity, 0)
+	for _, value := range dict {
+		if filter(value) {
+			values = append(values, value)
+		}
+	}
 	return values
 }
