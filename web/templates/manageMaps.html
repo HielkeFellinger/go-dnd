@@ -1,4 +1,4 @@
-{{define "campaignManageMaps"}}
+{{define "manageMaps"}}
     <div>
         <div style="display: flex; flex-direction: row;">
             <h2 style="width: max-content;">Map Overview</h2>
@@ -10,7 +10,7 @@
         <div style="display: flex; flex-flow: row; flex-wrap: wrap;">
             {{ range .Maps }}
                 <div style="flex: 0 0 24%; margin-bottom: 0.25em; margin-right: 0.25em;">
-                    {{ template "campaignManageMapSelectionBox" . }}
+                    {{ template "manageMapSelectionBox" . }}
                 </div>
             {{ end }}
         </div>

@@ -1,5 +1,7 @@
 package models
 
+import "github.com/hielkefellinger/go-dnd/app/ecs"
+
 type CampaignCharacter struct {
 	Id          string
 	Name        string
@@ -10,6 +12,13 @@ type CampaignCharacter struct {
 	Health      CampaignCharacterHealth
 	Inventories []CampaignInventory
 	Controllers []string
+}
+
+type CampaignDropdownCharacter struct {
+	Id       string
+	Name     string
+	Selected bool
+	Source   ecs.Entity
 }
 
 type CampaignCharacters []CampaignCharacter

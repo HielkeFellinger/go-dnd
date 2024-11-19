@@ -1,31 +1,31 @@
-{{define "campaignManageInventories"}}
+{{define "manageCharacters"}}
     <div>
         <div style="display: flex; flex-direction: row;">
-            <h2 style="width: max-content;">Inventory Overview</h2>
+            <h2 style="width: max-content;">Character Overview</h2>
             <b style="margin: 0.5em 0.5em 0.5em;">|</b>
-            <button class="btn" style="height: 2.4em;" onclick="upsertInventory()">
+            <button class="btn" style="height: 2.4em;" onclick="upsertCharacter('')">
                 <i class="bi bi-plus"></i>
             </button>
             <input type="text" placeholder="filter" style="margin-left: 0.5em; height: 2.4em; border-radius:.25rem;">
         </div>
         <details open="">
-            <summary>Inventories with Player as owner</summary>
+            <summary>Player Characters</summary>
             <div style="display: flex; flex-flow: row; flex-wrap: wrap; align-content: center; width: 100%;">
-                {{ range .PcInventories }}
+                {{ range .pc_chars }}
                     <div style="flex: 0 0 24%; margin-bottom: 0.25em; margin-right: 0.25em;">
-                        {{ template "campaignManageInventorySelectionBox" . }}
+                        {{ template "manageCharacterSelectionBox" . }}
                     </div>
                 {{ end }}
             </div>
         </details>
-        <details open="">
-            <summary>Other Inventories</summary>
+        <details open="" style="padding-top: 1em">
+            <summary>Non Player Characters</summary>
             <div style="display: flex; flex-flow: row; flex-wrap: wrap; align-content: center; width: 100%;">
-                {{ range .Inventories }}
-                    <div style="flex: 0 0 24%; margin-bottom: 0.25em; margin-right: 0.25em;">
-                        {{ template "campaignManageInventorySelectionBox" . }}
-                    </div>
-                {{ end }}
+            {{ range .npc_chars }}
+                <div style="flex: 0 0 24%; margin-bottom: 0.25em; margin-right: 0.25em;">
+                    {{ template "manageCharacterSelectionBox" . }}
+                </div>
+            {{ end }}
             </div>
         </details>
     </div>

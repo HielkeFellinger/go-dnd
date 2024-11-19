@@ -1,4 +1,4 @@
-{{define "campaignManageInventorySelectionBox"}}
+{{define "manageInventorySelectionBox"}}
     <div class="border" style="display: flex; flex-flow: row nowrap; min-height: 6em;">
         <div style="flex: 2 2 0; padding-left: 1em;">
             <h5>{{ or .Name "{empty}" }} </h5>
@@ -18,10 +18,10 @@
             <br>
             <button class="btn" style="height: 2.5em; width: 2.5em; margin-top: 0.3em; margin-right: 0.35em;
             float: right; margin-bottom: 0.3em;" title="Go To Selected Owner of: '{{ .Name }}'"
-            onclick="goToChar('charToMap{{.Id}}Select')" {{if not .Characters}}disabled{{end}}>
+                    onclick="goToSelectedCharCrud('charToInventory{{.Id}}Select')" {{if not .Characters}}disabled{{end}}>
                 <b><i class="bi bi-person-lines-fill"></i></b>
             </button>
-            <select id="charToMap{{.Id}}Select" style="height: 2.5em; margin-top: 0.3em; margin-right: 0.35em;
+            <select id="charToInventory{{.Id}}Select" style="height: 2.5em; margin-top: 0.3em; margin-right: 0.35em;
             float: right; margin-bottom: 0.3em;" {{if not .Characters}}disabled{{end}}>
                 {{ range $character := .Characters}}
                     <option value="{{$character.Id}}">{{$character.Name}}</option>

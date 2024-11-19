@@ -29,7 +29,7 @@ func (e *baseEventMessageHandler) typeManageItems(message EventMessage, pool Cam
 	data["Items"] = parsedItems
 
 	rawJsonBytes, err := json.Marshal(
-		e.handleLoadHtmlBody("campaignManageItems.html", "campaignManageItems", data))
+		e.handleLoadHtmlBody("manageItems.html", "manageItems", data))
 	if err != nil {
 		return err
 	}
@@ -87,8 +87,8 @@ func (e *baseEventMessageHandler) typeManageInventory(message EventMessage, pool
 	data["PcInventories"] = pcInventories
 
 	rawJsonBytes, err := json.Marshal(
-		e.handleLoadHtmlBodyMultipleTemplateFiles([]string{"campaignManageInventories.html",
-			"campaignManageInventorySelectionBox.html", "diceSpinnerSvg.html"}, "campaignManageInventories", data))
+		e.handleLoadHtmlBodyMultipleTemplateFiles([]string{"manageInventories.html",
+			"manageInventorySelectionBox.html", "diceSpinnerSvg.html"}, "manageInventories", data))
 	if err != nil {
 		return err
 	}
@@ -168,8 +168,8 @@ func (e *baseEventMessageHandler) typeManageCampaign(message EventMessage, pool 
 	data["charToPlayers"] = charControllers
 
 	rawJsonBytes, err := json.Marshal(
-		e.handleLoadHtmlBodyMultipleTemplateFiles([]string{"campaignManageCampaign.html", "diceSpinnerSvg.html"},
-			"campaignManageCampaign", data))
+		e.handleLoadHtmlBodyMultipleTemplateFiles([]string{"manageCampaign.html", "diceSpinnerSvg.html"},
+			"manageCampaign", data))
 	if err != nil {
 		return err
 	}
@@ -248,8 +248,8 @@ func (e *baseEventMessageHandler) typeManageCharacters(message EventMessage, poo
 
 	rawJsonBytes, err := json.Marshal(
 		e.handleLoadHtmlBodyMultipleTemplateFiles(
-			[]string{"campaignManageCharacters.html", "campaignManageCharacterSelectionBox.html"},
-			"campaignManageCharacters", data))
+			[]string{"manageCharacters.html", "manageCharacterSelectionBox.html"},
+			"manageCharacters", data))
 	if err != nil {
 		return err
 	}
@@ -283,8 +283,8 @@ func (e *baseEventMessageHandler) typeManageMaps(message EventMessage, pool Camp
 	data["Maps"] = mapEntries
 	rawJsonBytes, err := json.Marshal(
 		e.handleLoadHtmlBodyMultipleTemplateFiles(
-			[]string{"campaignManageMaps.html", "campaignManageMapSelectionBox.html"},
-			"campaignManageMaps", data))
+			[]string{"manageMaps.html", "manageMapSelectionBox.html"},
+			"manageMaps", data))
 	if err != nil {
 		return err
 	}

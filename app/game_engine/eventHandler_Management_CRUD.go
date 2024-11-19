@@ -7,6 +7,7 @@ import (
 	"github.com/hielkefellinger/go-dnd/app/ecs_components"
 	"github.com/hielkefellinger/go-dnd/app/ecs_model_translation"
 	"github.com/hielkefellinger/go-dnd/app/helpers"
+	"github.com/hielkefellinger/go-dnd/app/models"
 	"golang.org/x/net/html"
 	"sort"
 )
@@ -22,6 +23,16 @@ func (e *baseEventMessageHandler) typeLoadUpsertInventory(message EventMessage, 
 
 	data := make(map[string]any)
 
+	allSelectableChars := make([]models.CampaignDropdownCharacter, 0)
+	for _, characterEntity := range pool.GetEngine().GetWorld().GetCharacterEntities() {
+		allSelectableChars = append(allSelectableChars, models.CampaignDropdownCharacter{
+			Id:       characterEntity.GetId().String(),
+			Name:     characterEntity.GetName(),
+			Selected: false,
+			Source:   characterEntity,
+		})
+	}
+
 	// Check if there is an existing character with the supplied uuid
 	uuidInventoryFilter, err := helpers.ParseStringToUuid(clearedBody)
 	if err == nil {
@@ -30,12 +41,8 @@ func (e *baseEventMessageHandler) typeLoadUpsertInventory(message EventMessage, 
 			inventoryModel := ecs_model_translation.InventoryEntityToCampaignInventoryModel(inventoryEntity)
 
 			// Link to characters
-			for _, characterEntity := range pool.GetEngine().GetWorld().GetCharacterEntities() {
-				if characterEntity.HasRelationWithEntityByUuid(inventoryEntity.GetId()) {
-					inventoryModel.Characters = append(inventoryModel.Characters,
-						ecs_model_translation.CharacterEntityToCampaignCharacterModel(characterEntity))
-				}
-				sort.Sort(inventoryModel.Characters)
+			for i, characterEntity := range allSelectableChars {
+				allSelectableChars[i].Selected = characterEntity.Source.HasRelationWithEntityByUuid(inventoryEntity.GetId())
 			}
 
 			data["Inventory"] = inventoryModel
@@ -43,10 +50,25 @@ func (e *baseEventMessageHandler) typeLoadUpsertInventory(message EventMessage, 
 			return errors.New("no inventories found with matching identifier")
 		}
 	}
+	parsedItems := make([]*models.CampaignInventoryItem, 0)
+	allItemEntities := pool.GetEngine().GetWorld().GetItemEntities()
+	for _, itemEntity := range allItemEntities {
+		parsedItems = append(parsedItems, ecs_model_translation.ItemEntityToCampaignInventoryItem(itemEntity, 0))
+	}
+	sort.Slice(parsedItems, func(i, j int) bool {
+		return parsedItems[i].Name < parsedItems[j].Name
+	})
+	data["Items"] = parsedItems
+
+	// Sort
+	sort.Slice(allSelectableChars, func(i, j int) bool {
+		return allSelectableChars[i].Selected || (allSelectableChars[i].Name < allSelectableChars[j].Name && !allSelectableChars[j].Selected)
+	})
+	data["Characters"] = allSelectableChars
 
 	rawJsonBytes, err := json.Marshal(
-		e.handleLoadHtmlBodyMultipleTemplateFiles([]string{"campaignUpsertInventory.html", "diceSpinnerSvg.html", "inventory.html"},
-			"campaignUpsertInventory", data))
+		e.handleLoadHtmlBodyMultipleTemplateFiles([]string{"manageInventoryCrud.html", "diceSpinnerSvg.html", "inventory.html"},
+			"manageInventoryCrud", data))
 	if err != nil {
 		return err
 	}
@@ -109,8 +131,8 @@ func (e *baseEventMessageHandler) typeLoadUpsertCharacter(message EventMessage, 
 	}
 
 	rawJsonBytes, err := json.Marshal(
-		e.handleLoadHtmlBodyMultipleTemplateFiles([]string{"campaignUpsertCharacter.html", "diceSpinnerSvg.html"},
-			"campaignUpsertCharacter", data))
+		e.handleLoadHtmlBodyMultipleTemplateFiles([]string{"manageCharacterCrud.html", "diceSpinnerSvg.html"},
+			"manageCharacterCrud", data))
 	if err != nil {
 		return err
 	}
@@ -240,8 +262,8 @@ func (e *baseEventMessageHandler) typeLoadUpsertMap(message EventMessage, pool C
 	}
 
 	rawJsonBytes, err := json.Marshal(
-		e.handleLoadHtmlBodyMultipleTemplateFiles([]string{"campaignUpsertMap.html", "diceSpinnerSvg.html"},
-			"campaignUpsertMap", data))
+		e.handleLoadHtmlBodyMultipleTemplateFiles([]string{"manageMapCrud.html", "diceSpinnerSvg.html"},
+			"manageMapCrud", data))
 	if err != nil {
 		return err
 	}
@@ -311,8 +333,8 @@ func (e *baseEventMessageHandler) typeLoadUpsertItem(message EventMessage, pool 
 	}
 
 	rawJsonBytes, err := json.Marshal(
-		e.handleLoadHtmlBodyMultipleTemplateFiles([]string{"campaignUpsertItem.html", "diceSpinnerSvg.html"},
-			"campaignUpsertItem", data))
+		e.handleLoadHtmlBodyMultipleTemplateFiles([]string{"manageItemCrud.html", "diceSpinnerSvg.html"},
+			"manageItemCrud", data))
 	if err != nil {
 		return err
 	}
