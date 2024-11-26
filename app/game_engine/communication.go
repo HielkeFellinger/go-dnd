@@ -61,10 +61,12 @@ const (
 	TypeRemoveCharacter     EventType = 5523
 	TypeCloneCharacter      EventType = 5524
 
-	TypeLoadUpsertInventory EventType = 5531
-	TypeUpsertInventory     EventType = 5531
-	TypeRemoveInventory     EventType = 5531
-	TypeCloneInventory      EventType = 5531
+	TypeLoadUpsertInventory     EventType = 5531
+	TypeUpsertInventory         EventType = 5532
+	TypeRemoveInventory         EventType = 5533
+	TypeCloneInventory          EventType = 5534
+	TypeAddItemToInventory      EventType = 5535
+	TypeRemoveItemFromInventory EventType = 5536
 
 	TypeManagementCrudEnd EventType = 5600
 

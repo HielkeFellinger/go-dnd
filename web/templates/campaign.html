@@ -395,7 +395,7 @@
         let formElement = document.forms['upsertItemForm'];
         if (formElement && formElement.reportValidity()) {
             let formData = new FormData(formElement);
-            let item = {}
+            let item = {};
             item.Id = formData.get('id');
             item.Name = formData.get('name');
             item.Description = formData.get('description');
@@ -410,11 +410,24 @@
         }
     }
 
+    let submitUpsertInventory = () => {
+        let formElement = document.forms['upsertInventoryForm'];
+        if (formElement && formElement.reportValidity()) {
+            let formData = new FormData(formElement);
+            let inventory = {};
+
+            // TODO: Get info and Clear
+
+        } else {
+            stopLoadSpinner();
+        }
+    }
+
     let submitUpsertCharacter = () => {
         let formElement = document.forms['upsertCharacterForm'];
         if (formElement && formElement.reportValidity()) {
             let formData = new FormData(formElement);
-            let char = {}
+            let char = {};
             char.Id = formData.get('id');
             char.Name = formData.get('name');
             char.Description = formData.get('description');
@@ -478,6 +491,19 @@
             }
         } else {
             stopLoadSpinner();
+        }
+    }
+
+    let addItemToInventory = (inventoryId) => {
+        let itemSelected = document.getElementById("addItemToInventory");
+        if (inventoryId && itemSelected) {
+            let itemIdToAdd = document.getElementById("addItemToInventory")["value"];
+            if (itemIdToAdd) {
+                let addItemRequest = {};
+                addItemRequest.InventoryId = inventoryId;
+                addItemRequest.ItemId = itemIdToAdd;
+                sendEvent(wrapMessage(JSON.stringify(addItemRequest), 5535));
+            }
         }
     }
 
