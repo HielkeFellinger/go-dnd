@@ -2,7 +2,7 @@
     <div class="border" style="display: flex; flex-flow: row nowrap; min-height: 6em;">
         <div style="flex: 2 2 0; padding-left: 1em;">
             <h5>{{ or .Name "{empty}" }} </h5>
-            <p>Size: {{ .Size}}</p>
+            <p>Size: {{ .Size }} {{ if .Slots }} of max {{.Slots}} {{end}} </p>
             <p>Owners: {{ len .Characters}}</p>
         </div>
         <div style="flex: 2 2 0; align-content: flex-start; min-width: 10em">

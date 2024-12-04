@@ -107,7 +107,7 @@ func (e *BaseEntity) RemoveComponentByUuid(uuid uuid.UUID) bool {
 		delete(e.uuidToComponent, uuid)
 		if component.IsRelationalComponent() {
 			relComp := component.(RelationalComponent)
-			delete(e.uuidToRelEntity, uuid)
+			delete(e.uuidToRelEntity, relComp.GetEntity().GetId())
 			if index := slices.Index(e.RefEntities, relComp.GetEntity()); index > -1 {
 				e.RefEntities = slices.Delete(e.RefEntities, index, index+1)
 			}

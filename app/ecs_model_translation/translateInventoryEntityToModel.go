@@ -11,16 +11,24 @@ func InventoryEntityToCampaignInventoryModel(rawInventoryEntity ecs.Entity) mode
 
 	inventory := &models.CampaignInventory{
 		Name:              rawInventoryEntity.GetName(),
+		Description:       rawInventoryEntity.GetDescription(),
 		Size:              0,
+		Slots:             0,
 		ShowDetailButtons: true,
 		Items:             make([]models.CampaignInventoryItem, 0),
 	}
 
 	// Check if valid
-	if rawInventoryEntity.HasComponentType(ecs.SlotsComponentType) {
+	if rawInventoryEntity.HasComponentType(ecs.InventoryComponentType) {
 
 		// Set Inv. Entity ID
 		inventory.Id = rawInventoryEntity.GetId().String()
+
+		inventoryEntities := rawInventoryEntity.GetAllComponentsOfType(ecs.InventoryComponentType)
+		for _, inventoryEntity := range inventoryEntities {
+			inventory.Slots = inventoryEntity.(*ecs_components.InventoryComponent).Slots
+			break
+		}
 
 		// Loop over all the hasRelations and get the items
 		rawHasRelations := rawInventoryEntity.GetAllComponentsOfType(ecs.HasRelationComponentType)

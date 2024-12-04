@@ -21,8 +21,17 @@
                    value="{{ if and .Inventory .Inventory.Name }}{{.Inventory.Name}}{{end}}">
         </div>
         <div class="form-group">
+            <label for="description">Description</label>
+            <textarea type="text" name="description" class="form-control" id="description" placeholder="Description">{{ if and .Inventory .Inventory.Description }}{{.Inventory.Description}}{{end}}</textarea>
+        </div>
+        <div class="form-group">
+            <label for="slots">Slots (zero = infinite)</label>
+            <input type="number" name="slots" class="form-control" id="slots" placeholder="0"
+                   value="{{ if and .Inventory .Inventory.Slots }}{{.Inventory.Slots}}{{end}}">
+        </div>
+        <div class="form-group">
             <label for="chars">Linked Characters (Select Multiple)</label>
-            <select id="chars" class="form-control" multiple {{if not .Characters}}disabled{{end}}>
+            <select id="chars" name="chars" class="form-control" multiple {{if not .Characters}}disabled{{end}}>
                 {{ range $character := .Characters}}
                     <option {{if $character.Selected}}selected{{end}} value="{{$character.Id}}">{{$character.Name}}</option>
                 {{ end }}
@@ -30,7 +39,7 @@
         </div>
         <div style="min-height: 4em; width: 12em; display: flex; flex-flow: row; padding-top: 1em;">
             <div style="flex: 1 1 0;">
-                <button id="InventoryUpsertSubmit" type="submit" class="btn btn-primary" onclick="loadSpinner();submitUpsertInventory()" disabled>Save</button>
+                <button id="InventoryUpsertSubmit" type="submit" class="btn btn-primary" onclick="loadSpinner();submitUpsertInventory()">Save</button>
             </div>
             <div id="spinner" style="flex: 1 1 0; display: none">
                 {{ template "diceSpinnerSvg.html" .}}

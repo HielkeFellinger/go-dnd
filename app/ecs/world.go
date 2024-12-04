@@ -18,6 +18,7 @@ type World interface {
 	GetEntityByUuid(uuid uuid.UUID) (Entity, bool)
 	GetMapEntityByUuid(uuid uuid.UUID) (Entity, bool)
 	GetItemEntityByUuid(uuid uuid.UUID) (Entity, bool)
+	GetInventoryEntityByUuid(uuid uuid.UUID) (Entity, bool)
 	GetCharacterEntityByUuid(uuid uuid.UUID) (Entity, bool)
 }
 
@@ -62,7 +63,7 @@ func (w *BaseWorld) AddEntity(e Entity) error {
 		w.UuidToMapEntity[e.GetId()] = e
 	} else if e.HasComponentType(FactionComponentType) {
 		w.UuidToFactionEntity[e.GetId()] = e
-	} else if e.HasComponentType(SlotsComponentType) {
+	} else if e.HasComponentType(InventoryComponentType) {
 		w.UuidToInventoryEntity[e.GetId()] = e
 	} else if e.HasComponentType(ItemComponentType) {
 		w.UuidToItemEntity[e.GetId()] = e
@@ -119,6 +120,11 @@ func (w *BaseWorld) GetMapEntityByUuid(uuid uuid.UUID) (Entity, bool) {
 
 func (w *BaseWorld) GetItemEntityByUuid(uuid uuid.UUID) (Entity, bool) {
 	entity, ok := w.UuidToItemEntity[uuid]
+	return entity, ok
+}
+
+func (w *BaseWorld) GetInventoryEntityByUuid(uuid uuid.UUID) (Entity, bool) {
+	entity, ok := w.UuidToInventoryEntity[uuid]
 	return entity, ok
 }
 

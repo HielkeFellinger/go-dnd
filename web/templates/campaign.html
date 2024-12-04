@@ -415,9 +415,14 @@
         if (formElement && formElement.reportValidity()) {
             let formData = new FormData(formElement);
             let inventory = {};
-
-            // TODO: Get info and Clear
-
+            inventory.Id = formData.get('id');
+            inventory.Name = formData.get('name');
+            inventory.Slots = formData.get('slots');
+            inventory.Description = formData.get('description');
+            inventory.Characters = formData.getAll('chars');
+            console.warn(inventory)
+            console.warn(formData)
+            sendEvent(wrapMessage(JSON.stringify(inventory), 5532));
         } else {
             stopLoadSpinner();
         }

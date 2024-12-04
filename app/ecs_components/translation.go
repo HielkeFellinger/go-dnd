@@ -21,7 +21,7 @@ func MapIntToTypeV0(rawId int) uint64 {
 	case 7:
 		return ecs.WeightComponentType
 	case 8:
-		return ecs.SlotsComponentType
+		return ecs.InventoryComponentType
 	case 9:
 		return ecs.LevelComponentType
 	case 10:
@@ -88,8 +88,8 @@ func MapTypeToConstructorFunction(componentType uint64) func() ecs.Component {
 		return NewAmountComponent
 	case ecs.WeightComponentType:
 		return NewWeightComponent
-	case ecs.SlotsComponentType:
-		return NewSlotsComponent
+	case ecs.InventoryComponentType:
+		return NewInventoryComponent
 	case ecs.LevelComponentType:
 		return NewLevelComponent
 	case ecs.TypeComponentType:

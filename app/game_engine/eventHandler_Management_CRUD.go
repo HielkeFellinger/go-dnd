@@ -37,7 +37,7 @@ func (e *baseEventMessageHandler) typeLoadUpsertInventory(message EventMessage, 
 	uuidInventoryFilter, err := helpers.ParseStringToUuid(clearedBody)
 	if err == nil {
 		inventoryEntity, match := pool.GetEngine().GetWorld().GetEntityByUuid(uuidInventoryFilter)
-		if match && inventoryEntity.HasComponentType(ecs.SlotsComponentType) {
+		if match && inventoryEntity.HasComponentType(ecs.InventoryComponentType) {
 			inventoryModel := ecs_model_translation.InventoryEntityToCampaignInventoryModel(inventoryEntity)
 
 			// Link to characters
@@ -84,27 +84,35 @@ func (e *baseEventMessageHandler) typeLoadUpsertInventory(message EventMessage, 
 }
 
 func (e *baseEventMessageHandler) typeUpsertInventory(message EventMessage, pool CampaignPool) error {
-	//// Undo escaping
-	//clearedBody := html.UnescapeString(message.Body)
-	//
-	//// Check if user is lead
-	//if message.Source != pool.GetLeadId() {
-	//	return errors.New("modifying characters is not allowed as non-lead")
-	//}
-	//
-	//data := make(map[string]any)
-	//
-	//// Check if there is an existing map with the supplied uuid
-	//uuidItemFilter, err := helpers.ParseStringToUuid(clearedBody)
-	//if err == nil {
-	//	inventoryCandidate, match := pool.GetEngine().GetWorld().GetEntityByUuid(uuidItemFilter)
-	//	if match && inventoryCandidate.HasComponentType(ecs.SlotsComponentType) {
-	//		//data["Inventory"] = ecs_model_translation.CharacterEntityToCampaignCharacterModel(inventoryCandidate)
-	//	} else {
-	//		return errors.New("no characters found with matching identifier")
-	//	}
-	//}
+	// Check if user is lead
+	if message.Source != pool.GetLeadId() {
+		return errors.New("modifying Inventory details and ownership is not allowed as non-lead")
+	}
 
+	// Undo escaping
+	clearedBody := html.UnescapeString(message.Body)
+
+	var inventUpsertRequest inventoryUpsertRequest
+	if err := json.Unmarshal([]byte(clearedBody), &inventUpsertRequest); err != nil {
+		return err
+	}
+
+	// Upsert
+	inventoryEntity, upsertError := upsertInventory(inventUpsertRequest, pool)
+	if upsertError != nil {
+		return upsertError
+	}
+
+	// Update the CRUD box AND the "Manage Inventory screen"
+	loadUpsertInventoryMessage := NewEventMessage()
+	loadUpsertInventoryMessage.Source = pool.GetLeadId()
+	loadUpsertInventoryMessage.Body = inventoryEntity.GetId().String()
+	if typeLoadUpsertInventoryErr := e.typeLoadUpsertInventory(loadUpsertInventoryMessage, pool); typeLoadUpsertInventoryErr != nil {
+		return e.sendManagementError("Error", typeLoadUpsertInventoryErr.Error(), pool)
+	}
+	if typeManageInventoryErr := e.typeManageInventory(loadUpsertInventoryMessage, pool); typeManageInventoryErr != nil {
+		return e.sendManagementError("Error", typeManageInventoryErr.Error(), pool)
+	}
 	return nil
 }
 
@@ -157,8 +165,7 @@ func (e *baseEventMessageHandler) typeUpsertCharacter(message EventMessage, pool
 	clearedBody := html.UnescapeString(message.Body)
 
 	var charUpsertRequest characterUpsertRequest
-	err := json.Unmarshal([]byte(clearedBody), &charUpsertRequest)
-	if err != nil {
+	if err := json.Unmarshal([]byte(clearedBody), &charUpsertRequest); err != nil {
 		return err
 	}
 
@@ -172,7 +179,7 @@ func (e *baseEventMessageHandler) typeUpsertCharacter(message EventMessage, pool
 	if charUpsertRequest.AddInventory {
 		newInventory := ecs.NewEntity()
 		// Set Entity to SlotType
-		if addErr := newInventory.AddComponent(ecs_components.NewSlotsComponent()); addErr != nil {
+		if addErr := newInventory.AddComponent(ecs_components.NewInventoryComponent()); addErr != nil {
 			return SendManagementError("Error", addErr.Error(), pool)
 		}
 		// Add to world
@@ -288,8 +295,7 @@ func (e *baseEventMessageHandler) typeUpsertMap(message EventMessage, pool Campa
 	clearedBody := html.UnescapeString(message.Body)
 
 	var mapUpdateRequest mapUpsertRequest
-	err := json.Unmarshal([]byte(clearedBody), &mapUpdateRequest)
-	if err != nil {
+	if err := json.Unmarshal([]byte(clearedBody), &mapUpdateRequest); err != nil {
 		return err
 	}
 
@@ -359,8 +365,7 @@ func (e *baseEventMessageHandler) typeUpsertItem(message EventMessage, pool Camp
 	clearedBody := html.UnescapeString(message.Body)
 
 	var itemUpsertRequest itemUpsertRequest
-	err := json.Unmarshal([]byte(clearedBody), &itemUpsertRequest)
-	if err != nil {
+	if err := json.Unmarshal([]byte(clearedBody), &itemUpsertRequest); err != nil {
 		return err
 	}
 
@@ -381,6 +386,14 @@ func (e *baseEventMessageHandler) typeUpsertItem(message EventMessage, pool Camp
 		return e.sendManagementError("Error", typeManageMapsErr.Error(), pool)
 	}
 	return nil
+}
+
+type inventoryUpsertRequest struct {
+	Id          string   `json:"Id"`
+	Name        string   `json:"Name"`
+	Slots       string   `json:"Slots"`
+	Description string   `json:"Description"`
+	Characters  []string `json:"Characters"`
 }
 
 type characterUpsertRequest struct {

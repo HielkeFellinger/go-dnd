@@ -69,7 +69,7 @@ func CharacterEntityToCampaignCharacterModel(rawCharacterEntity ecs.Entity) mode
 		for _, rawHasRelationComponent := range hasRelationComponents {
 			hasRelationComponent := rawHasRelationComponent.(*ecs_components.HasRelationComponent)
 			// Test if relation is an Inventory
-			if hasRelationComponent.Entity.HasComponentType(ecs.SlotsComponentType) {
+			if hasRelationComponent.Entity.HasComponentType(ecs.InventoryComponentType) {
 				character.Inventories = append(character.Inventories,
 					InventoryEntityToCampaignInventoryModel(hasRelationComponent.Entity))
 			}

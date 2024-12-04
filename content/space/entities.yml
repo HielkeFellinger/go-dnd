@@ -21,7 +21,7 @@ type_translation:
   RequiresRelation: 42
   Resource: 12
   Restore: 4
-  Slots: 8
+  Inventory: 8
   Stat: 17
   Transport: 13
   TurnDistance: 14
@@ -234,9 +234,9 @@ base_inventories:
     name: inventory_piet
     description: ""
     components:
-      - type: Slots
+      - type: Inventory
         params:
-          count: "200"
+          slots: "200"
       - type: HasRelation
         params:
           count: "1"
@@ -245,9 +245,9 @@ base_inventories:
     name: inventory_jheronimus
     description: ""
     components:
-      - type: Slots
+      - type: Inventory
         params:
-          count: "200"
+          slots: "200"
       - type: HasRelation
         params:
           count: "1"
@@ -260,9 +260,9 @@ base_inventories:
     name: inventory_judith
     description: ""
     components:
-      - type: Slots
+      - type: Inventory
         params:
-          count: "200"
+          slots: "200"
       - type: HasRelation
         params:
           count: "1"
@@ -271,9 +271,9 @@ base_inventories:
     name: inventory_pirate
     description: ""
     components:
-      - type: Slots
+      - type: Inventory
         params:
-          count: "200"
+          slots: "200"
       - type: HasRelation
         params:
           count: "1"
@@ -282,9 +282,9 @@ base_inventories:
     name: inventory_ninja
     description: ""
     components:
-      - type: Slots
+      - type: Inventory
         params:
-          count: "200"
+          slots: "200"
       - type: HasRelation
         params:
           count: "1"

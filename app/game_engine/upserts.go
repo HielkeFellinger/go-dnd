@@ -7,9 +7,88 @@ import (
 	"slices"
 )
 
+func upsertInventory(inventUpdateRequest inventoryUpsertRequest, pool CampaignPool) (ecs.BaseEntity, error) {
+	var isNewEntry = inventUpdateRequest.Id == ""
+	var inventoryEntity ecs.BaseEntity
+	var rawInventoryEntity ecs.Entity = nil
+
+	if inventUpdateRequest.Name == "" {
+		return ecs.BaseEntity{}, SendManagementError("Error", "missing Required Inventory Name", pool)
+	}
+
+	if !isNewEntry {
+		inventoryUuid, err := helpers.ParseStringToUuid(inventUpdateRequest.Id)
+		if err != nil {
+			return ecs.BaseEntity{}, err
+		}
+		inventoryEntityFromWorld, match := pool.GetEngine().GetWorld().GetInventoryEntityByUuid(inventoryUuid)
+		if !match || inventoryEntityFromWorld == nil {
+			return ecs.BaseEntity{}, SendManagementError("Error", "failure of loading Char by UUID", pool)
+		}
+		rawInventoryEntity = inventoryEntityFromWorld
+		inventoryEntity = *inventoryEntityFromWorld.(*ecs.BaseEntity)
+	} else {
+		inventoryEntity = ecs.NewEntity()
+		if addErr := inventoryEntity.AddComponent(ecs_components.NewInventoryComponent()); addErr != nil {
+			return ecs.BaseEntity{}, SendManagementError("Error", addErr.Error(), pool)
+		}
+	}
+
+	// Slots
+	inventoryComponents := inventoryEntity.GetAllComponentsOfType(ecs.InventoryComponentType)
+	for _, rawInventoryComponent := range inventoryComponents {
+		inventoryComponent := rawInventoryComponent.(*ecs_components.InventoryComponent)
+		if slotsErr := inventoryComponent.SlotsFromString(inventUpdateRequest.Slots); slotsErr != nil {
+			return ecs.BaseEntity{}, SendManagementError("Error", slotsErr.Error(), pool)
+		}
+	}
+
+	// Update Basis Entity Properties
+	if !isNewEntry && rawInventoryEntity != nil {
+		rawInventoryEntity.SetName(inventUpdateRequest.Name)
+		rawInventoryEntity.SetDescription(inventUpdateRequest.Description)
+	} else {
+		inventoryEntity.Name = inventUpdateRequest.Name
+		inventoryEntity.Description = inventUpdateRequest.Description
+
+		// Add to world
+		if addErr := pool.GetEngine().GetWorld().AddEntity(&inventoryEntity); addErr != nil {
+			return ecs.BaseEntity{}, SendManagementError("Error", addErr.Error(), pool)
+		}
+	}
+
+	// Character Cleanup: add or remove
+	for _, characterEntity := range pool.GetEngine().GetWorld().GetCharacterEntities() {
+		if slices.Contains(inventUpdateRequest.Characters, characterEntity.GetId().String()) {
+			// Only add if character has no relation to inventory
+			if !characterEntity.HasRelationWithEntityByUuid(inventoryEntity.GetId()) {
+				hasRelation := ecs_components.NewHasRelationComponent().(*ecs_components.HasRelationComponent)
+				hasRelation.Entity = &inventoryEntity
+				if err := characterEntity.AddComponent(hasRelation); err != nil {
+					return ecs.BaseEntity{}, SendManagementError("Error", err.Error(), pool)
+				}
+			}
+		} else if !isNewEntry && characterEntity.HasRelationWithEntityByUuid(inventoryEntity.GetId()) {
+			// Remove if needed
+			for _, hasRelation := range characterEntity.GetAllComponentsOfType(ecs.HasRelationComponentType) {
+				hasRelationComponent := hasRelation.(*ecs_components.HasRelationComponent)
+				if hasRelationComponent.Entity.GetId() == inventoryEntity.GetId() {
+					characterEntity.RemoveComponentByUuid(hasRelationComponent.GetId())
+				}
+			}
+		}
+	}
+
+	return inventoryEntity, nil
+}
+
 func upsertCharacter(charUpdateRequest characterUpsertRequest, pool CampaignPool) (ecs.BaseEntity, error) {
 	var isNewEntry = charUpdateRequest.Id == ""
 	var charEntity ecs.BaseEntity
+
+	if charUpdateRequest.Name == "" {
+		return ecs.BaseEntity{}, SendManagementError("Error", "missing Required Character Name", pool)
+	}
 
 	if !isNewEntry {
 		charUuid, err := helpers.ParseStringToUuid(charUpdateRequest.Id)
@@ -35,12 +114,8 @@ func upsertCharacter(charUpdateRequest characterUpsertRequest, pool CampaignPool
 	// Update Character Details
 	if charDetails := charEntity.GetAllComponentsOfType(ecs.CharacterComponentType); len(charDetails) > 0 {
 		charDetail := charDetails[0].(*ecs_components.CharacterComponent)
-		if charDetail.Name != charUpdateRequest.Name {
-			charDetail.Name = charUpdateRequest.Name
-		}
-		if charDetail.Description != charUpdateRequest.Description {
-			charDetail.Description = charUpdateRequest.Description
-		}
+		charDetail.Name = charUpdateRequest.Name
+		charDetail.Description = charUpdateRequest.Description
 	}
 
 	// Add Health
@@ -170,6 +245,10 @@ func upsertMap(mapUpdateRequest mapUpsertRequest, pool CampaignPool) (ecs.BaseEn
 	var mapEntity ecs.BaseEntity
 	var rawMapEntity ecs.Entity = nil
 
+	if mapUpdateRequest.Name == "" {
+		return ecs.BaseEntity{}, SendManagementError("Error", "missing Required Map Name", pool)
+	}
+
 	if !isNewEntry {
 		mapUuid, err := helpers.ParseStringToUuid(mapUpdateRequest.Id)
 		if err != nil {
@@ -238,7 +317,7 @@ func upsertMap(mapUpdateRequest mapUpsertRequest, pool CampaignPool) (ecs.BaseEn
 			return ecs.BaseEntity{}, SendManagementError("Error", addErr.Error(), pool)
 		}
 	} else if isNewEntry {
-		return ecs.BaseEntity{}, SendManagementError("Error", "Missing image on new Map", pool)
+		return ecs.BaseEntity{}, SendManagementError("Error", "missing image on new Map", pool)
 	}
 
 	// Update the needed removal of images
@@ -272,19 +351,12 @@ func upsertMap(mapUpdateRequest mapUpsertRequest, pool CampaignPool) (ecs.BaseEn
 	}
 
 	// Update Basis Entity Properties
-	if mapUpdateRequest.Name != "" && mapUpdateRequest.Name != mapEntity.Name {
+	if !isNewEntry {
+		rawMapEntity.SetName(mapUpdateRequest.Name)
+		rawMapEntity.SetDescription(mapUpdateRequest.Description)
+	} else {
 		mapEntity.SetName(mapUpdateRequest.Name)
-		if !isNewEntry && rawMapEntity != nil {
-			rawMapEntity.SetName(mapUpdateRequest.Name)
-		}
-	} else if isNewEntry {
-		return ecs.BaseEntity{}, SendManagementError("Error", "Map should have a name", pool)
-	}
-	if mapUpdateRequest.Description != "" && mapUpdateRequest.Description != mapEntity.Description {
 		mapEntity.SetDescription(mapUpdateRequest.Description)
-		if !isNewEntry && rawMapEntity != nil {
-			rawMapEntity.SetDescription(mapUpdateRequest.Description)
-		}
 	}
 
 	// Update Area
@@ -314,7 +386,7 @@ func upsertItem(itemUpsertRequest itemUpsertRequest, pool CampaignPool) (ecs.Bas
 
 	// Required Fields
 	if itemUpsertRequest.Name == "" {
-		return ecs.BaseEntity{}, SendManagementError("Error", "name is required for Item", pool)
+		return ecs.BaseEntity{}, SendManagementError("Error", "missing Required Item Name", pool)
 	}
 
 	if !isNewEntity {

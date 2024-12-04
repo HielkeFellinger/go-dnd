@@ -10,7 +10,7 @@ const (
 	ItemComponentType         uint64 = 1 << 5
 	AmountComponentType       uint64 = 1 << 6
 	WeightComponentType       uint64 = 1 << 7
-	SlotsComponentType        uint64 = 1 << 8
+	InventoryComponentType    uint64 = 1 << 8
 	LevelComponentType        uint64 = 1 << 9
 	TypeComponentType         uint64 = 1 << 10
 	ValutaComponentType       uint64 = 1 << 11
@@ -47,7 +47,7 @@ var TypeNameToNthBit = map[uint64]TypeTranslationStruct{
 	ItemComponentType:         newTypeTranslation("Item", 5),
 	AmountComponentType:       newTypeTranslation("Amount", 6),
 	WeightComponentType:       newTypeTranslation("Weight", 7),
-	SlotsComponentType:        newTypeTranslation("Slots", 8),
+	InventoryComponentType:    newTypeTranslation("Inventory", 8),
 	LevelComponentType:        newTypeTranslation("Level", 9),
 	TypeComponentType:         newTypeTranslation("Type", 10),
 	ValutaComponentType:       newTypeTranslation("Valuta", 11),
