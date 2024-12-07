@@ -33,14 +33,14 @@ func (c *InventoryComponent) ParseToRawComponent() (ecs.RawComponent, error) {
 	rawComponent := ecs.RawComponent{
 		ComponentType: ecs.TypeNameToNthBit[c.ComponentType()].Name,
 		Params: map[string]string{
-			"count": strconv.Itoa(int(c.Slots)),
+			"slots": strconv.Itoa(int(c.Slots)),
 		},
 	}
 	return rawComponent, nil
 }
 
-func (c *InventoryComponent) SlotsFromString(counter string) error {
-	n, err := strconv.Atoi(counter)
+func (c *InventoryComponent) SlotsFromString(slots string) error {
+	n, err := strconv.Atoi(slots)
 	c.Slots = uint(n)
 	return err
 }

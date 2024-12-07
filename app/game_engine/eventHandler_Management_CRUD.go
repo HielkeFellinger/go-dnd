@@ -116,6 +116,81 @@ func (e *baseEventMessageHandler) typeUpsertInventory(message EventMessage, pool
 	return nil
 }
 
+func (e *baseEventMessageHandler) typeAddItemToInventory(message EventMessage, pool CampaignPool) error {
+	// Check if user is lead
+	if message.Source != pool.GetLeadId() {
+		return errors.New("modifying Inventory details and ownership is not allowed as non-lead")
+	}
+
+	// Undo escaping
+	clearedBody := html.UnescapeString(message.Body)
+
+	var inventAddItemRequest inventoryAddItemRequest
+	if err := json.Unmarshal([]byte(clearedBody), &inventAddItemRequest); err != nil {
+		return err
+	}
+
+	// Check if there is an item and an inventory that match the request
+	var item ecs.Entity = nil
+	if uuidItemFilter, errItem := helpers.ParseStringToUuid(inventAddItemRequest.ItemId); errItem == nil {
+		if entityFound, ok := pool.GetEngine().GetWorld().GetEntityByUuid(uuidItemFilter); ok {
+			if entityFound.HasComponentType(ecs.ItemComponentType) {
+				item = entityFound
+			}
+		}
+	}
+	var inventory ecs.Entity = nil
+	if uuidInventoryFilter, errInv := helpers.ParseStringToUuid(inventAddItemRequest.InventoryId); errInv == nil {
+		if entityFound, ok := pool.GetEngine().GetWorld().GetEntityByUuid(uuidInventoryFilter); ok {
+			if entityFound.HasComponentType(ecs.InventoryComponentType) {
+				inventory = entityFound
+			}
+		}
+	}
+
+	// Check integrity
+	if item == nil || inventory == nil {
+		return errors.New("no item and/or inventory found with matching identifier")
+	}
+	if inventory.HasRelationWithEntityByUuid(inventory.GetId()) {
+		return SendManagementError("Warning", "item is already present in inventory", pool)
+	}
+
+	// Find owning characters
+	owningPcCharIds := make([]string, 0)
+	for _, characterEntity := range pool.GetEngine().GetWorld().GetCharacterEntities() {
+		if characterEntity.HasRelationWithEntityByUuid(inventory.GetId()) && characterEntity.HasComponentType(ecs.PlayerComponentType) {
+			owningPcCharIds = append(owningPcCharIds, characterEntity.GetId().String())
+		}
+	}
+
+	// Add Item
+	hasRelationComponent := ecs_components.NewHasRelationComponent().(*ecs_components.HasRelationComponent)
+	hasRelationComponent.Entity = item
+	if err := inventory.AddComponent(hasRelationComponent); err != nil {
+		return SendManagementError("Warning", err.Error(), pool)
+	}
+
+	// Trigger Visual Updates on chars (details)
+	for _, charId := range owningPcCharIds {
+		var reloadCharDetailMessage = NewEventMessage()
+		reloadCharDetailMessage.Source = ServerUser
+		reloadCharDetailMessage.Body = charId
+		loadCharErr := e.loadCharactersDetails(reloadCharDetailMessage, pool)
+		if loadCharErr != nil {
+			return loadCharErr
+		}
+	}
+	loadUpsertInventoryMessage := NewEventMessage()
+	loadUpsertInventoryMessage.Source = pool.GetLeadId()
+	loadUpsertInventoryMessage.Body = inventory.GetId().String()
+	if typeLoadUpsertInventoryErr := e.typeLoadUpsertInventory(loadUpsertInventoryMessage, pool); typeLoadUpsertInventoryErr != nil {
+		return e.sendManagementError("Error", typeLoadUpsertInventoryErr.Error(), pool)
+	}
+
+	return nil
+}
+
 func (e *baseEventMessageHandler) typeLoadUpsertCharacter(message EventMessage, pool CampaignPool) error {
 	// Undo escaping
 	clearedBody := html.UnescapeString(message.Body)
@@ -386,6 +461,11 @@ func (e *baseEventMessageHandler) typeUpsertItem(message EventMessage, pool Camp
 		return e.sendManagementError("Error", typeManageMapsErr.Error(), pool)
 	}
 	return nil
+}
+
+type inventoryAddItemRequest struct {
+	InventoryId string `json:"InventoryId"`
+	ItemId      string `json:"ItemId"`
 }
 
 type inventoryUpsertRequest struct {

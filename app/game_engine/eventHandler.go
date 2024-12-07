@@ -133,6 +133,8 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 			return e.typeLoadUpsertInventory(message, pool)
 		} else if message.Type == TypeUpsertInventory {
 			return e.typeUpsertInventory(message, pool)
+		} else if message.Type == TypeAddItemToInventory {
+			return e.typeAddItemToInventory(message, pool)
 		}
 		return errors.New(fmt.Sprintf("message of type '%d' is not recognised as a 'Management CRUD Event'", message.Type))
 	}
