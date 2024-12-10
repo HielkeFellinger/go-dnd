@@ -26,6 +26,8 @@ const (
 	TypeUpdateCharacterHealth EventType = 511
 	TypeUpdateCharacterUsers  EventType = 512
 
+	TypeLoadItemDetails EventType = 521
+
 	TypeLoadMap         EventType = 531
 	TypeLoadMapEntities EventType = 532
 	TypeLoadMapEntity   EventType = 533

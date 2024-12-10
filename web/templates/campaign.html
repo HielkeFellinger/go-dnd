@@ -206,6 +206,17 @@
             }
             return;
         }
+
+        // Parse Item Events
+        else if (payLoad.type >= 520 && payLoad.type < 530) {
+            if (payLoad.type === 521) {
+                handleRightBarCrudHtml(payLoad)
+            } else {
+                console.error("Type '" + payLoad.type + "' not handled by 'Parse Character Events'")
+            }
+            return;
+        }
+
         // Parse Map Events
         else if (payLoad.type >= 530 && payLoad.type < 549) {
             if (payLoad.type === 531) {
@@ -348,6 +359,7 @@
 
     let selectedCharDetailsId = "";
     let loadedCharDetailsId = "";
+    let lastCharDetailsId = "";
     let loadCharDetails = (id) => {
         selectedCharDetailsId = id;
         sendEvent(wrapMessage(id, 504));
@@ -389,6 +401,10 @@
     let upsertItem = (id) => {
         stopLoadSpinner();
         sendEvent(wrapMessage(JSON.stringify(id), 5541));
+    }
+
+    let showItemDetails = (id) => {
+        sendEvent(wrapMessage(id, 521));
     }
 
     let submitUpsertItem = () => {
@@ -570,11 +586,22 @@
         let body = JSON.parse(data.body);
         // Reset possible Char links
         selectedCharDetailsId = "";
+        lastCharDetailsId = loadedCharDetailsId;
         loadedCharDetailsId = "";
         if (!rightBarVisible) {
             toggleVisibilityRightBar();
         }
         document.getElementById("entity-details-holder").innerHTML = body;
+        if (!lastCharDetailsId && document.getElementById("goBackToLastDetails")) {
+            document.getElementById("goBackToLastDetails")["style"].visibility = "hidden";
+        }
+    }
+
+    let goBackToLastDetail = () => {
+        if (lastCharDetailsId) {
+            loadCharDetails(lastCharDetailsId);
+            lastCharDetailsId = "";
+        }
     }
 
     let campaignMapTabIds = [];

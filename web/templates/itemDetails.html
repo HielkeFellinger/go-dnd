@@ -1,0 +1,59 @@
+{{ define "itemDetails" }}
+
+<div>
+    <div id="goBackToLastDetails" style="width: 100%;">
+        <button class="btn" title="Go back to last Char Details" onclick="goBackToLastDetail()" style="height: 2.4em; width: 2.4em">
+            <b><i class="bi bi-arrow-left"></i></b>
+        </button>
+    </div>
+    </div>
+    <div style="display: flex; flex-flow: row nowrap; align-content: center; width: 100%; padding-top: 0.25em;">
+        {{ if and .Item.Image .Item.Image.Url  }}
+        <div style="flex: 1 1 0; background-image: url('{{ .Item.Image.Url }}'); width: 100%; background-size: 75%; background-repeat: no-repeat; min-height: 5em;">
+
+        </div>
+        {{ end }}
+        <div style="flex: 4 4 0;">
+            <h2>{{ .Item.Name }}</h2>
+        </div>
+    </div>
+    <div style="display: flex; flex-direction: row; flex-grow: 2;  flex-wrap: wrap">
+        {{ if .Item.Damage }}
+        <div style="flex: 2 2 0;">
+            <b><label for="damage">Damage</label></b>
+            <p id="damage">{{ .Item.Damage }}</p>
+        </div>
+        {{end}}
+        {{ if .Item.Restore }}
+        <div style="flex: 2 2 0;">
+            <b><label for="restore">Restore</label></b>
+            <p id="restore">{{ .Item.Restore }}</p>
+        </div>
+        {{end}}
+        {{ if and .Item.Range .Item.Range.Min }}
+        <div style="flex: 2 2 0;">
+            <b><label for="rangeMin">Range (Min)</label></b>
+            <p id="rangeMin">{{ .Item.Range.Min }}</p>
+        </div>
+        {{ end }}
+        {{ if and .Item.Range .Item.Range.Max }}
+        <div style="flex: 2 2 0;">
+            <b><label for="rangeMax">Range (Max)</label></b>
+            <p id="rangeMax">{{ .Item.Range.Max }}</p>
+        </div>
+        {{ end }}
+        {{ if .Item.Weight }}
+        <div style="flex: 2 2 0;">
+            <b><label for="weight">Weight</label></b>
+            <p id="weight">{{ .Item.Weight }}</p>
+        </div>
+        {{ end }}
+    </div>
+    <div style="width: 100%; padding-top: 0.25em;">
+        <b><label for="damage">Description</label></b>
+        <p>{{ .Item.Description }}</p>
+    </div>
+
+</div>
+
+{{ end }}

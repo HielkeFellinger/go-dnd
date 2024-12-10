@@ -21,6 +21,7 @@ type CampaignInventoryItem struct {
 	Restore     string
 	Range       CampaignInventoryItemRange
 	Weight      string
+	Image       CampaignImage
 }
 
 type CampaignInventoryItemRange struct {

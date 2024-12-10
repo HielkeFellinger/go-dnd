@@ -62,6 +62,12 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 		return errors.New(fmt.Sprintf("message of type '%d' is not recognised as a 'Player Character Update Event'", message.Type))
 	}
 
+	// Player Item Details Load Event(s)
+	if message.Type == TypeLoadItemDetails {
+		log.Printf("- Item. Event Type: '%d' Message: '%s'", message.Type, message.Id)
+		return e.typeLoadItemDetails(message, pool)
+	}
+
 	// Player Map Load Event(s)
 	if message.Type >= TypeLoadMap && message.Type <= TypeLoadMapEntity {
 		log.Printf("- Map. Event Type: '%d' Message: '%s'", message.Type, message.Id)

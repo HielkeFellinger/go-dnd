@@ -43,7 +43,7 @@
             </td>
             {{ if $.ShowDetailButtons }}
             <td>
-                <button class="btn" title="Show Details" onclick="showItemDetails('{{ $item.Id }}')" style="height: 2.5em; width: 2.5em" disabled>
+                <button class="btn" title="Show Details" onclick="showItemDetails('{{ $item.Id }}')" style="height: 2.5em; width: 2.5em">
                     <b><i class="bi bi-search"></i></b>
                 </button>
                 <button class="btn btn-danger" title="Remove Items"  onclick="removeInventoryItem('{{ $.Id }}', '{{ $item.Id }}')" style="height: 2.5em; width: 2.5em" disabled>
