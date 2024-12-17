@@ -46,8 +46,8 @@
                 <button class="btn" title="Show Details" onclick="showItemDetails('{{ $item.Id }}')" style="height: 2.5em; width: 2.5em">
                     <b><i class="bi bi-search"></i></b>
                 </button>
-                <button class="btn btn-danger" title="Remove Items"  onclick="removeInventoryItem('{{ $.Id }}', '{{ $item.Id }}')" style="height: 2.5em; width: 2.5em" disabled>
-                    <b><i class="bi bi-minus"></i></b>
+                <button class="btn btn-danger" title="Remove Items"  onclick="removeInventoryItem('{{ $.Id }}', '{{ $item.Id }}')" style="height: 2.5em; width: 2.5em" >
+                    <b><i class="bi bi-trash3-fill"></i></b>
                 </button>
             </td>
             {{ end }}

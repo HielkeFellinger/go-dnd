@@ -528,6 +528,15 @@
         }
     }
 
+    let removeInventoryItem = (inventoryId, itemId) => {
+        if (inventoryId && itemId) {
+            let removeItemRequest = {};
+            removeItemRequest.InventoryId = inventoryId;
+            removeItemRequest.ItemId = itemId;
+            sendEvent(wrapMessage(JSON.stringify(removeItemRequest), 5536));
+        }
+    }
+
     let parseFormFileToBase64 = (file, doneFunction) => {
         let parsedFile = {
             Name: "",
