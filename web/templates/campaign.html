@@ -3,7 +3,7 @@
 <!--Embed the header.html template at this location-->
 {{ template "header.html" .}}
 
-<div class="content" style="max-width: 100%">
+<div class="content" style="max-width: 100%;">
     <div class="row g-4" style="overflow: hidden;">
         <!--If there's an error, display the error-->
         {{ if .ErrorTitle}}
@@ -272,6 +272,8 @@
                 handleRightBarCrudHtml(payLoad); // Inventory
             } else if (payLoad.type === 5541) {
                 handleRightBarCrudHtml(payLoad); // Items
+            } else if (payLoad.type === 5533) {
+                clearRightBarContent(); // Remove Inventory
             } else {
                 console.error("Type '" + payLoad.type + "' not handled by 'Parse Management Events'")
             }
@@ -436,9 +438,15 @@
             inventory.Slots = formData.get('slots');
             inventory.Description = formData.get('description');
             inventory.Characters = formData.getAll('chars');
-            console.warn(inventory)
-            console.warn(formData)
             sendEvent(wrapMessage(JSON.stringify(inventory), 5532));
+        } else {
+            stopLoadSpinner();
+        }
+    }
+
+    let submitRemoveInventory = (inventoryId, inventoryName) => {
+        if (inventoryId && confirm("Are you sure you want to delete Inventory: '" + inventoryName + "'?")) {
+            sendEvent(wrapMessage(JSON.stringify(inventoryId), 5533));
         } else {
             stopLoadSpinner();
         }
@@ -601,6 +609,16 @@
             toggleVisibilityRightBar();
         }
         document.getElementById("entity-details-holder").innerHTML = body;
+        if (!lastCharDetailsId && document.getElementById("goBackToLastDetails")) {
+            document.getElementById("goBackToLastDetails")["style"].visibility = "hidden";
+        }
+    }
+
+    let clearRightBarContent = () => {
+        if (rightBarVisible) {
+            toggleVisibilityRightBar();
+        }
+        document.getElementById("entity-details-holder").innerHTML = "";
         if (!lastCharDetailsId && document.getElementById("goBackToLastDetails")) {
             document.getElementById("goBackToLastDetails")["style"].visibility = "hidden";
         }

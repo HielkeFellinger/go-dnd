@@ -141,6 +141,8 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 			return e.typeUpsertInventory(message, pool)
 		} else if message.Type == TypeAddItemToInventory {
 			return e.typeAddItemToInventory(message, pool)
+		} else if message.Type == TypeRemoveInventory {
+			return e.typeRemoveInventory(message, pool)
 		} else if message.Type == TypeRemoveItemFromInventory {
 			return e.typeRemoveItemFromInventory(message, pool)
 		}

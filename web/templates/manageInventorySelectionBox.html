@@ -5,7 +5,7 @@
             <p>Size: {{ .Size }} {{ if .Slots }} of max {{.Slots}} {{end}} </p>
             <p>Owners: {{ len .Characters}}</p>
         </div>
-        <div style="flex: 2 2 0; align-content: flex-start; min-width: 10em">
+        <div style="flex: 3 3 0; align-content: flex-start; min-width: 12em">
             <button class="btn" style="height: 2.5em; width: 2.5em; margin-top: 0.3em; margin-right: 0.35em;
             float: right" title="Edit Inventory '{{ .Name }}'" onclick="upsertInventory('{{ .Id }}')">
                 <b><i class="bi bi-pencil"></i></b>
@@ -16,17 +16,19 @@
             </button>
             <br>
             <br>
+            {{if .Characters}}
             <button class="btn" style="height: 2.5em; width: 2.5em; margin-top: 0.3em; margin-right: 0.35em;
             float: right; margin-bottom: 0.3em;" title="Go To Selected Owner of: '{{ .Name }}'"
-                    onclick="goToSelectedCharCrud('charToInventory{{.Id}}Select')" {{if not .Characters}}disabled{{end}}>
+                    onclick="goToSelectedCharCrud('charToInventory{{.Id}}Select')">
                 <b><i class="bi bi-person-lines-fill"></i></b>
             </button>
             <select id="charToInventory{{.Id}}Select" style="height: 2.5em; margin-top: 0.3em; margin-right: 0.35em;
-            float: right; margin-bottom: 0.3em;" {{if not .Characters}}disabled{{end}}>
+            float: right; margin-bottom: 0.3em; max-width: 14em;">
                 {{ range $character := .Characters}}
                     <option value="{{$character.Id}}">{{$character.Name}}</option>
                 {{ end }}
             </select>
+            {{end}}
         </div>
     </div>
 {{end}}

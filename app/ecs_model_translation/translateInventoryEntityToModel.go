@@ -13,7 +13,7 @@ func InventoryEntityToCampaignInventoryModel(rawInventoryEntity ecs.Entity) mode
 		Name:              rawInventoryEntity.GetName(),
 		Description:       rawInventoryEntity.GetDescription(),
 		Size:              0,
-		Slots:             0,
+		Slots:             "0",
 		ShowDetailButtons: true,
 		Items:             make([]models.CampaignInventoryItem, 0),
 	}
@@ -26,7 +26,7 @@ func InventoryEntityToCampaignInventoryModel(rawInventoryEntity ecs.Entity) mode
 
 		inventoryEntities := rawInventoryEntity.GetAllComponentsOfType(ecs.InventoryComponentType)
 		for _, inventoryEntity := range inventoryEntities {
-			inventory.Slots = inventoryEntity.(*ecs_components.InventoryComponent).Slots
+			inventory.Slots = strconv.Itoa(int(inventoryEntity.(*ecs_components.InventoryComponent).Slots))
 			break
 		}
 

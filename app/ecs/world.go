@@ -4,10 +4,12 @@ import (
 	"errors"
 	"github.com/google/uuid"
 	"log"
+	"slices"
 )
 
 type World interface {
 	AddEntity(e Entity) error
+	RemoveEntity(e Entity) error
 	AddEntities(e []Entity) error
 	GetCharacterEntities() []Entity
 	GetPlayerCharacterEntities() []Entity
@@ -80,6 +82,25 @@ func (w *BaseWorld) AddEntities(e []Entity) error {
 			return err
 		}
 	}
+	return nil
+}
+
+func (w *BaseWorld) RemoveEntity(e Entity) error {
+	rawItem, match := w.UuidToEntity[e.GetId()]
+	if !match {
+		return errors.New("entity with UUID already removed")
+	}
+
+	// Cleanup ref's
+	delete(w.UuidToEntity, e.GetId())
+	delete(w.UuidToItemEntity, e.GetId())
+	delete(w.UuidToCharacterEntity, e.GetId())
+	delete(w.UuidToMapEntity, e.GetId())
+	delete(w.UuidToFactionEntity, e.GetId())
+	delete(w.UuidToInventoryEntity, e.GetId())
+	// Remove from entity
+	w.entities = slices.DeleteFunc(w.entities, func(e Entity) bool { return e.GetId() == rawItem.GetId() })
+
 	return nil
 }
 

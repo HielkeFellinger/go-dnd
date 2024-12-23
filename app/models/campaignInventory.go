@@ -4,7 +4,7 @@ type CampaignInventory struct {
 	Id                string
 	Description       string
 	Name              string
-	Slots             uint
+	Slots             string
 	Size              uint
 	ReadOnly          bool
 	ShowDetailButtons bool

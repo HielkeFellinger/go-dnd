@@ -5,6 +5,7 @@ import (
 	"github.com/hielkefellinger/go-dnd/app/ecs_components"
 	"github.com/hielkefellinger/go-dnd/app/helpers"
 	"slices"
+	"strconv"
 )
 
 func upsertInventory(inventUpdateRequest inventoryUpsertRequest, pool CampaignPool) (ecs.BaseEntity, error) {
@@ -38,8 +39,10 @@ func upsertInventory(inventUpdateRequest inventoryUpsertRequest, pool CampaignPo
 	inventoryComponents := inventoryEntity.GetAllComponentsOfType(ecs.InventoryComponentType)
 	for _, rawInventoryComponent := range inventoryComponents {
 		inventoryComponent := rawInventoryComponent.(*ecs_components.InventoryComponent)
-		if slotsErr := inventoryComponent.SlotsFromString(inventUpdateRequest.Slots); slotsErr != nil {
-			return ecs.BaseEntity{}, SendManagementError("Error", slotsErr.Error(), pool)
+		if strconv.Itoa(int(inventoryComponent.Slots)) != inventUpdateRequest.Slots {
+			if slotsErr := inventoryComponent.SlotsFromString(inventUpdateRequest.Slots); slotsErr != nil {
+				return ecs.BaseEntity{}, SendManagementError("Error", slotsErr.Error(), pool)
+			}
 		}
 	}
 

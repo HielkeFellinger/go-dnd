@@ -116,6 +116,50 @@ func (e *baseEventMessageHandler) typeUpsertInventory(message EventMessage, pool
 	return nil
 }
 
+func (e *baseEventMessageHandler) typeRemoveInventory(message EventMessage, pool CampaignPool) error {
+	// Check if user is lead
+	if message.Source != pool.GetLeadId() {
+		return errors.New("modifying Inventory details and ownership is not allowed as non-lead")
+	}
+
+	// Undo escaping
+	clearedBody := html.UnescapeString(message.Body)
+
+	uuidInventoryFilter, err := helpers.ParseStringToUuid(clearedBody)
+	if err == nil {
+		inventoryEntity, match := pool.GetEngine().GetWorld().GetEntityByUuid(uuidInventoryFilter)
+		if match && inventoryEntity.HasComponentType(ecs.InventoryComponentType) {
+
+			// Check if linked to characters
+			for _, characterEntity := range pool.GetEngine().GetWorld().GetCharacterEntities() {
+				if characterEntity.HasRelationWithEntityByUuid(inventoryEntity.GetId()) {
+					return SendManagementError("Error", "This Specific Inventory is still linked to one or multiple Characters", pool)
+				}
+			}
+
+			// Remove without clearing items
+			if removeErr := pool.GetEngine().GetWorld().RemoveEntity(inventoryEntity); removeErr != nil {
+				return removeErr
+			}
+
+			removeInventoryMessage := NewEventMessage()
+			removeInventoryMessage.Type = TypeRemoveInventory
+			removeInventoryMessage.Source = pool.GetLeadId()
+			removeInventoryMessage.Body = ""
+			removeInventoryMessage.Destinations = append(message.Destinations, pool.GetLeadId())
+			if typeManageInventoryErr := e.typeManageInventory(removeInventoryMessage, pool); typeManageInventoryErr != nil {
+				return e.sendManagementError("Error", typeManageInventoryErr.Error(), pool)
+			}
+			pool.TransmitEventMessage(removeInventoryMessage)
+
+		} else {
+			return errors.New("no inventories found with matching identifier")
+		}
+	}
+
+	return err
+}
+
 func (e *baseEventMessageHandler) typeAddItemToInventory(message EventMessage, pool CampaignPool) error {
 	// Check if user is lead
 	if message.Source != pool.GetLeadId() {
@@ -153,7 +197,7 @@ func (e *baseEventMessageHandler) typeAddItemToInventory(message EventMessage, p
 		return errors.New("no item and/or inventory found with matching identifier")
 	}
 	if inventory.HasRelationWithEntityByUuid(item.GetId()) {
-		return SendManagementError("Warning", "item is already present in inventory", pool)
+		return SendManagementError("Warning", "This Specific Item is already present in inventory", pool)
 	}
 
 	// Find owning characters
