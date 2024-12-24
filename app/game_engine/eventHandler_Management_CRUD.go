@@ -3,6 +3,7 @@ package game_engine
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
 	"github.com/hielkefellinger/go-dnd/app/ecs_components"
 	"github.com/hielkefellinger/go-dnd/app/ecs_model_translation"
@@ -10,6 +11,7 @@ import (
 	"github.com/hielkefellinger/go-dnd/app/models"
 	"golang.org/x/net/html"
 	"sort"
+	"strconv"
 )
 
 func (e *baseEventMessageHandler) typeLoadUpsertInventory(message EventMessage, pool CampaignPool) error {
@@ -108,10 +110,74 @@ func (e *baseEventMessageHandler) typeUpsertInventory(message EventMessage, pool
 	loadUpsertInventoryMessage.Source = pool.GetLeadId()
 	loadUpsertInventoryMessage.Body = inventoryEntity.GetId().String()
 	if typeLoadUpsertInventoryErr := e.typeLoadUpsertInventory(loadUpsertInventoryMessage, pool); typeLoadUpsertInventoryErr != nil {
-		return e.sendManagementError("Error", typeLoadUpsertInventoryErr.Error(), pool)
+		return SendManagementError("Error", typeLoadUpsertInventoryErr.Error(), pool)
 	}
 	if typeManageInventoryErr := e.typeManageInventory(loadUpsertInventoryMessage, pool); typeManageInventoryErr != nil {
-		return e.sendManagementError("Error", typeManageInventoryErr.Error(), pool)
+		return SendManagementError("Error", typeManageInventoryErr.Error(), pool)
+	}
+	return nil
+}
+
+func (e *baseEventMessageHandler) typeCloneInventory(message EventMessage, pool CampaignPool) error {
+	// Check if user is lead
+	if message.Source != pool.GetLeadId() {
+		return errors.New("modifying Inventory details and ownership is not allowed as non-lead")
+	}
+
+	// Undo escaping
+	clearedBody := html.UnescapeString(message.Body)
+
+	uuidInventoryFilter, err := helpers.ParseStringToUuid(clearedBody)
+	if err == nil {
+		inventoryEntity, match := pool.GetEngine().GetWorld().GetEntityByUuid(uuidInventoryFilter)
+		if match && inventoryEntity.HasComponentType(ecs.InventoryComponentType) {
+
+			inventUpsertRequest := inventoryUpsertRequest{
+				Name:        inventoryEntity.GetName() + " (clone)",
+				Description: inventoryEntity.GetDescription(),
+				Characters:  make([]string, 0),
+			}
+
+			for _, component := range inventoryEntity.GetAllComponentsOfType(ecs.InventoryComponentType) {
+				inventoryComponent := component.(*ecs_components.InventoryComponent)
+				inventUpsertRequest.Slots = strconv.Itoa(int(inventoryComponent.Slots))
+			}
+
+			clonedInventoryEntity, upsertError := upsertInventory(inventUpsertRequest, pool)
+			if upsertError != nil {
+				return upsertError
+			}
+
+			// Add the items
+			// Loop over all the hasRelations and get the items
+			rawHasRelations := inventoryEntity.GetAllComponentsOfType(ecs.HasRelationComponentType)
+			for _, rawHasRelation := range rawHasRelations {
+				hasRelation := rawHasRelation.(*ecs_components.HasRelationComponent)
+
+				// Check if containing entity is an Item
+				if hasRelation.Entity != nil && hasRelation.Entity.HasComponentType(ecs.ItemComponentType) {
+					rawClonedHasRelation := ecs_components.NewHasRelationComponent()
+					clonedHasRelation := rawClonedHasRelation.(*ecs_components.HasRelationComponent)
+					clonedHasRelation.Entity = hasRelation.Entity
+					clonedHasRelation.Count = hasRelation.Count
+
+					if addErr := clonedInventoryEntity.AddComponent(clonedHasRelation); addErr != nil {
+						return SendManagementError("Error", addErr.Error(), pool)
+					}
+				}
+			}
+
+			// Update the CRUD box AND the "Manage Inventory screen"
+			loadUpsertInventoryMessage := NewEventMessage()
+			loadUpsertInventoryMessage.Source = pool.GetLeadId()
+			loadUpsertInventoryMessage.Body = clonedInventoryEntity.GetId().String()
+			if typeLoadUpsertInventoryErr := e.typeLoadUpsertInventory(loadUpsertInventoryMessage, pool); typeLoadUpsertInventoryErr != nil {
+				return SendManagementError("Error", typeLoadUpsertInventoryErr.Error(), pool)
+			}
+			if typeManageInventoryErr := e.typeManageInventory(loadUpsertInventoryMessage, pool); typeManageInventoryErr != nil {
+				return SendManagementError("Error", typeManageInventoryErr.Error(), pool)
+			}
+		}
 	}
 	return nil
 }
@@ -148,7 +214,7 @@ func (e *baseEventMessageHandler) typeRemoveInventory(message EventMessage, pool
 			removeInventoryMessage.Body = ""
 			removeInventoryMessage.Destinations = append(message.Destinations, pool.GetLeadId())
 			if typeManageInventoryErr := e.typeManageInventory(removeInventoryMessage, pool); typeManageInventoryErr != nil {
-				return e.sendManagementError("Error", typeManageInventoryErr.Error(), pool)
+				return SendManagementError("Error", typeManageInventoryErr.Error(), pool)
 			}
 			pool.TransmitEventMessage(removeInventoryMessage)
 
@@ -229,7 +295,7 @@ func (e *baseEventMessageHandler) typeAddItemToInventory(message EventMessage, p
 	loadUpsertInventoryMessage.Source = pool.GetLeadId()
 	loadUpsertInventoryMessage.Body = inventory.GetId().String()
 	if typeLoadUpsertInventoryErr := e.typeLoadUpsertInventory(loadUpsertInventoryMessage, pool); typeLoadUpsertInventoryErr != nil {
-		return e.sendManagementError("Error", typeLoadUpsertInventoryErr.Error(), pool)
+		return SendManagementError("Error", typeLoadUpsertInventoryErr.Error(), pool)
 	}
 
 	return nil
@@ -313,7 +379,7 @@ func (e *baseEventMessageHandler) typeRemoveItemFromInventory(message EventMessa
 	loadUpsertInventoryMessage.Source = pool.GetLeadId()
 	loadUpsertInventoryMessage.Body = inventory.GetId().String()
 	if typeLoadUpsertInventoryErr := e.typeLoadUpsertInventory(loadUpsertInventoryMessage, pool); typeLoadUpsertInventoryErr != nil {
-		return e.sendManagementError("Error", typeLoadUpsertInventoryErr.Error(), pool)
+		return SendManagementError("Error", typeLoadUpsertInventoryErr.Error(), pool)
 	}
 
 	return nil
@@ -404,17 +470,17 @@ func (e *baseEventMessageHandler) typeUpsertCharacter(message EventMessage, pool
 	loadUpsertCharMessage.Source = pool.GetLeadId()
 	loadUpsertCharMessage.Body = charEntity.GetId().String()
 	if typeLoadUpsertMapErr := e.typeLoadUpsertCharacter(loadUpsertCharMessage, pool); typeLoadUpsertMapErr != nil {
-		return e.sendManagementError("Error", typeLoadUpsertMapErr.Error(), pool)
+		return SendManagementError("Error", typeLoadUpsertMapErr.Error(), pool)
 	}
 	if typeManageMapsErr := e.typeManageCharacters(loadUpsertCharMessage, pool); typeManageMapsErr != nil {
-		return e.sendManagementError("Error", typeManageMapsErr.Error(), pool)
+		return SendManagementError("Error", typeManageMapsErr.Error(), pool)
 	}
 
 	// Update Char info
 	var reloadCharRibbon = NewEventMessage()
 	reloadCharRibbon.Source = ServerUser
 	reloadCharRibbon.Type = TypeLoadCharacters
-	e.loadCharacters(reloadCharRibbon, pool)
+	_ = e.loadCharacters(reloadCharRibbon, pool)
 
 	var closeCharDetailMessage = NewEventMessage()
 	closeCharDetailMessage.Source = ServerUser
@@ -449,6 +515,80 @@ func (e *baseEventMessageHandler) typeUpsertCharacter(message EventMessage, pool
 		}
 	}
 	return nil
+}
+
+func (e *baseEventMessageHandler) typeRemoveCharacter(message EventMessage, pool CampaignPool) error {
+	// Undo escaping
+	clearedBody := html.UnescapeString(message.Body)
+
+	// Check if user is lead
+	if message.Source != pool.GetLeadId() {
+		return errors.New("modifying maps is not allowed as non-lead")
+	}
+
+	uuidCharacterFilter, err := helpers.ParseStringToUuid(clearedBody)
+	if err == nil {
+		characterEntity, match := pool.GetEngine().GetWorld().GetEntityByUuid(uuidCharacterFilter)
+		if match && characterEntity.HasComponentType(ecs.CharacterComponentType) {
+			// Test if on a map
+			isOnMapNames := make([]string, 0)
+			for _, rawMapEntity := range pool.GetEngine().GetWorld().GetMapEntities() {
+				if rawMapEntity.HasRelationWithEntityByUuid(uuidCharacterFilter) {
+					isOnMapNames = append(isOnMapNames, rawMapEntity.GetName())
+				}
+			}
+
+			// Test if linked to player
+			playersAssigned := make([]string, 0)
+			isAPlayerChar := false
+			for _, rawPlayerComponent := range characterEntity.GetAllComponentsOfType(ecs.PlayerComponentType) {
+				isAPlayerChar = true
+				playerComponent := rawPlayerComponent.(*ecs_components.PlayerComponent)
+				if playerComponent.Name != "" {
+					playersAssigned = append(playersAssigned, playerComponent.Name)
+				}
+			}
+
+			// Handle player linked to game.
+			if len(isOnMapNames) > 0 || len(playersAssigned) > 0 {
+				errorMessage := "Deletion of Character '' is not allowed!"
+				if len(isOnMapNames) > 0 {
+					errorMessage += fmt.Sprintf("\nCharacter is still present on the following maps: '%v'", isOnMapNames)
+				}
+				if len(playersAssigned) > 0 {
+					errorMessage += fmt.Sprintf("\nCharacter is still linked to the following players: '%v'", playersAssigned)
+				}
+				return SendManagementError("Error", errorMessage, pool)
+			}
+
+			// Remove without clearing items
+			if removeErr := pool.GetEngine().GetWorld().RemoveEntity(characterEntity); removeErr != nil {
+				return removeErr
+			}
+
+			removeCharacterMessage := NewEventMessage()
+			removeCharacterMessage.Type = TypeRemoveCharacter
+			removeCharacterMessage.Source = pool.GetLeadId()
+			removeCharacterMessage.Body = ""
+			removeCharacterMessage.Destinations = append(message.Destinations, pool.GetLeadId())
+			if typeManageCharactersErr := e.typeManageCharacters(removeCharacterMessage, pool); typeManageCharactersErr != nil {
+				return SendManagementError("Error", typeManageCharactersErr.Error(), pool)
+			}
+			pool.TransmitEventMessage(removeCharacterMessage)
+
+			// If a player Char; update ribbon
+			if isAPlayerChar {
+				var reloadCharRibbon = NewEventMessage()
+				reloadCharRibbon.Source = ServerUser
+				reloadCharRibbon.Type = TypeLoadCharacters
+				_ = e.loadCharacters(reloadCharRibbon, pool)
+			}
+
+		} else {
+			return errors.New("no Characters found with matching identifier")
+		}
+	}
+	return err
 }
 
 func (e *baseEventMessageHandler) typeLoadUpsertMap(message EventMessage, pool CampaignPool) error {
@@ -513,10 +653,10 @@ func (e *baseEventMessageHandler) typeUpsertMap(message EventMessage, pool Campa
 	loadUpsertMapMessage.Source = pool.GetLeadId()
 	loadUpsertMapMessage.Body = mapEntity.GetId().String()
 	if typeLoadUpsertMapErr := e.typeLoadUpsertMap(loadUpsertMapMessage, pool); typeLoadUpsertMapErr != nil {
-		return e.sendManagementError("Error", typeLoadUpsertMapErr.Error(), pool)
+		return SendManagementError("Error", typeLoadUpsertMapErr.Error(), pool)
 	}
 	if typeManageMapsErr := e.typeManageMaps(loadUpsertMapMessage, pool); typeManageMapsErr != nil {
-		return e.sendManagementError("Error", typeManageMapsErr.Error(), pool)
+		return SendManagementError("Error", typeManageMapsErr.Error(), pool)
 	}
 	return nil
 }
@@ -583,10 +723,10 @@ func (e *baseEventMessageHandler) typeUpsertItem(message EventMessage, pool Camp
 	loadUpsertItemMessage.Source = pool.GetLeadId()
 	loadUpsertItemMessage.Body = itemEntity.GetId().String()
 	if typeLoadUpsertMapErr := e.typeLoadUpsertItem(loadUpsertItemMessage, pool); typeLoadUpsertMapErr != nil {
-		return e.sendManagementError("Error", typeLoadUpsertMapErr.Error(), pool)
+		return SendManagementError("Error", typeLoadUpsertMapErr.Error(), pool)
 	}
 	if typeManageMapsErr := e.typeManageItems(loadUpsertItemMessage, pool); typeManageMapsErr != nil {
-		return e.sendManagementError("Error", typeManageMapsErr.Error(), pool)
+		return SendManagementError("Error", typeManageMapsErr.Error(), pool)
 	}
 	return nil
 }

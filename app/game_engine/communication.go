@@ -57,6 +57,7 @@ const (
 
 	TypeLoadUpsertItem EventType = 5541
 	TypeUpsertItem     EventType = 5542
+	TypeRemoveItem     EventType = 5543
 
 	TypeLoadUpsertCharacter EventType = 5521
 	TypeUpsertCharacter     EventType = 5522

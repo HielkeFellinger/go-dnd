@@ -272,6 +272,8 @@
                 handleRightBarCrudHtml(payLoad); // Inventory
             } else if (payLoad.type === 5541) {
                 handleRightBarCrudHtml(payLoad); // Items
+            } else if (payLoad.type === 5523) {
+                clearRightBarContent(); // Remove Character
             } else if (payLoad.type === 5533) {
                 clearRightBarContent(); // Remove Inventory
             } else {
@@ -400,6 +402,11 @@
         sendEvent(wrapMessage(JSON.stringify(id), 5531));
     }
 
+    let cloneInventory = (id) => {
+        stopLoadSpinner();
+        sendEvent(wrapMessage(JSON.stringify(id), 5534));
+    }
+
     let upsertItem = (id) => {
         stopLoadSpinner();
         sendEvent(wrapMessage(JSON.stringify(id), 5541));
@@ -479,6 +486,14 @@
                 // Send without image
                 sendEvent(wrapMessage(JSON.stringify(char), 5522));
             }
+        } else {
+            stopLoadSpinner();
+        }
+    }
+
+    let submitRemoveCharacter = (characterId, characterName) => {
+        if (characterId && confirm("Are you sure you want to delete Character: '" + characterName + "'?")) {
+            sendEvent(wrapMessage(JSON.stringify(characterId), 5523));
         } else {
             stopLoadSpinner();
         }

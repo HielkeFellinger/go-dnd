@@ -30,13 +30,13 @@ func (e *baseEngine) SaveWorld(campaignId uint) error {
 	baseLocation := os.Getenv("CAMPAIGN_DATA_DIR") + "/" + strconv.Itoa(int(campaignId))
 
 	if _, err := os.Stat(baseLocation + "/save"); os.IsNotExist(err) {
-		if err := os.MkdirAll(baseLocation+"/save", os.ModePerm); err != nil {
-			return err
+		if mkSaveDirErr := os.MkdirAll(baseLocation+"/save", os.ModePerm); mkSaveDirErr != nil {
+			return mkSaveDirErr
 		}
 	}
 	if _, err := os.Stat(baseLocation + "/images"); os.IsNotExist(err) {
-		if err := os.MkdirAll(baseLocation+"/images", os.ModePerm); err != nil {
-			return err
+		if mkImageDirErr := os.MkdirAll(baseLocation+"/images", os.ModePerm); mkImageDirErr != nil {
+			return mkImageDirErr
 		}
 	}
 
@@ -46,7 +46,7 @@ func (e *baseEngine) SaveWorld(campaignId uint) error {
 }
 
 func InitGameEngine(campaign models.Campaign) Engine {
-	var baseEngine = baseEngine{}
+	var baseEngineInstance = baseEngine{}
 	baseLocation := os.Getenv("CAMPAIGN_DATA_DIR") + "/" + strconv.Itoa(int(campaign.ID))
 	gameFile := baseLocation + "/save/" + "campaign.yml"
 
@@ -55,11 +55,11 @@ func InitGameEngine(campaign models.Campaign) Engine {
 	}
 
 	if campaign.GameFile != "" {
-		baseEngine.World = loadGame(campaign.GameFile)
+		baseEngineInstance.World = loadGame(campaign.GameFile)
 	} else {
-		baseEngine.World = loadGame(SpaceGame)
+		baseEngineInstance.World = loadGame(SpaceGame)
 	}
-	baseEngine.EventHandler = &baseEventMessageHandler{}
+	baseEngineInstance.EventHandler = &baseEventMessageHandler{}
 
-	return &baseEngine
+	return &baseEngineInstance
 }

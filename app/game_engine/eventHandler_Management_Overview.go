@@ -34,8 +34,6 @@ func (e *baseEventMessageHandler) typeManageItems(message EventMessage, pool Cam
 		return err
 	}
 
-	// @todo Add Crud
-
 	// Send
 	manageItems := NewEventMessage()
 	manageItems.Source = message.Source
@@ -297,25 +295,6 @@ func (e *baseEventMessageHandler) typeManageMaps(message EventMessage, pool Camp
 	pool.TransmitEventMessage(manageMaps)
 
 	return nil
-}
-
-func (e *baseEventMessageHandler) sendManagementError(title string, message string, pool CampaignPool) error {
-	body, err := json.Marshal(models.ManagementError{
-		Title:   title,
-		Message: message,
-	})
-	if err != nil {
-		return err
-	}
-
-	errorMessage := NewEventMessage()
-	errorMessage.Source = pool.GetLeadId()
-	errorMessage.Type = TypeManagementError
-	errorMessage.Body = string(body)
-	errorMessage.Destinations = append(errorMessage.Destinations, pool.GetLeadId())
-
-	pool.TransmitEventMessage(errorMessage)
-	return errors.New(message)
 }
 
 type charUserController struct {

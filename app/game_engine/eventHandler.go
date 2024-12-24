@@ -135,14 +135,18 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 			return e.typeLoadUpsertCharacter(message, pool)
 		} else if message.Type == TypeUpsertCharacter {
 			return e.typeUpsertCharacter(message, pool)
+		} else if message.Type == TypeRemoveCharacter {
+			return e.typeRemoveCharacter(message, pool)
 		} else if message.Type == TypeLoadUpsertInventory { // Inventories
 			return e.typeLoadUpsertInventory(message, pool)
 		} else if message.Type == TypeUpsertInventory {
 			return e.typeUpsertInventory(message, pool)
-		} else if message.Type == TypeAddItemToInventory {
-			return e.typeAddItemToInventory(message, pool)
 		} else if message.Type == TypeRemoveInventory {
 			return e.typeRemoveInventory(message, pool)
+		} else if message.Type == TypeCloneInventory {
+			return e.typeCloneInventory(message, pool)
+		} else if message.Type == TypeAddItemToInventory {
+			return e.typeAddItemToInventory(message, pool)
 		} else if message.Type == TypeRemoveItemFromInventory {
 			return e.typeRemoveItemFromInventory(message, pool)
 		}
