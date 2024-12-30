@@ -1,5 +1,13 @@
 {{define "manageInventoryCrud"}}
 
+<div style="width: 100%;">
+    <button id="goBackToLastDetails" class="btn btn-primary" title="Go Back" onclick="goBackInRightBarHistory()" style="height: 2.4em; width: 2.4em">
+        <b><i class="bi bi-arrow-left"></i></b>
+    </button>
+    <button id="goForwardToLastDetails" class="btn btn-primary" title="Go Forward" onclick="goForwardInRightBarHistory()" style="height: 2.4em; width: 2.4em">
+        <b><i class="bi bi-arrow-right"></i></b>
+    </button>
+</div>
 <h2>{{ if and .Inventory .Inventory.Id }}Update{{else}}Add{{end}} Inventory</h2>
 <div style="width: 100%;">
     <form class="form" onsubmit="return false" style="width: 100%;" id="upsertInventoryForm">

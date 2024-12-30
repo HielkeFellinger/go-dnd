@@ -137,11 +137,11 @@
         });
 
     // <!--  Starting Websocket  -->
-    console.log("connecting to campaign: '{{.campaign.Title}}'")
+    console.log("connecting to campaign: '{{.campaign.Title}}'");
 
     var socket;
-    let currentUser = "{{.user.Name}}"
-    let backoff = 1000
+    let currentUser = "{{.user.Name}}";
+    let backoff = 1000;
 
     let connectWs = () => {
         socket = new WebSocket("ws://" + document.location.host + "/campaign/session/{{.campaign.ID}}/ws")
@@ -156,12 +156,11 @@
             console.log("Connected to Websocket: false");
             // cleanup
             for (let index in campaignMapTabIds) {
-                document.getElementById(campaignMapTabIds[index])?.remove()
-                document.getElementById(campaignMapTabIds[index] + "List")?.remove()
+                document.getElementById(campaignMapTabIds[index])?.remove();
+                document.getElementById(campaignMapTabIds[index] + "List")?.remove();
             }
-            campaignMapTabIds = []
-            selectedCharDetailsId = ""
-            loadedCharDetailsId = ""
+            campaignMapTabIds = [];
+            resetIdFromRightBarHistory();
             mapItems = new Map();
             mapItemIdToEntityId = new Map();
             mapItemHtmlIdToMapItem = new Map();
@@ -173,7 +172,7 @@
                 if (backoff < 30000) {
                     connectWs();
                 } else {
-                    console.error("Could not re-connect")
+                    console.error("Could not re-connect");
                 }
             }, (backoff))
         }
@@ -200,7 +199,7 @@
             if (payLoad.type === 501) {
                 setCharRibbon(payLoad)
             } else if (payLoad.type === 504) {
-                setCharDetails(payLoad)
+                handleRightBarCrudHtml(payLoad)
             } else {
                 console.error("Type '" + payLoad.type + "' not handled by 'Parse Character Events'")
             }
@@ -303,8 +302,7 @@
     }
 
     let fullRefresh = () => {
-        selectedCharDetailsId = "";
-        loadedCharDetailsId = "";
+        resetIdFromRightBarHistory()
         document.getElementById("entity-details-holder").innerHTML = "";
         sendEvent(wrapMessage('', 500));
     }
@@ -338,40 +336,164 @@
         }
     }
 
-    let setCharDetails = (data) => {
-        // If empty body, user is not allowed to see details, reset to old state
-        if (!data.body.trim()) {
-            // User may be not allowed to view old state, if so clean-up
-            if (selectedCharDetailsId === loadedCharDetailsId) {
-                selectedCharDetailsId = "";
-                loadedCharDetailsId = "";
-                document.getElementById("entity-details-holder").innerHTML = "";
-            } else {
-                selectedCharDetailsId = loadedCharDetailsId;
-            }
-        } else {
-            let body = JSON.parse(data.body)
-            if (selectedCharDetailsId === body.Id) {
-                loadedCharDetailsId = body.Id;
-                if (!rightBarVisible) {
-                    toggleVisibilityRightBar();
+    let rightBarIdHistory = [];
+    let rightBarIdHistoryIndex = 0;
+
+    let clearIdFromRightBarHistory = (id) => {
+        let newRightBarIdHistory = [];
+        let newRightBarIdHistoryPointer = rightBarIdHistoryIndex;
+
+        // Clear old refs adjust pointer
+        for (let i = 0; i < rightBarIdHistory.length; i++) {
+            if ( rightBarIdHistory[i]?.id || rightBarIdHistory[i].id === id) {
+                if (i <= rightBarIdHistoryIndex) {
+                    newRightBarIdHistoryPointer -= 1;
                 }
-                document.getElementById("entity-details-holder").innerHTML = body.Html;
+            } else {
+                newRightBarIdHistory.push(rightBarIdHistory[i]);
+            }
+        }
+
+        // Hide from history
+        if (newRightBarIdHistory.length === 0) {
+            newRightBarIdHistoryPointer = 0;
+            clearRightBarContent();
+        } else if (newRightBarIdHistory[newRightBarIdHistory.length -1] !== rightBarIdHistory[rightBarIdHistory.length -1]) {
+            newRightBarIdHistoryPointer = newRightBarIdHistory.length -1;
+            clearRightBarContent();
+        }
+
+        // Recover to ensure zero
+        if (newRightBarIdHistoryPointer < 0) {
+            newRightBarIdHistoryPointer = 0;
+        }
+
+        // Update
+        rightBarIdHistory = newRightBarIdHistory;
+        rightBarIdHistoryIndex = newRightBarIdHistoryPointer;
+        handleRightBarBreadcrumbButtons();
+    }
+
+    let addIdFromRightBarHistory = (rawId, rawType) => {
+        let id = ("" + rawId).trim()
+        let type = ("" + rawType).trim()
+        if (type) {
+            if (rightBarIdHistory.length > 0) {
+                let lastEntity = rightBarIdHistory[rightBarIdHistoryIndex -1];
+                if (lastEntity && lastEntity.type === type ) {
+                    if (lastEntity.id === id) {
+                        // No duplicates in history
+                        return;
+                    } else if (!lastEntity.id && id ) {
+                        // An id after no id on same type most likely mean a successful
+                        rightBarIdHistory[rightBarIdHistory.length -1].id = id;
+                        return;
+                    }
+                }
+            }
+
+            // Snip the array if ot at the end of the history breadcrumb trail
+            if (rightBarIdHistoryIndex !== rightBarIdHistory.length) {
+                rightBarIdHistory = rightBarIdHistory.slice(0, rightBarIdHistoryIndex)
+            }
+
+            let historyEntry = {}
+            historyEntry.id = id.trim()
+            historyEntry.type = ("" + type).trim()
+            rightBarIdHistory.push(historyEntry)
+            rightBarIdHistoryIndex = rightBarIdHistory.length
+            handleRightBarBreadcrumbButtons();
+        }
+    }
+
+    let resetIdFromRightBarHistory = () => {
+        rightBarIdHistory = [];
+        rightBarIdHistoryIndex = 0;
+        handleRightBarBreadcrumbButtons()
+    }
+
+    let handleRightBarCrudHtml = (data) => {
+        let body = JSON.parse(data.body);
+
+        if (data.type < 5500 && !(body.Html?.trim())) {
+            // Html is empty; user most likely has no access anymore (clear)
+            clearIdFromRightBarHistory(body.Id);
+            return;
+        }
+
+        if (body.Html) {
+            addIdFromRightBarHistory(body.Id, data.type)
+            document.getElementById("entity-details-holder").innerHTML = body.Html;
+            if (!rightBarVisible) {
+                toggleVisibilityRightBar();
+            }
+        }
+        handleRightBarBreadcrumbButtons()
+    }
+
+    let handleRightBarCrudClear = (data) => {
+        let body = JSON.parse(data.body);
+        if (!(body.Html?.trim()) && body.Id) {
+            clearIdFromRightBarHistory(body.Id);
+        }
+    }
+
+    let handleRightBarBreadcrumbButtons = () => {
+        let backButton = document.getElementById("goBackToLastDetails")
+        if (backButton) {
+            if (rightBarIdHistory.length > 1 && rightBarIdHistoryIndex > 1) {
+                backButton["style"].visibility = "visible";
+            } else {
+                backButton["style"].visibility = "hidden";
+            }
+        }
+        let forwardButton = document.getElementById("goForwardToLastDetails")
+        if (forwardButton) {
+            if (rightBarIdHistory.length > 1 && rightBarIdHistoryIndex !== rightBarIdHistory.length) {
+                forwardButton["style"].visibility = "visible";
+            } else {
+                forwardButton["style"].visibility = "hidden";
             }
         }
     }
 
-    let selectedCharDetailsId = "";
-    let loadedCharDetailsId = "";
-    let lastCharDetailsId = "";
-    let loadCharDetails = (id) => {
-        selectedCharDetailsId = id;
-        sendEvent(wrapMessage(id, 504));
+    let clearRightBarContent = () => {
+        if (rightBarVisible) {
+            toggleVisibilityRightBar();
+        }
+        let holder = document.getElementById("entity-details-holder")
+        if (holder) {
+            holder.innerHTML = "";
+        }
     }
+
+    let goBackInRightBarHistory = () => {
+        if (rightBarIdHistory.length > 1 && rightBarIdHistoryIndex > 1) {
+            let pointer = rightBarIdHistory[rightBarIdHistoryIndex-2];
+            if (pointer && pointer.id && pointer.type) {
+                rightBarIdHistoryIndex--
+                sendEvent(wrapMessage(JSON.stringify(pointer.id),  Number(pointer.type)));
+            }
+        }
+    }
+
+    let goForwardInRightBarHistory = () => {
+        if (rightBarIdHistory.length > 1 && rightBarIdHistoryIndex < rightBarIdHistory.length) {
+            let pointer = rightBarIdHistory[rightBarIdHistoryIndex];
+            if (pointer && pointer.id && pointer.type) {
+                rightBarIdHistoryIndex++
+                sendEvent(wrapMessage(JSON.stringify(pointer.id), Number(pointer.type)));
+            }
+        }
+    }
+
+    let loadCharDetails = (id) => {
+        sendEvent(wrapMessage(JSON.stringify(id), 504));
+    }
+
     let loadCharDetailsByMapItem = (mapItemId) => {
         if (mapItemIdToEntityId.has(mapItemId)) {
-            selectedCharDetailsId = mapItemIdToEntityId.get(mapItemId);
-            sendEvent(wrapMessage(selectedCharDetailsId, 504));
+            sendEvent(wrapMessage(JSON.stringify(mapItemIdToEntityId.get(mapItemId)), 504));
         }
     }
 
@@ -541,10 +663,10 @@
     let addItemToInventory = (inventoryId) => {
         let itemSelected = document.getElementById("addItemToInventory");
         if (inventoryId && itemSelected) {
-            let itemIdToAdd = document.getElementById("addItemToInventory")["value"];
+            let itemIdToAdd = itemSelected["value"];
             if (itemIdToAdd) {
                 let addItemRequest = {};
-                addItemRequest.InventoryId = inventoryId;
+                addItemRequest.InventoryId = inventoryId;v
                 addItemRequest.ItemId = itemIdToAdd;
                 sendEvent(wrapMessage(JSON.stringify(addItemRequest), 5535));
             }
@@ -557,6 +679,19 @@
             removeItemRequest.InventoryId = inventoryId;
             removeItemRequest.ItemId = itemId;
             sendEvent(wrapMessage(JSON.stringify(removeItemRequest), 5536));
+        }
+    }
+
+    let updateCountInventoryItem = (inventoryId, itemId) => {
+        if (inventoryId && itemId) {
+            let itemAmountInput = document.getElementById("Item" + itemId + "Amount" + inventoryId);
+            if (itemAmountInput) {
+                let updateItemCountRequest = {};
+                updateItemCountRequest.InventoryId = inventoryId;
+                updateItemCountRequest.ItemId = itemId;
+                updateItemCountRequest.Amount = itemAmountInput["value"];
+                sendEvent(wrapMessage(JSON.stringify(updateItemCountRequest), 5537));
+            }
         }
     }
 
@@ -611,38 +746,6 @@
                 button.title= "Undo Removal of Image";
                 button.innerHTML = '<b>-</b>';
             }
-        }
-    }
-
-    let handleRightBarCrudHtml = (data) => {
-        let body = JSON.parse(data.body);
-        // Reset possible Char links
-        selectedCharDetailsId = "";
-        lastCharDetailsId = loadedCharDetailsId;
-        loadedCharDetailsId = "";
-        if (!rightBarVisible) {
-            toggleVisibilityRightBar();
-        }
-        document.getElementById("entity-details-holder").innerHTML = body;
-        if (!lastCharDetailsId && document.getElementById("goBackToLastDetails")) {
-            document.getElementById("goBackToLastDetails")["style"].visibility = "hidden";
-        }
-    }
-
-    let clearRightBarContent = () => {
-        if (rightBarVisible) {
-            toggleVisibilityRightBar();
-        }
-        document.getElementById("entity-details-holder").innerHTML = "";
-        if (!lastCharDetailsId && document.getElementById("goBackToLastDetails")) {
-            document.getElementById("goBackToLastDetails")["style"].visibility = "hidden";
-        }
-    }
-
-    let goBackToLastDetail = () => {
-        if (lastCharDetailsId) {
-            loadCharDetails(lastCharDetailsId);
-            lastCharDetailsId = "";
         }
     }
 
@@ -794,7 +897,6 @@
 
         let mapGrid = document.getElementById("mapGrid" + mapId);
 
-        console.error(mapGrid);
         if (mapGrid) {
             mapGrid["style"].backgroundImage = "url('" + url + "')";
         }

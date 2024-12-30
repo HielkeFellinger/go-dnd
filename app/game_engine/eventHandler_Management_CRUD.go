@@ -24,6 +24,7 @@ func (e *baseEventMessageHandler) typeLoadUpsertInventory(message EventMessage, 
 	}
 
 	data := make(map[string]any)
+	messageIdBody := EventMessageIdBody{}
 
 	allSelectableChars := make([]models.CampaignDropdownCharacter, 0)
 	for _, characterEntity := range pool.GetEngine().GetWorld().GetCharacterEntities() {
@@ -47,6 +48,7 @@ func (e *baseEventMessageHandler) typeLoadUpsertInventory(message EventMessage, 
 				allSelectableChars[i].Selected = characterEntity.Source.HasRelationWithEntityByUuid(inventoryEntity.GetId())
 			}
 
+			messageIdBody.Id = inventoryModel.Id
 			data["Inventory"] = inventoryModel
 		} else {
 			return errors.New("no inventories found with matching identifier")
@@ -68,9 +70,8 @@ func (e *baseEventMessageHandler) typeLoadUpsertInventory(message EventMessage, 
 	})
 	data["Characters"] = allSelectableChars
 
-	rawJsonBytes, err := json.Marshal(
-		e.handleLoadHtmlBodyMultipleTemplateFiles([]string{"manageInventoryCrud.html", "diceSpinnerSvg.html", "inventory.html"},
-			"manageInventoryCrud", data))
+	messageIdBody.Html = e.handleLoadHtmlBodyMultipleTemplateFiles(
+		[]string{"manageInventoryCrud.html", "diceSpinnerSvg.html", "inventory.html"}, "manageInventoryCrud", data)
 	if err != nil {
 		return err
 	}
@@ -78,7 +79,7 @@ func (e *baseEventMessageHandler) typeLoadUpsertInventory(message EventMessage, 
 	loadItemMessage := NewEventMessage()
 	loadItemMessage.Source = message.Source
 	loadItemMessage.Type = TypeLoadUpsertInventory
-	loadItemMessage.Body = string(rawJsonBytes)
+	loadItemMessage.Body = messageIdBody.ToBodyString()
 	loadItemMessage.Destinations = append(loadItemMessage.Destinations, pool.GetLeadId())
 	pool.TransmitEventMessage(loadItemMessage)
 
@@ -208,10 +209,14 @@ func (e *baseEventMessageHandler) typeRemoveInventory(message EventMessage, pool
 				return removeErr
 			}
 
+			messageBody := EventMessageIdBody{
+				Id: inventoryEntity.GetId().String(),
+			}
+
 			removeInventoryMessage := NewEventMessage()
 			removeInventoryMessage.Type = TypeRemoveInventory
 			removeInventoryMessage.Source = pool.GetLeadId()
-			removeInventoryMessage.Body = ""
+			removeInventoryMessage.Body = messageBody.ToBodyString()
 			removeInventoryMessage.Destinations = append(message.Destinations, pool.GetLeadId())
 			if typeManageInventoryErr := e.typeManageInventory(removeInventoryMessage, pool); typeManageInventoryErr != nil {
 				return SendManagementError("Error", typeManageInventoryErr.Error(), pool)
@@ -385,6 +390,92 @@ func (e *baseEventMessageHandler) typeRemoveItemFromInventory(message EventMessa
 	return nil
 }
 
+func (e *baseEventMessageHandler) typeUpdateItemCountInventory(message EventMessage, pool CampaignPool) error {
+	// Check if user is lead
+	if message.Source != pool.GetLeadId() {
+		return errors.New("modifying Inventory details and ownership is not allowed as non-lead")
+	}
+
+	// Undo escaping
+	clearedBody := html.UnescapeString(message.Body)
+
+	var inventUpdateItemCountRequest inventoryUpdateItemCountRequest
+	if err := json.Unmarshal([]byte(clearedBody), &inventUpdateItemCountRequest); err != nil {
+		return err
+	}
+
+	// Parse Amount; ensure fallback to zero
+	var Amount uint = 0
+	if rawAmount, err := strconv.Atoi(inventUpdateItemCountRequest.Amount); err == nil && rawAmount >= 0 {
+		Amount = uint(rawAmount)
+	} else {
+		return SendManagementError("Warning", "This Specific Item amount is not parsable as number", pool)
+	}
+
+	// Check if there is an item and an inventory that match the request
+	var item ecs.Entity = nil
+	if uuidItemFilter, errItem := helpers.ParseStringToUuid(inventUpdateItemCountRequest.ItemId); errItem == nil {
+		if entityFound, ok := pool.GetEngine().GetWorld().GetEntityByUuid(uuidItemFilter); ok {
+			if entityFound.HasComponentType(ecs.ItemComponentType) {
+				item = entityFound
+			}
+		}
+	}
+	var inventory ecs.Entity = nil
+	if uuidInventoryFilter, errInv := helpers.ParseStringToUuid(inventUpdateItemCountRequest.InventoryId); errInv == nil {
+		if entityFound, ok := pool.GetEngine().GetWorld().GetEntityByUuid(uuidInventoryFilter); ok {
+			if entityFound.HasComponentType(ecs.InventoryComponentType) {
+				inventory = entityFound
+			}
+		}
+	}
+
+	// Check integrity
+	if item == nil || inventory == nil {
+		return errors.New("no item and/or inventory found with matching identifier")
+	}
+	if !inventory.HasRelationWithEntityByUuid(item.GetId()) {
+		return SendManagementError("Warning", "This Specific Item is not present in inventory", pool)
+	}
+
+	// Find owning characters
+	owningPcCharIds := make([]string, 0)
+	for _, characterEntity := range pool.GetEngine().GetWorld().GetCharacterEntities() {
+		if characterEntity.HasRelationWithEntityByUuid(inventory.GetId()) && characterEntity.HasComponentType(ecs.PlayerComponentType) {
+			owningPcCharIds = append(owningPcCharIds, characterEntity.GetId().String())
+		}
+	}
+
+	// Update Item
+	for _, rawHasRelation := range inventory.GetAllComponentsOfType(ecs.HasRelationComponentType) {
+		hasRelation := rawHasRelation.(*ecs_components.HasRelationComponent)
+		// Update the count
+		if hasRelation.Entity.GetId() == item.GetId() {
+			hasRelation.Count = Amount
+		}
+	}
+
+	// Trigger Visual Updates on chars (details)
+	for _, charId := range owningPcCharIds {
+		var reloadCharDetailMessage = NewEventMessage()
+		reloadCharDetailMessage.Source = ServerUser
+		reloadCharDetailMessage.Body = charId
+		loadCharErr := e.loadCharactersDetails(reloadCharDetailMessage, pool)
+		if loadCharErr != nil {
+			return loadCharErr
+		}
+	}
+
+	loadUpsertInventoryMessage := NewEventMessage()
+	loadUpsertInventoryMessage.Source = pool.GetLeadId()
+	loadUpsertInventoryMessage.Body = inventory.GetId().String()
+	if typeLoadUpsertInventoryErr := e.typeLoadUpsertInventory(loadUpsertInventoryMessage, pool); typeLoadUpsertInventoryErr != nil {
+		return SendManagementError("Error", typeLoadUpsertInventoryErr.Error(), pool)
+	}
+
+	return nil
+}
+
 func (e *baseEventMessageHandler) typeLoadUpsertCharacter(message EventMessage, pool CampaignPool) error {
 	// Undo escaping
 	clearedBody := html.UnescapeString(message.Body)
@@ -395,29 +486,28 @@ func (e *baseEventMessageHandler) typeLoadUpsertCharacter(message EventMessage, 
 	}
 
 	data := make(map[string]any)
+	messageIdBody := EventMessageIdBody{}
 
 	// Check if there is an existing character with the supplied uuid
 	uuidItemFilter, err := helpers.ParseStringToUuid(clearedBody)
 	if err == nil {
 		charCandidate, match := pool.GetEngine().GetWorld().GetEntityByUuid(uuidItemFilter)
 		if match && charCandidate.HasComponentType(ecs.CharacterComponentType) {
-			data["Character"] = ecs_model_translation.CharacterEntityToCampaignCharacterModel(charCandidate)
+			model := ecs_model_translation.CharacterEntityToCampaignCharacterModel(charCandidate)
+			messageIdBody.Id = model.Id
+			data["Character"] = model
 		} else {
 			return errors.New("no characters found with matching identifier")
 		}
 	}
 
-	rawJsonBytes, err := json.Marshal(
-		e.handleLoadHtmlBodyMultipleTemplateFiles([]string{"manageCharacterCrud.html", "diceSpinnerSvg.html"},
-			"manageCharacterCrud", data))
-	if err != nil {
-		return err
-	}
+	messageIdBody.Html = e.handleLoadHtmlBodyMultipleTemplateFiles(
+		[]string{"manageCharacterCrud.html", "diceSpinnerSvg.html"}, "manageCharacterCrud", data)
 
 	loadItemCharacter := NewEventMessage()
 	loadItemCharacter.Source = message.Source
 	loadItemCharacter.Type = TypeLoadUpsertCharacter
-	loadItemCharacter.Body = string(rawJsonBytes)
+	loadItemCharacter.Body = messageIdBody.ToBodyString()
 	loadItemCharacter.Destinations = append(loadItemCharacter.Destinations, pool.GetLeadId())
 	pool.TransmitEventMessage(loadItemCharacter)
 
@@ -566,10 +656,14 @@ func (e *baseEventMessageHandler) typeRemoveCharacter(message EventMessage, pool
 				return removeErr
 			}
 
+			messageBody := EventMessageIdBody{
+				Id: characterEntity.GetId().String(),
+			}
+
 			removeCharacterMessage := NewEventMessage()
 			removeCharacterMessage.Type = TypeRemoveCharacter
 			removeCharacterMessage.Source = pool.GetLeadId()
-			removeCharacterMessage.Body = ""
+			removeCharacterMessage.Body = messageBody.ToBodyString()
 			removeCharacterMessage.Destinations = append(message.Destinations, pool.GetLeadId())
 			if typeManageCharactersErr := e.typeManageCharacters(removeCharacterMessage, pool); typeManageCharactersErr != nil {
 				return SendManagementError("Error", typeManageCharactersErr.Error(), pool)
@@ -601,27 +695,26 @@ func (e *baseEventMessageHandler) typeLoadUpsertMap(message EventMessage, pool C
 	}
 
 	data := make(map[string]any)
+	messageIdBody := EventMessageIdBody{}
 
 	// Check if there is an existing map with the supplied uuid
 	uuidItemFilter, err := helpers.ParseStringToUuid(clearedBody)
 	if err == nil {
 		mapCandidate, match := pool.GetEngine().GetWorld().GetEntityByUuid(uuidItemFilter)
 		if match && mapCandidate.HasComponentType(ecs.MapComponentType) {
-			data["Map"] = ecs_model_translation.MapEntityToCampaignMapModel(mapCandidate)
+			mapModel := ecs_model_translation.MapEntityToCampaignMapModel(mapCandidate)
+			data["Map"] = mapModel
+			messageIdBody.Id = mapModel.Id
 		}
 	}
 
-	rawJsonBytes, err := json.Marshal(
-		e.handleLoadHtmlBodyMultipleTemplateFiles([]string{"manageMapCrud.html", "diceSpinnerSvg.html"},
-			"manageMapCrud", data))
-	if err != nil {
-		return err
-	}
+	messageIdBody.Html = e.handleLoadHtmlBodyMultipleTemplateFiles(
+		[]string{"manageMapCrud.html", "diceSpinnerSvg.html"}, "manageMapCrud", data)
 
 	loadMapMessage := NewEventMessage()
 	loadMapMessage.Source = message.Source
 	loadMapMessage.Type = TypeLoadUpsertMap
-	loadMapMessage.Body = string(rawJsonBytes)
+	loadMapMessage.Body = messageIdBody.ToBodyString()
 	loadMapMessage.Destinations = append(loadMapMessage.Destinations, pool.GetLeadId())
 	pool.TransmitEventMessage(loadMapMessage)
 
@@ -671,27 +764,26 @@ func (e *baseEventMessageHandler) typeLoadUpsertItem(message EventMessage, pool 
 	clearedBody := html.UnescapeString(message.Body)
 
 	data := make(map[string]any)
+	messageIdBody := EventMessageIdBody{}
 
 	// Check if there is an existing item with the supplied uuid
 	uuidItemFilter, err := helpers.ParseStringToUuid(clearedBody)
 	if err == nil {
 		itemCandidate, match := pool.GetEngine().GetWorld().GetItemEntityByUuid(uuidItemFilter)
 		if match && itemCandidate.HasComponentType(ecs.ItemComponentType) {
-			data["Item"] = ecs_model_translation.ItemEntityToCampaignInventoryItem(itemCandidate, 0)
+			model := ecs_model_translation.ItemEntityToCampaignInventoryItem(itemCandidate, 0)
+			messageIdBody.Id = model.Id
+			data["Item"] = model
 		}
 	}
 
-	rawJsonBytes, err := json.Marshal(
-		e.handleLoadHtmlBodyMultipleTemplateFiles([]string{"manageItemCrud.html", "diceSpinnerSvg.html"},
-			"manageItemCrud", data))
-	if err != nil {
-		return err
-	}
+	messageIdBody.Html = e.handleLoadHtmlBodyMultipleTemplateFiles([]string{"manageItemCrud.html", "diceSpinnerSvg.html"},
+		"manageItemCrud", data)
 
 	loadItemMessage := NewEventMessage()
 	loadItemMessage.Source = message.Source
 	loadItemMessage.Type = TypeLoadUpsertItem
-	loadItemMessage.Body = string(rawJsonBytes)
+	loadItemMessage.Body = messageIdBody.ToBodyString()
 	loadItemMessage.Destinations = append(loadItemMessage.Destinations, pool.GetLeadId())
 	pool.TransmitEventMessage(loadItemMessage)
 
@@ -707,13 +799,13 @@ func (e *baseEventMessageHandler) typeUpsertItem(message EventMessage, pool Camp
 	// Undo escaping
 	clearedBody := html.UnescapeString(message.Body)
 
-	var itemUpsertRequest itemUpsertRequest
-	if err := json.Unmarshal([]byte(clearedBody), &itemUpsertRequest); err != nil {
+	var itmUpsertRequest itemUpsertRequest
+	if err := json.Unmarshal([]byte(clearedBody), &itmUpsertRequest); err != nil {
 		return err
 	}
 
 	// Upsert
-	itemEntity, upsertError := upsertItem(itemUpsertRequest, pool)
+	itemEntity, upsertError := upsertItem(itmUpsertRequest, pool)
 	if upsertError != nil {
 		return upsertError
 	}
@@ -734,6 +826,12 @@ func (e *baseEventMessageHandler) typeUpsertItem(message EventMessage, pool Camp
 type inventoryAddRemoveItemRequest struct {
 	InventoryId string `json:"InventoryId"`
 	ItemId      string `json:"ItemId"`
+}
+
+type inventoryUpdateItemCountRequest struct {
+	InventoryId string `json:"InventoryId"`
+	ItemId      string `json:"ItemId"`
+	Amount      string `json:"Amount"`
 }
 
 type inventoryUpsertRequest struct {

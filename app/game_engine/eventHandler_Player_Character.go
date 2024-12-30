@@ -23,7 +23,8 @@ func (e *baseEventMessageHandler) loadCharactersDetails(message EventMessage, po
 	isLead := message.Source == pool.GetLeadId()
 
 	// Validate UUID Filter form message
-	uuidCharFilter, err := helpers.ParseStringToUuid(message.Body)
+	clearedBody := html.UnescapeString(message.Body)
+	uuidCharFilter, err := helpers.ParseStringToUuid(clearedBody)
 	if err != nil {
 		return err
 	}
@@ -37,6 +38,9 @@ func (e *baseEventMessageHandler) loadCharactersDetails(message EventMessage, po
 
 	// Parse and check if the character could be parsed
 	campaignCharacter := ecs_model_translation.CharacterEntityToCampaignCharacterModel(charEntity)
+	messageIdBody := EventMessageIdBody{
+		Id: charEntity.GetId().String(),
+	}
 
 	// Send only to people allowed to view this character
 	if message.Source == ServerUser {
@@ -49,19 +53,13 @@ func (e *baseEventMessageHandler) loadCharactersDetails(message EventMessage, po
 	if len(transmitMessage.Destinations) > 0 && len(campaignCharacter.Id) > 0 {
 		data := make(map[string]any)
 		data["character"] = campaignCharacter
-
-		messageIdBody := EventMessageIdBody{
-			Id: uuidCharFilter.String(),
-			Html: e.handleLoadHtmlBodyMultipleTemplateFiles(
-				[]string{"characterDetails.html", "inventory.html"},
-				"characterDetails", data),
-		}
-
-		transmitMessage.Body = messageIdBody.ToBodyString()
+		messageIdBody.Html = e.handleLoadHtmlBodyMultipleTemplateFiles(
+			[]string{"characterDetails.html", "inventory.html"}, "characterDetails", data)
 	} else {
 		transmitMessage.Destinations = append(transmitMessage.Destinations, message.Source)
 	}
 
+	transmitMessage.Body = messageIdBody.ToBodyString()
 	pool.TransmitEventMessage(transmitMessage)
 	return nil
 }

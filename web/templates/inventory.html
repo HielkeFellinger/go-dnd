@@ -20,7 +20,8 @@
         {{ range $item := .Items }}
         <tr>
             {{ if not $.ReadOnly }}
-            <td> <input type="number" value="{{ $item.Count }}" style="max-width: 4em;"> </td>
+            <td> <input type="number" value="{{ $item.Count }}" id="Item{{ $item.Id }}Amount{{ $.Id }}"
+                        onchange="updateCountInventoryItem('{{ $.Id }}', '{{ $item.Id }}')" style="max-width: 4em;"> </td>
             {{ end }}
             <td> {{ $item.Name }} </td>
             <td> {{ $item.Description }} </td>

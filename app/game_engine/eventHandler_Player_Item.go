@@ -1,7 +1,6 @@
 package game_engine
 
 import (
-	"encoding/json"
 	"errors"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
 	"github.com/hielkefellinger/go-dnd/app/ecs_model_translation"
@@ -33,13 +32,12 @@ func (e *baseEventMessageHandler) typeLoadItemDetails(message EventMessage, pool
 	if len(inventoryItem.Id) > 0 {
 		data := make(map[string]any)
 		data["Item"] = inventoryItem
-
-		rawJsonBytes, errJson := json.Marshal(e.handleLoadHtmlBody("itemDetails.html", "itemDetails", data))
-		if errJson != nil {
-			return errJson
+		messageIdBody := EventMessageIdBody{
+			Id:   inventoryItem.Id,
+			Html: e.handleLoadHtmlBody("itemDetails.html", "itemDetails", data),
 		}
 
-		transmitMessage.Body = string(rawJsonBytes)
+		transmitMessage.Body = messageIdBody.ToBodyString()
 		pool.TransmitEventMessage(transmitMessage)
 	}
 	return nil
