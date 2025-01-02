@@ -84,13 +84,17 @@ func (pool *baseCampaignPool) Run() {
 				pool.transmitMessage(transmitMessage)
 
 				// Close content; and remove from session container @todo Save state?
-				for client := range pool.Clients {
-					delete(pool.Clients, client)
+				for uClient := range pool.Clients {
+					pool.Clients[uClient] = false
+					log.Printf("Removing the WS connection of user `%s`", uClient.Id)
+					_ = uClient.Conn.Close()
+					delete(pool.Clients, uClient)
 				}
 				runningCampaignSessionsContainer.Unregister <- pool
 				return
 			} else {
 				pool.Clients[client] = false
+				_ = client.Conn.Close()
 				delete(pool.Clients, client)
 			}
 

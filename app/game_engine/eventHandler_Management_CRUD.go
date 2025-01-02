@@ -10,6 +10,7 @@ import (
 	"github.com/hielkefellinger/go-dnd/app/helpers"
 	"github.com/hielkefellinger/go-dnd/app/models"
 	"golang.org/x/net/html"
+	"slices"
 	"sort"
 	"strconv"
 )
@@ -72,9 +73,6 @@ func (e *baseEventMessageHandler) typeLoadUpsertInventory(message EventMessage, 
 
 	messageIdBody.Html = e.handleLoadHtmlBodyMultipleTemplateFiles(
 		[]string{"manageInventoryCrud.html", "diceSpinnerSvg.html", "inventory.html"}, "manageInventoryCrud", data)
-	if err != nil {
-		return err
-	}
 
 	loadItemMessage := NewEventMessage()
 	loadItemMessage.Source = message.Source
@@ -391,11 +389,6 @@ func (e *baseEventMessageHandler) typeRemoveItemFromInventory(message EventMessa
 }
 
 func (e *baseEventMessageHandler) typeUpdateItemCountInventory(message EventMessage, pool CampaignPool) error {
-	// Check if user is lead
-	if message.Source != pool.GetLeadId() {
-		return errors.New("modifying Inventory details and ownership is not allowed as non-lead")
-	}
-
 	// Undo escaping
 	clearedBody := html.UnescapeString(message.Body)
 
@@ -440,10 +433,21 @@ func (e *baseEventMessageHandler) typeUpdateItemCountInventory(message EventMess
 
 	// Find owning characters
 	owningPcCharIds := make([]string, 0)
+	owningPcNames := make([]string, 0)
 	for _, characterEntity := range pool.GetEngine().GetWorld().GetCharacterEntities() {
 		if characterEntity.HasRelationWithEntityByUuid(inventory.GetId()) && characterEntity.HasComponentType(ecs.PlayerComponentType) {
 			owningPcCharIds = append(owningPcCharIds, characterEntity.GetId().String())
+			for _, rawPlayerComponents := range characterEntity.GetAllComponentsOfType(ecs.PlayerComponentType) {
+				playerComponents := rawPlayerComponents.(*ecs_components.PlayerComponent)
+				if playerComponents.Name != "" && !slices.Contains(owningPcCharIds, playerComponents.Name) {
+					owningPcNames = append(owningPcNames, playerComponents.Name)
+				}
+			}
 		}
+	}
+	// Check if user is allowed to make modification
+	if message.Source != pool.GetLeadId() && !slices.Contains(owningPcNames, message.Source) {
+		return errors.New("modifying Inventory details is not allowed as non-lead and non-owner")
 	}
 
 	// Update Item
@@ -466,11 +470,15 @@ func (e *baseEventMessageHandler) typeUpdateItemCountInventory(message EventMess
 		}
 	}
 
-	loadUpsertInventoryMessage := NewEventMessage()
-	loadUpsertInventoryMessage.Source = pool.GetLeadId()
-	loadUpsertInventoryMessage.Body = inventory.GetId().String()
-	if typeLoadUpsertInventoryErr := e.typeLoadUpsertInventory(loadUpsertInventoryMessage, pool); typeLoadUpsertInventoryErr != nil {
-		return SendManagementError("Error", typeLoadUpsertInventoryErr.Error(), pool)
+	if rawType, err := strconv.Atoi(inventUpdateItemCountRequest.Type); err == nil && rawType >= 0 {
+		if message.Source == pool.GetLeadId() && rawType == int(TypeLoadUpsertInventory) {
+			loadUpsertInventoryMessage := NewEventMessage()
+			loadUpsertInventoryMessage.Source = pool.GetLeadId()
+			loadUpsertInventoryMessage.Body = inventory.GetId().String()
+			if typeLoadUpsertInventoryErr := e.typeLoadUpsertInventory(loadUpsertInventoryMessage, pool); typeLoadUpsertInventoryErr != nil {
+				return SendManagementError("Error", typeLoadUpsertInventoryErr.Error(), pool)
+			}
+		}
 	}
 
 	return nil
@@ -831,6 +839,7 @@ type inventoryAddRemoveItemRequest struct {
 type inventoryUpdateItemCountRequest struct {
 	InventoryId string `json:"InventoryId"`
 	ItemId      string `json:"ItemId"`
+	Type        string `json:"Type"`
 	Amount      string `json:"Amount"`
 }
 

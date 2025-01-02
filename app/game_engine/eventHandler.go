@@ -151,7 +151,6 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 			return e.typeRemoveItemFromInventory(message, pool)
 		} else if message.Type == TypeUpdateItemCountInventory {
 			return e.typeUpdateItemCountInventory(message, pool)
-
 		}
 		return errors.New(fmt.Sprintf("message of type '%d' is not recognised as a 'Management CRUD Event'", message.Type))
 	}

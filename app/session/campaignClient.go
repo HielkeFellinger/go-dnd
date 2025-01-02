@@ -30,7 +30,11 @@ func (c *campaignClient) Read() {
 			c.Pool.Unregister <- c
 		}
 		c.Pool = nil
-		c.Conn.Close()
+		err := c.Conn.Close()
+		if err != nil {
+			log.Println(err)
+			return
+		}
 	}()
 
 	for {

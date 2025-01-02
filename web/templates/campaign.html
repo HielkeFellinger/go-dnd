@@ -142,6 +142,7 @@
     var socket;
     let currentUser = "{{.user.Name}}";
     let backoff = 1000;
+    let breadcrumbHistoryMaxSize = 50;
 
     let connectWs = () => {
         socket = new WebSocket("ws://" + document.location.host + "/campaign/session/{{.campaign.ID}}/ws")
@@ -160,6 +161,9 @@
                 document.getElementById(campaignMapTabIds[index] + "List")?.remove();
             }
             campaignMapTabIds = [];
+            if (rightBarVisible) {
+                toggleVisibilityRightBar();
+            }
             resetIdFromRightBarHistory();
             mapItems = new Map();
             mapItemIdToEntityId = new Map();
@@ -302,7 +306,7 @@
     }
 
     let fullRefresh = () => {
-        resetIdFromRightBarHistory()
+        resetIdFromRightBarHistory();
         document.getElementById("entity-details-holder").innerHTML = "";
         sendEvent(wrapMessage('', 500));
     }
@@ -338,7 +342,6 @@
 
     let rightBarIdHistory = [];
     let rightBarIdHistoryIndex = 0;
-
     let clearIdFromRightBarHistory = (id) => {
         let newRightBarIdHistory = [];
         let newRightBarIdHistoryPointer = rightBarIdHistoryIndex;
@@ -375,17 +378,17 @@
     }
 
     let addIdFromRightBarHistory = (rawId, rawType) => {
-        let id = ("" + rawId).trim()
-        let type = ("" + rawType).trim()
+        let id = ("" + rawId).trim();
+        let type = ("" + rawType).trim();
         if (type) {
             if (rightBarIdHistory.length > 0) {
-                let lastEntity = rightBarIdHistory[rightBarIdHistoryIndex -1];
-                if (lastEntity && lastEntity.type === type ) {
-                    if (lastEntity.id === id) {
-                        // No duplicates in history
+                let currentBarEntity = rightBarIdHistory[rightBarIdHistoryIndex -1];
+                if (currentBarEntity && currentBarEntity.type === type ) {
+                    if (currentBarEntity.id === id) {
+                        // No duplicates in history, skip adding
                         return;
-                    } else if (!lastEntity.id && id ) {
-                        // An id after no id on same type most likely mean a successful
+                    } else if (!currentBarEntity.id && id ) {
+                        // An id after no id on same type most likely mean a successful creation, adjust and skip adding
                         rightBarIdHistory[rightBarIdHistory.length -1].id = id;
                         return;
                     }
@@ -394,14 +397,20 @@
 
             // Snip the array if ot at the end of the history breadcrumb trail
             if (rightBarIdHistoryIndex !== rightBarIdHistory.length) {
-                rightBarIdHistory = rightBarIdHistory.slice(0, rightBarIdHistoryIndex)
+                rightBarIdHistory = rightBarIdHistory.slice(0, rightBarIdHistoryIndex);
+            }
+            if (rightBarIdHistory.length > breadcrumbHistoryMaxSize) {
+                let oldLength = rightBarIdHistory.length;
+                rightBarIdHistory = rightBarIdHistory.slice(rightBarIdHistory.length - breadcrumbHistoryMaxSize, rightBarIdHistory.length);
+                let newLength = rightBarIdHistory.length;
+                rightBarIdHistoryIndex = rightBarIdHistory.length - (newLength - oldLength);
             }
 
-            let historyEntry = {}
-            historyEntry.id = id.trim()
-            historyEntry.type = ("" + type).trim()
-            rightBarIdHistory.push(historyEntry)
-            rightBarIdHistoryIndex = rightBarIdHistory.length
+            let historyEntry = {};
+            historyEntry.id = id.trim();
+            historyEntry.type = ("" + type).trim();
+            rightBarIdHistory.push(historyEntry);
+            rightBarIdHistoryIndex = rightBarIdHistory.length;
             handleRightBarBreadcrumbButtons();
         }
     }
@@ -421,14 +430,29 @@
             return;
         }
 
+        // Check if user needs updated data form server origin
+        if (data.source.toLowerCase() === "server") {
+            if (rightBarIdHistory.length > 0 && rightBarIdHistoryIndex >= 0 &&
+                rightBarIdHistoryIndex <= rightBarIdHistory.length) {
+                let currentContent = rightBarIdHistory[rightBarIdHistoryIndex -1];
+                if (!(""+currentContent.type === ""+data.type && (!currentContent.id || currentContent.id === body.Id))) {
+                    // Data is not needed; not current screen of user!
+                    return;
+                }
+            } else if (rightBarIdHistory.length === 0) {
+                // Right bar content is not requested by the user and no relevant history. stop here
+                return;
+            }
+        }
+
         if (body.Html) {
-            addIdFromRightBarHistory(body.Id, data.type)
+            addIdFromRightBarHistory(body.Id, data.type);
             document.getElementById("entity-details-holder").innerHTML = body.Html;
             if (!rightBarVisible) {
                 toggleVisibilityRightBar();
             }
         }
-        handleRightBarBreadcrumbButtons()
+        handleRightBarBreadcrumbButtons();
     }
 
     let handleRightBarCrudClear = (data) => {
@@ -439,7 +463,7 @@
     }
 
     let handleRightBarBreadcrumbButtons = () => {
-        let backButton = document.getElementById("goBackToLastDetails")
+        let backButton = document.getElementById("goBackToLastDetails");
         if (backButton) {
             if (rightBarIdHistory.length > 1 && rightBarIdHistoryIndex > 1) {
                 backButton["style"].visibility = "visible";
@@ -447,7 +471,7 @@
                 backButton["style"].visibility = "hidden";
             }
         }
-        let forwardButton = document.getElementById("goForwardToLastDetails")
+        let forwardButton = document.getElementById("goForwardToLastDetails");
         if (forwardButton) {
             if (rightBarIdHistory.length > 1 && rightBarIdHistoryIndex !== rightBarIdHistory.length) {
                 forwardButton["style"].visibility = "visible";
@@ -461,7 +485,7 @@
         if (rightBarVisible) {
             toggleVisibilityRightBar();
         }
-        let holder = document.getElementById("entity-details-holder")
+        let holder = document.getElementById("entity-details-holder");
         if (holder) {
             holder.innerHTML = "";
         }
@@ -470,8 +494,8 @@
     let goBackInRightBarHistory = () => {
         if (rightBarIdHistory.length > 1 && rightBarIdHistoryIndex > 1) {
             let pointer = rightBarIdHistory[rightBarIdHistoryIndex-2];
-            if (pointer && pointer.id && pointer.type) {
-                rightBarIdHistoryIndex--
+            if (pointer && pointer.type) {
+                rightBarIdHistoryIndex--;
                 sendEvent(wrapMessage(JSON.stringify(pointer.id),  Number(pointer.type)));
             }
         }
@@ -480,8 +504,8 @@
     let goForwardInRightBarHistory = () => {
         if (rightBarIdHistory.length > 1 && rightBarIdHistoryIndex < rightBarIdHistory.length) {
             let pointer = rightBarIdHistory[rightBarIdHistoryIndex];
-            if (pointer && pointer.id && pointer.type) {
-                rightBarIdHistoryIndex++
+            if (pointer && pointer.type) {
+                rightBarIdHistoryIndex++;
                 sendEvent(wrapMessage(JSON.stringify(pointer.id), Number(pointer.type)));
             }
         }
@@ -535,7 +559,7 @@
     }
 
     let showItemDetails = (id) => {
-        sendEvent(wrapMessage(id, 521));
+        sendEvent(wrapMessage(JSON.stringify(id), 521));
     }
 
     let submitUpsertItem = () => {
@@ -666,7 +690,7 @@
             let itemIdToAdd = itemSelected["value"];
             if (itemIdToAdd) {
                 let addItemRequest = {};
-                addItemRequest.InventoryId = inventoryId;v
+                addItemRequest.InventoryId = inventoryId;
                 addItemRequest.ItemId = itemIdToAdd;
                 sendEvent(wrapMessage(JSON.stringify(addItemRequest), 5535));
             }
@@ -690,6 +714,10 @@
                 updateItemCountRequest.InventoryId = inventoryId;
                 updateItemCountRequest.ItemId = itemId;
                 updateItemCountRequest.Amount = itemAmountInput["value"];
+                if (rightBarIdHistory.length > 0 && rightBarIdHistoryIndex >= 0 &&
+                    rightBarIdHistoryIndex <= rightBarIdHistory.length) {
+                    updateItemCountRequest.Type = rightBarIdHistory[rightBarIdHistoryIndex-1].type;
+                }
                 sendEvent(wrapMessage(JSON.stringify(updateItemCountRequest), 5537));
             }
         }
@@ -727,7 +755,6 @@
 
     let handleRemovalOfImagesRequest = (id) => {
         if (document.getElementById("removeImages")) {
-            console.log(document.getElementById("removeImages")["value"]);
             // Check if to be removed or needs to be recovered
             if (document.getElementById("removeImages")["value"] &&
                 document.getElementById("removeImages")["value"].indexOf(id) > 0) {
@@ -781,7 +808,7 @@
 
     let rightBarVisible = false;
     let toggleVisibilityRightBar = () => {
-        rightBarVisible = !rightBarVisible
+        rightBarVisible = !rightBarVisible;
         let element = document.getElementById('toggle-right-bar-visibility');
 
         if (rightBarVisible) {
@@ -1001,7 +1028,7 @@
                     if (element) {
                         for (const child of element.children) {
                             if (child.classList.contains('context-menu')) {
-                                clearAllMenus()
+                                clearAllMenus();
                                 setContextMenuToActive(child, map, event);
                                 parent["style"].border = 'solid #991c2c';
                                 event.preventDefault();
@@ -1218,7 +1245,7 @@
         campaignMapTabIds = campaignMapTabIds.filter(id => id !== targetId);
     }
 
-    let cellSizeInHalfEms = 8
+    let cellSizeInHalfEms = 8;
     let makeMapsSmaller = () => {
         if (cellSizeInHalfEms > 4) {
             cellSizeInHalfEms--;
@@ -1268,7 +1295,7 @@
         }
 
         // Remove Menus
-        clearAllMenus()
+        clearAllMenus();
 
         // modifying the rule in the stylesheet
         elementRules["style"].setProperty('max-height', '' + (cellSizeInHalfEms/2) + 'em' );
@@ -1363,7 +1390,6 @@
                 charToPlayer.connect = true;
             }
         }
-
         sendEvent(wrapMessage(JSON.stringify(charToPlayer), 512));
     }
 
@@ -1373,7 +1399,6 @@
 
     let stopLoadSpinner = () => {
         let spinner = document.getElementById("spinner");
-
         if (spinner) {
             document.getElementById("spinner")["style"].display = "none";
         }

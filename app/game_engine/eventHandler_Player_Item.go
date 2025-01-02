@@ -5,6 +5,7 @@ import (
 	"github.com/hielkefellinger/go-dnd/app/ecs"
 	"github.com/hielkefellinger/go-dnd/app/ecs_model_translation"
 	"github.com/hielkefellinger/go-dnd/app/helpers"
+	"golang.org/x/net/html"
 )
 
 func (e *baseEventMessageHandler) typeLoadItemDetails(message EventMessage, pool CampaignPool) error {
@@ -13,8 +14,11 @@ func (e *baseEventMessageHandler) typeLoadItemDetails(message EventMessage, pool
 	transmitMessage.Source = message.Source
 	transmitMessage.Destinations = append(transmitMessage.Destinations, message.Source)
 
+	// Undo escaping
+	clearedBody := html.UnescapeString(message.Body)
+
 	// Validate UUID Filter form message
-	uuidCharFilter, err := helpers.ParseStringToUuid(message.Body)
+	uuidCharFilter, err := helpers.ParseStringToUuid(clearedBody)
 	if err != nil {
 		return err
 	}
