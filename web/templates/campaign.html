@@ -1239,8 +1239,6 @@
         if (document.getElementById(id) && document.getElementById(id).value.trim() !== '') {
             filterObj.Filter = document.getElementById(id).value.trim();
         }
-        console.error(document.getElementById(id));
-        console.error(event);
         sendEvent(wrapMessage(JSON.stringify(filterObj), type));
     }
 
@@ -1249,7 +1247,6 @@
             document.getElementById(targetId + 'Link').className.indexOf("active") !== -1) {
             openTab('current');
         }
-
         document.getElementById(targetId)?.remove();
         document.getElementById(targetId + 'Link')?.remove();
         campaignMapTabIds = campaignMapTabIds.filter(id => id !== targetId);
