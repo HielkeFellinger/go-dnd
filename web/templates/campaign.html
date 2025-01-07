@@ -1217,21 +1217,31 @@
 
         {{ if .campaign.UserIsLead }}
         if (targetId === 'manageMaps') {
-            sendEvent(wrapMessage('', 551));
+            sendEvent(wrapMessage(JSON.stringify({}), 551));
         }
         if (targetId === 'manageCharacters') {
-            sendEvent(wrapMessage('', 552));
+            sendEvent(wrapMessage(JSON.stringify({}), 552));
         }
         if (targetId === 'manageInventory') {
-            sendEvent(wrapMessage('', 553));
+            sendEvent(wrapMessage(JSON.stringify({}), 553));
         }
         if (targetId === 'manageItems') {
-            sendEvent(wrapMessage('', 554));
+            sendEvent(wrapMessage(JSON.stringify({}), 554));
         }
         if (targetId === 'manageCampaign') {
-            sendEvent(wrapMessage('', 555));
+            sendEvent(wrapMessage(JSON.stringify({}), 555));
         }
         {{ end }}
+    }
+
+    let filterTab = (id, type) => {
+        let filterObj = {};
+        if (document.getElementById(id) && document.getElementById(id).value.trim() !== '') {
+            filterObj.Filter = document.getElementById(id).value.trim();
+        }
+        console.error(document.getElementById(id));
+        console.error(event);
+        sendEvent(wrapMessage(JSON.stringify(filterObj), type));
     }
 
     let closeTab = (targetId) => {

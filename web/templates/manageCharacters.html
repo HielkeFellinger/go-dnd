@@ -6,10 +6,11 @@
             <button class="btn" style="height: 2.4em;" onclick="upsertCharacter('')">
                 <i class="bi bi-plus"></i>
             </button>
-            <input type="text" placeholder="filter" style="margin-left: 0.5em; height: 2.4em; border-radius:.25rem;">
+            <input type="text" id="charContentFilter" placeholder="filter"  onchange="filterTab('charContentFilter', 552)"
+                   {{ if .Filter }} value="{{.Filter}}" {{ end }} style="margin-left: 0.5em; height: 2.4em; border-radius:.25rem;">
         </div>
         <details open="">
-            <summary>Player Characters</summary>
+            <summary>Player Characters ({{ .pc_chars | len }})</summary>
             <div style="display: flex; flex-flow: row; flex-wrap: wrap; align-content: center; width: 100%;">
                 {{ range .pc_chars }}
                     <div style="flex: 0 0 24%; margin-bottom: 0.25em; margin-right: 0.25em;">
@@ -19,7 +20,7 @@
             </div>
         </details>
         <details open="" style="padding-top: 1em">
-            <summary>Non Player Characters</summary>
+            <summary>Non Player Characters ({{ .npc_chars | len }})</summary>
             <div style="display: flex; flex-flow: row; flex-wrap: wrap; align-content: center; width: 100%;">
             {{ range .npc_chars }}
                 <div style="flex: 0 0 24%; margin-bottom: 0.25em; margin-right: 0.25em;">

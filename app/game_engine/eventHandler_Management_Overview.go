@@ -7,8 +7,10 @@ import (
 	"github.com/hielkefellinger/go-dnd/app/ecs_components"
 	"github.com/hielkefellinger/go-dnd/app/ecs_model_translation"
 	"github.com/hielkefellinger/go-dnd/app/models"
+	"golang.org/x/net/html"
 	"slices"
 	"sort"
+	"strings"
 )
 
 func (e *baseEventMessageHandler) typeManageItems(message EventMessage, pool CampaignPool) error {
@@ -16,17 +18,36 @@ func (e *baseEventMessageHandler) typeManageItems(message EventMessage, pool Cam
 		return errors.New("managing game Item elements is not allowed as non-lead")
 	}
 
+	// Undo escaping
+	clearedBody := html.UnescapeString(message.Body)
+	var overviewFilter OverviewFilter
+	if err := json.Unmarshal([]byte(clearedBody), &overviewFilter); err != nil {
+		return err
+	}
+
 	// Get all Items and parse them to CampaignInventoryItem's
 	data := make(map[string]any)
 	parsedItems := make([]*models.CampaignInventoryItem, 0)
 	allItemEntities := pool.GetEngine().GetWorld().GetItemEntities()
 	for _, itemEntity := range allItemEntities {
-		parsedItems = append(parsedItems, ecs_model_translation.ItemEntityToCampaignInventoryItem(itemEntity, 0))
+		if overviewFilter.Filter != "" {
+			itemComponents := itemEntity.GetAllComponentsOfType(ecs.ItemComponentType)
+			if len(itemComponents) >= 1 {
+				itemComponent := itemComponents[0].(*ecs_components.ItemComponent)
+				if strings.Contains(itemComponent.Name, overviewFilter.Filter) ||
+					strings.Contains(itemComponent.Description, overviewFilter.Filter) {
+					parsedItems = append(parsedItems, ecs_model_translation.ItemEntityToCampaignInventoryItem(itemEntity, 0))
+				}
+			}
+		} else {
+			parsedItems = append(parsedItems, ecs_model_translation.ItemEntityToCampaignInventoryItem(itemEntity, 0))
+		}
 	}
 	sort.Slice(parsedItems, func(i, j int) bool {
 		return parsedItems[i].Name < parsedItems[j].Name
 	})
 	data["Items"] = parsedItems
+	data["Filter"] = overviewFilter.Filter
 
 	rawJsonBytes, err := json.Marshal(
 		e.handleLoadHtmlBody("manageItems.html", "manageItems", data))
@@ -41,7 +62,6 @@ func (e *baseEventMessageHandler) typeManageItems(message EventMessage, pool Cam
 	manageItems.Body = string(rawJsonBytes)
 	manageItems.Destinations = append(manageItems.Destinations, pool.GetLeadId())
 	pool.TransmitEventMessage(manageItems)
-
 	return nil
 }
 
@@ -50,13 +70,24 @@ func (e *baseEventMessageHandler) typeManageInventory(message EventMessage, pool
 		return errors.New("managing game Inventory elements is not allowed as non-lead")
 	}
 
-	data := make(map[string]any)
+	// Undo escaping
+	clearedBody := html.UnescapeString(message.Body)
+	var overviewFilter OverviewFilter
+	if err := json.Unmarshal([]byte(clearedBody), &overviewFilter); err != nil {
+		return err
+	}
 
+	data := make(map[string]any)
 	inventories := pool.GetEngine().GetWorld().GetInventoryEntities()
 	characters := pool.GetEngine().GetWorld().GetCharacterEntities()
 	parsedInventories := make([]models.CampaignInventory, 0)
 	pcInventories := make([]models.CampaignInventory, 0)
 	for _, inventoryEntity := range inventories {
+		if overviewFilter.Filter != "" && !(strings.Contains(inventoryEntity.GetName(), overviewFilter.Filter) ||
+			strings.Contains(inventoryEntity.GetDescription(), overviewFilter.Filter)) {
+			continue
+		}
+
 		inventoryModel := ecs_model_translation.InventoryEntityToCampaignInventoryModel(inventoryEntity)
 		isOwnedByPc := false
 
@@ -83,6 +114,7 @@ func (e *baseEventMessageHandler) typeManageInventory(message EventMessage, pool
 	})
 	data["Inventories"] = parsedInventories
 	data["PcInventories"] = pcInventories
+	data["Filter"] = overviewFilter.Filter
 
 	rawJsonBytes, err := json.Marshal(
 		e.handleLoadHtmlBodyMultipleTemplateFiles([]string{"manageInventories.html",
@@ -97,7 +129,6 @@ func (e *baseEventMessageHandler) typeManageInventory(message EventMessage, pool
 	manageInventories.Body = string(rawJsonBytes)
 	manageInventories.Destinations = append(manageInventories.Destinations, pool.GetLeadId())
 	pool.TransmitEventMessage(manageInventories)
-
 	return nil
 }
 
@@ -178,7 +209,6 @@ func (e *baseEventMessageHandler) typeManageCampaign(message EventMessage, pool 
 	manageCampaign.Body = string(rawJsonBytes)
 	manageCampaign.Destinations = append(manageCampaign.Destinations, pool.GetLeadId())
 	pool.TransmitEventMessage(manageCampaign)
-
 	return nil
 }
 
@@ -187,12 +217,23 @@ func (e *baseEventMessageHandler) typeManageCharacters(message EventMessage, poo
 		return errors.New("managing game Characters elements is not allowed as non-lead")
 	}
 
+	// Undo escaping
+	clearedBody := html.UnescapeString(message.Body)
+	var overviewFilter OverviewFilter
+	if err := json.Unmarshal([]byte(clearedBody), &overviewFilter); err != nil {
+		return err
+	}
+
 	charEntities := pool.GetEngine().GetWorld().GetCharacterEntities()
 	allPlayers := pool.GetAllClientIds()
 
 	var playerChars models.Characters
 	var nonPlayerChars models.Characters
 	for _, charEntity := range charEntities {
+		if overviewFilter.Filter != "" && !(strings.Contains(charEntity.GetName(), overviewFilter.Filter) ||
+			strings.Contains(charEntity.GetDescription(), overviewFilter.Filter)) {
+			continue
+		}
 
 		charModel := models.Character{
 			Id:          charEntity.GetId().String(),
@@ -243,6 +284,7 @@ func (e *baseEventMessageHandler) typeManageCharacters(message EventMessage, poo
 	data := make(map[string]any)
 	data["pc_chars"] = playerChars
 	data["npc_chars"] = nonPlayerChars
+	data["Filter"] = overviewFilter.Filter
 
 	rawJsonBytes, err := json.Marshal(
 		e.handleLoadHtmlBodyMultipleTemplateFiles(
@@ -258,13 +300,19 @@ func (e *baseEventMessageHandler) typeManageCharacters(message EventMessage, poo
 	manageChars.Body = string(rawJsonBytes)
 	manageChars.Destinations = append(manageChars.Destinations, pool.GetLeadId())
 	pool.TransmitEventMessage(manageChars)
-
 	return nil
 }
 
 func (e *baseEventMessageHandler) typeManageMaps(message EventMessage, pool CampaignPool) error {
 	if message.Source != pool.GetLeadId() {
 		return errors.New("managing game Map elements is not allowed as non-lead")
+	}
+
+	// Undo escaping
+	clearedBody := html.UnescapeString(message.Body)
+	var overviewFilter OverviewFilter
+	if err := json.Unmarshal([]byte(clearedBody), &overviewFilter); err != nil {
+		return err
 	}
 
 	// Update possible Map Entities
@@ -274,11 +322,16 @@ func (e *baseEventMessageHandler) typeManageMaps(message EventMessage, pool Camp
 		return mapEntities[i].GetName() < mapEntities[j].GetName()
 	})
 	for _, mapEntity := range mapEntities {
+		if overviewFilter.Filter != "" && !(strings.Contains(mapEntity.GetName(), overviewFilter.Filter) ||
+			strings.Contains(mapEntity.GetDescription(), overviewFilter.Filter)) {
+			continue
+		}
 		mapEntries = append(mapEntries, ecs_model_translation.MapEntityToCampaignMapModel(mapEntity))
 	}
 
 	data := make(map[string]any)
 	data["Maps"] = mapEntries
+	data["Filter"] = overviewFilter.Filter
 	rawJsonBytes, err := json.Marshal(
 		e.handleLoadHtmlBodyMultipleTemplateFiles(
 			[]string{"manageMaps.html", "manageMapSelectionBox.html"},
@@ -293,8 +346,11 @@ func (e *baseEventMessageHandler) typeManageMaps(message EventMessage, pool Camp
 	manageMaps.Body = string(rawJsonBytes)
 	manageMaps.Destinations = append(manageMaps.Destinations, pool.GetLeadId())
 	pool.TransmitEventMessage(manageMaps)
-
 	return nil
+}
+
+type OverviewFilter struct {
+	Filter string `json:"filter"`
 }
 
 type charUserController struct {

@@ -6,10 +6,11 @@
             <button class="btn" style="height: 2.4em;" onclick="upsertInventory('')">
                 <i class="bi bi-plus"></i>
             </button>
-            <input type="text" placeholder="filter" style="margin-left: 0.5em; height: 2.4em; border-radius:.25rem;">
+            <input type="text" id="inventoryContentFilter" placeholder="filter" onchange="filterTab('inventoryContentFilter', 553)"
+                   {{ if .Filter }} value="{{.Filter}}" {{ end }} style="margin-left: 0.5em; height: 2.4em; border-radius:.25rem;">
         </div>
         <details open="">
-            <summary>Inventories with Player as owner</summary>
+            <summary>Inventories with Player as owner ({{ .PcInventories | len }})</summary>
             <div style="display: flex; flex-flow: row; flex-wrap: wrap; align-content: center; width: 100%;">
                 {{ range .PcInventories }}
                     <div style="flex: 0 0 24%; margin-bottom: 0.25em; margin-right: 0.25em;">
@@ -19,7 +20,7 @@
             </div>
         </details>
         <details open="">
-            <summary>Other Inventories</summary>
+            <summary>Other Inventories ({{ .Inventories | len }})</summary>
             <div style="display: flex; flex-flow: row; flex-wrap: wrap; align-content: center; width: 100%;">
                 {{ range .Inventories }}
                     <div style="flex: 0 0 24%; margin-bottom: 0.25em; margin-right: 0.25em;">
