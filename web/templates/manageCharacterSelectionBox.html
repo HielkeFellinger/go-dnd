@@ -1,11 +1,11 @@
 {{define "manageCharacterSelectionBox"}}
-    <div class="border" style="display: flex; flex-flow: row nowrap; min-height: 6em;">
+    <div class="border" style="display: flex; flex-flow: row nowrap; min-height: 6em; height: 100%">
         <div style="flex: 1 1 0; background-image: url('{{ .Image.Url }}'); width: 100%; background-size: 75%;
-                background-repeat: no-repeat; cursor: pointer; background-color: #495057" onclick="loadCharDetails('{{.Id}}')">
+                background-repeat: no-repeat; cursor: pointer; background-color: #333333" onclick="loadCharDetails('{{.Id}}')">
         </div>
         <div style="flex: 3 3 0; padding-left: 1em;">
             <h4>{{ .Name }}</h4>
-            <p>{{ .Description }} </p>
+            <p style="word-break: break-all;">{{ .Description }} </p>
         </div>
         <div style="flex: 1 1 0; align-content: flex-start">
             <button class="btn" style="height: 2.5em; width: 2.5em; margin-top: 0.3em; margin-right: 0.35em;

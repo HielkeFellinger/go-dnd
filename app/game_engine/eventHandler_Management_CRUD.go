@@ -98,6 +98,11 @@ func (e *baseEventMessageHandler) typeUpsertInventory(message EventMessage, pool
 		return err
 	}
 
+	// Escape input
+	inventUpsertRequest.Description = html.EscapeString(inventUpsertRequest.Description)
+	inventUpsertRequest.Name = html.EscapeString(inventUpsertRequest.Name)
+	inventUpsertRequest.Slots = html.EscapeString(inventUpsertRequest.Slots)
+
 	// Upsert
 	inventoryEntity, upsertError := upsertInventory(inventUpsertRequest, pool)
 	if upsertError != nil {
@@ -536,6 +541,15 @@ func (e *baseEventMessageHandler) typeUpsertCharacter(message EventMessage, pool
 		return err
 	}
 
+	// Escape input
+	charUpsertRequest.Description = html.EscapeString(charUpsertRequest.Description)
+	charUpsertRequest.Name = html.EscapeString(charUpsertRequest.Name)
+	charUpsertRequest.ImageName = html.EscapeString(charUpsertRequest.ImageName)
+	charUpsertRequest.Level = html.EscapeString(charUpsertRequest.Level)
+	charUpsertRequest.HealthDamage = html.EscapeString(charUpsertRequest.HealthDamage)
+	charUpsertRequest.HealthTmp = html.EscapeString(charUpsertRequest.HealthTmp)
+	charUpsertRequest.HealthMax = html.EscapeString(charUpsertRequest.HealthMax)
+
 	// Upsert
 	charEntity, upsertError := upsertCharacter(charUpsertRequest, pool)
 	if upsertError != nil {
@@ -743,6 +757,13 @@ func (e *baseEventMessageHandler) typeUpsertMap(message EventMessage, pool Campa
 		return err
 	}
 
+	// Escape input
+	mapUpdateRequest.Description = html.EscapeString(mapUpdateRequest.Description)
+	mapUpdateRequest.Name = html.EscapeString(mapUpdateRequest.Name)
+	mapUpdateRequest.ImageName = html.EscapeString(mapUpdateRequest.ImageName)
+	mapUpdateRequest.X = html.EscapeString(mapUpdateRequest.X)
+	mapUpdateRequest.Y = html.EscapeString(mapUpdateRequest.Y)
+
 	// Upsert
 	mapEntity, upsertError := upsertMap(mapUpdateRequest, pool)
 	if upsertError != nil {
@@ -811,6 +832,15 @@ func (e *baseEventMessageHandler) typeUpsertItem(message EventMessage, pool Camp
 	if err := json.Unmarshal([]byte(clearedBody), &itmUpsertRequest); err != nil {
 		return err
 	}
+
+	// Escape input
+	itmUpsertRequest.Description = html.EscapeString(itmUpsertRequest.Description)
+	itmUpsertRequest.Name = html.EscapeString(itmUpsertRequest.Name)
+	itmUpsertRequest.Damage = html.EscapeString(itmUpsertRequest.Damage)
+	itmUpsertRequest.Restore = html.EscapeString(itmUpsertRequest.Restore)
+	itmUpsertRequest.RangeMin = html.EscapeString(itmUpsertRequest.RangeMin)
+	itmUpsertRequest.RangeMax = html.EscapeString(itmUpsertRequest.RangeMax)
+	itmUpsertRequest.Weight = html.EscapeString(itmUpsertRequest.Weight)
 
 	// Upsert
 	itemEntity, upsertError := upsertItem(itmUpsertRequest, pool)

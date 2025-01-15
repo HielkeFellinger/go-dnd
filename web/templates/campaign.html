@@ -28,8 +28,8 @@
             </div>
             <div class="form-group" style="margin-top: 0.25em; display: flex; flex-wrap: nowrap">
                 <div style="flex: 5 5 0">
-                    <label for="message" style="margin-left: 1em; min-width: 100%; min-height: 100%">
-                        <input type="text" id="message" name="message" style="min-width: 100%; height: 2.4em;" />
+                    <label for="message" style="margin-left: 0.5em; min-width: calc(100% - 0.5em); min-height: 100%">
+                        <input type="text" id="message" name="message" style="min-width: 100%; height: 2.9em;" />
                     </label>
                 </div>
                 <div style="flex: 1 1 0;">
@@ -40,12 +40,12 @@
             </div>
         </div>
 
-        <div id="ui-center-bar" class="col border" style="min-width: 1100px;">
+        <div id="ui-center-bar" class="col" style="min-width: 700px;">
             <div id="char-ribbon-row" class="char-ribbon-row">
                 <h4> Characters </h4>
             </div>
             <div id="campaign-screen" class="campaign-screen">
-                <ul id="campaign-tabs" class="nav nav-tabs">
+                <ul id="campaign-tabs" class="nav nav-tabs" style="font-size: smaller;">
                     {{ if .campaign.UserIsLead }}
                     <li class="nav-item" id="manageMapsList">
                         <button id="manageMapsLink" class="nav-link" onclick="openTab('manageMaps');" style="color: goldenrod"><i class="bi bi-pencil"></i> Maps</button>
@@ -111,13 +111,14 @@
             </div>
         </div>
 
-        <div id="ui-right-bar" class="" style="width: calc(3em); min-height: 100%;">
+        <div id="ui-right-bar" class="right-bar">
             <button class="btn" id="toggle-right-bar-visibility" onclick="toggleVisibilityRightBar()"
                     style="position: relative; left: 0;">
                 <b><i class="bi bi-chevron-double-left"></i></b>
             </button>
-            <div id="right-bar-inner-content" style="position: relative; min-height: 100%; left: 3em; top: -2.4em; width: 0; display: none">
-                <div id="entity-details-holder" class="">
+            <div id="right-bar-inner-content" style="position: relative; min-height: max(calc(100vh - 3.2em), 600px);
+            max-height: calc(100vh - 3.2em); overflow-y: auto; left: 3.2em; top: -2.9em; width: 0; display: none">
+                <div id="entity-details-holder" >
 
                 </div>
             </div>
@@ -814,8 +815,8 @@
         if (rightBarVisible) {
             element.innerHTML = '<b><i class="bi bi-chevron-double-right"></i></b>';
             document.getElementById('right-bar-inner-content')["style"].display = "inherit";
-            document.getElementById('right-bar-inner-content')["style"].width = "643px";
-            document.getElementById('ui-right-bar')["style"].width = "calc(653px + 3em)";
+            document.getElementById('right-bar-inner-content')["style"].width = "583px";
+            document.getElementById('ui-right-bar')["style"].width = "calc(603px + 3em)";
         } else {
             element.innerHTML = '<b><i class="bi bi-chevron-double-left"></i></b>';
             document.getElementById('right-bar-inner-content')["style"].display = "none";

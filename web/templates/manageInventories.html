@@ -13,7 +13,7 @@
             <summary>Inventories with Player as owner ({{ .PcInventories | len }})</summary>
             <div style="display: flex; flex-flow: row; flex-wrap: wrap; align-content: center; width: 100%;">
                 {{ range .PcInventories }}
-                    <div style="flex: 0 0 24%; margin-bottom: 0.25em; margin-right: 0.25em;">
+                    <div style="flex: 0 0 24%; margin-bottom: 0.25em; margin-right: 0.25em; min-height: auto;">
                         {{ template "manageInventorySelectionBox" . }}
                     </div>
                 {{ end }}
@@ -23,7 +23,7 @@
             <summary>Other Inventories ({{ .Inventories | len }})</summary>
             <div style="display: flex; flex-flow: row; flex-wrap: wrap; align-content: center; width: 100%;">
                 {{ range .Inventories }}
-                    <div style="flex: 0 0 24%; margin-bottom: 0.25em; margin-right: 0.25em;">
+                    <div style="flex: 0 0 24%; margin-bottom: 0.25em; margin-right: 0.25em; min-height: auto;">
                         {{ template "manageInventorySelectionBox" . }}
                     </div>
                 {{ end }}

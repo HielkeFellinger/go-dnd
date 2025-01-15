@@ -11,7 +11,7 @@
         </div>
         <div style="display: flex; flex-flow: row; flex-wrap: wrap;">
             {{ range .Maps }}
-                <div style="flex: 0 0 24%; margin-bottom: 0.25em; margin-right: 0.25em;">
+                <div style="flex: 0 0 24%; margin-bottom: 0.25em; margin-right: 0.25em; min-height: auto;">
                     {{ template "manageMapSelectionBox" . }}
                 </div>
             {{ end }}

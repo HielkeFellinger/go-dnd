@@ -641,7 +641,13 @@ func (e *baseEventMessageHandler) buildMapItem(mapItemModel models.CampaignScree
 		data["healthTotal"] = mapItemModel.Health.Total
 		data["healthCurrent"] = mapItemModel.Health.Current
 
-		// @todo health colour changing progressbar
+		data["healthColour"] = "green"
+		if mapItemModel.Health.Current < (int(mapItemModel.Health.Total) / 2) {
+			data["healthColour"] = "yellow"
+		}
+		if mapItemModel.Health.Current < int(float64(mapItemModel.Health.Total)*0.334) {
+			data["healthColour"] = "red"
+		}
 	}
 
 	mapItemModel.Html = e.handleLoadHtmlBody("campaignContentMapCell.html", "campaignContentMapCell", data)

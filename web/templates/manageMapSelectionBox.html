@@ -1,12 +1,12 @@
 {{define "manageMapSelectionBox"}}
-    <div class="border" style="display: flex; flex-flow: row nowrap; min-height: 6em;">
+    <div class="border" style="display: flex; flex-flow: row nowrap; min-height: 6em; height: 100%;">
         <div style="flex: 1 1 0; background-image: url('{{ .ActiveImage.Url }}'); width: 100%; background-size: 100%;
-                background-repeat: no-repeat; cursor: pointer; background-color: #495057"
+                background-repeat: no-repeat; cursor: pointer; background-color: #333333"
              onclick="requestMapLoadFromServer('{{.Id}}')">
         </div>
         <div style="flex: 3 3 0; padding-left: 1em">
             <h5>{{ .Name }} </h5>
-            <h5>{{ .Description }}&nbsp</h5>
+            <p style="word-break: break-all;">{{ .Description }}&nbsp</p>
             <p>Active: {{ .Active }}</p>
             <p>Size: X: {{ .X }} Y: {{ .Y }}</p>
         </div>

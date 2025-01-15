@@ -6,6 +6,7 @@ import (
 	"github.com/hielkefellinger/go-dnd/app/models"
 	"github.com/hielkefellinger/go-dnd/app/session"
 	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/net/html"
 	"net/http"
 	"slices"
 )
@@ -92,6 +93,8 @@ func CampaignNew(c *gin.Context) {
 		c.HTML(http.StatusBadRequest, template, templateMap)
 		return
 	}
+	campaign.Title = html.EscapeString(campaign.Title)
+	campaign.Description = html.EscapeString(campaign.Description)
 
 	// Attempt to insert campaign
 	var service = models.CampaignService{}

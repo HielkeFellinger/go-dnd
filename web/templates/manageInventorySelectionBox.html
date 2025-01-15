@@ -1,5 +1,5 @@
 {{define "manageInventorySelectionBox"}}
-    <div class="border" style="display: flex; flex-flow: row nowrap; min-height: 6em;">
+    <div class="border" style="display: flex; flex-flow: row nowrap; min-height: 6em; height: 100%">
         <div style="flex: 2 2 0; padding-left: 1em;">
             <h5>{{ or .Name "{empty}" }} </h5>
             <p>Size: {{ .Size }} {{ if .Slots }} of max {{.Slots}} {{end}} </p>

@@ -112,7 +112,7 @@ func (pool *baseCampaignPool) Run() {
 
 			err := pool.Engine.GetEventMessageHandler().HandleEventMessage(eventMessage, pool)
 			if err != nil {
-				log.Printf("Message failed with error: %+v\n", err.Error())
+				log.Printf("Message '%s' failed with error: %+v\n", eventMessage.Id, err.Error())
 			}
 			break
 		}

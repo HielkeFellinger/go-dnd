@@ -20,9 +20,11 @@ func (e *baseEventMessageHandler) typeManageItems(message EventMessage, pool Cam
 
 	// Undo escaping
 	clearedBody := html.UnescapeString(message.Body)
+
+	// Get the filter, if no valid filter has been found use empty
 	var overviewFilter OverviewFilter
 	if err := json.Unmarshal([]byte(clearedBody), &overviewFilter); err != nil {
-		return err
+		overviewFilter = OverviewFilter{}
 	}
 
 	// Get all Items and parse them to CampaignInventoryItem's
@@ -72,9 +74,11 @@ func (e *baseEventMessageHandler) typeManageInventory(message EventMessage, pool
 
 	// Undo escaping
 	clearedBody := html.UnescapeString(message.Body)
+
+	// Get the filter, if no valid filter has been found use empty
 	var overviewFilter OverviewFilter
 	if err := json.Unmarshal([]byte(clearedBody), &overviewFilter); err != nil {
-		return err
+		overviewFilter = OverviewFilter{}
 	}
 
 	data := make(map[string]any)
@@ -219,9 +223,11 @@ func (e *baseEventMessageHandler) typeManageCharacters(message EventMessage, poo
 
 	// Undo escaping
 	clearedBody := html.UnescapeString(message.Body)
+
+	// Get the filter, if no valid filter has been found use empty
 	var overviewFilter OverviewFilter
 	if err := json.Unmarshal([]byte(clearedBody), &overviewFilter); err != nil {
-		return err
+		overviewFilter = OverviewFilter{}
 	}
 
 	charEntities := pool.GetEngine().GetWorld().GetCharacterEntities()
@@ -310,9 +316,11 @@ func (e *baseEventMessageHandler) typeManageMaps(message EventMessage, pool Camp
 
 	// Undo escaping
 	clearedBody := html.UnescapeString(message.Body)
+
+	// Get the filter, if no valid filter has been found use empty
 	var overviewFilter OverviewFilter
 	if err := json.Unmarshal([]byte(clearedBody), &overviewFilter); err != nil {
-		return err
+		overviewFilter = OverviewFilter{}
 	}
 
 	// Update possible Map Entities

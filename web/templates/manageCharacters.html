@@ -11,7 +11,7 @@
         </div>
         <details open="">
             <summary>Player Characters ({{ .pc_chars | len }})</summary>
-            <div style="display: flex; flex-flow: row; flex-wrap: wrap; align-content: center; width: 100%;">
+            <div style="display: flex; flex-flow: row; flex-wrap: wrap; align-content: center; width: 100%; min-height: auto;">
                 {{ range .pc_chars }}
                     <div style="flex: 0 0 24%; margin-bottom: 0.25em; margin-right: 0.25em;">
                         {{ template "manageCharacterSelectionBox" . }}
@@ -21,7 +21,7 @@
         </details>
         <details open="" style="padding-top: 1em">
             <summary>Non Player Characters ({{ .npc_chars | len }})</summary>
-            <div style="display: flex; flex-flow: row; flex-wrap: wrap; align-content: center; width: 100%;">
+            <div style="display: flex; flex-flow: row; flex-wrap: wrap; align-content: center; width: 100%; min-height: auto;">
             {{ range .npc_chars }}
                 <div style="flex: 0 0 24%; margin-bottom: 0.25em; margin-right: 0.25em;">
                     {{ template "manageCharacterSelectionBox" . }}

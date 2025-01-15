@@ -8,7 +8,7 @@
         <b><i class="bi bi-arrow-right"></i></b>
     </button>
 </div>
-<h2>{{ if and .Inventory .Inventory.Id }}Update{{else}}Add{{end}} Inventory</h2>
+<h3>{{ if and .Inventory .Inventory.Id }}Update{{else}}Add{{end}} Inventory</h3>
 <div style="width: 100%;">
     <form class="form" onsubmit="return false" style="width: 100%;" id="upsertInventoryForm">
 
@@ -73,7 +73,7 @@
             </div>
         </div>
         <div style="flex: 1 1 0;">
-            <button id="addItemToInventorySubmit" type="submit" class="btn btn-primary" style="margin-top: 2em;" onclick="addItemToInventory('{{.Inventory.Id}}')">
+            <button id="addItemToInventorySubmit" type="submit" class="btn btn-primary" style="margin-top: 1.7em;" onclick="addItemToInventory('{{.Inventory.Id}}')">
                 <i class="bi bi-plus"></i>
             </button>
         </div>

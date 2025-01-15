@@ -19,7 +19,7 @@ body {
 }
 
 .content {
-    min-height: calc(100vh - 152px);
+    min-height: 600px;
     max-height: calc(100vh - 152px);
 }
 
@@ -27,11 +27,17 @@ body {
 
 .chat-screen {
     width: 375px;
+    font-size: smaller;
+    background-color: #333333;
+}
+
+.chat-screen div {
+    background-color: inherit;
 }
 
 .chat-screen .chat-content {
-    min-height: calc(100vh - 125px);
-    max-height: calc(100vh - 125px);
+    min-height: max(calc(100vh - 123px), 600px);
+    max-height: calc(100vh - 123px);
     margin-top: 0.25em;
     overflow-y: auto;
 }
@@ -70,16 +76,29 @@ body {
 
 /* Campaign Screens */
 .campaign-screen {
-    min-width: 1100px;
-    min-height: calc(100vh - 95px);
-    max-height: calc(100vh);
-    overflow: hidden
+    min-width: 700px;
+    min-height: 600px;
+    max-height: calc(100vh - 95px);
+    overflow: hidden;
 }
 
 .campaign-screen .campaign-content {
     display: flex;
     flex-flow: column;
     height: 100%;
+}
+
+/* Right (Detail) Bar */
+
+.right-bar {
+    width: calc(3em);
+    max(100vh, 600px);
+    font-size: smaller;
+    background-color: #333333;
+}
+
+.right-bar div {
+    background-color: inherit;
 }
 
 /* Campaign Tabs */
@@ -91,7 +110,7 @@ body {
 
 div .nav-link {
     background-color: buttonface;
-    color: #495057;
+    color: #333333;
     font-weight: 400;
     cursor: default;
 }
@@ -115,7 +134,7 @@ div .nav-link {
     margin-top: 0.5em;
     margin-bottom: 1em;
     min-height: 4em;
-    max-height: 4em
+    max-height: 4em;
 }
 
 .char-ribbon-row .char-ribbon-content {
@@ -127,7 +146,7 @@ div .nav-link {
     float: left;
     margin-left: 0.25em;
     margin-right: 1em;
-    position: relative
+    position: relative;
 }
 
 .char-ribbon-row .char-ribbon-content .char-name-box {
@@ -137,7 +156,7 @@ div .nav-link {
     left: -0.5em;
     min-width: 125%;
     max-width: 125%;
-    font-size: small
+    font-size: smaller;
 }
 
 .char-ribbon-row .char-ribbon-content .char-name-box .char-name-box-content {
@@ -177,4 +196,8 @@ div .nav-link {
 
 .context-menu .context-menu-item.end{
     border-bottom: none;
+}
+
+#entity-details-holder .form-control {
+    font-size: inherit;
 }
