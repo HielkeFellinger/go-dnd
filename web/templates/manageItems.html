@@ -20,7 +20,7 @@
                     <th> Damage </th>
                     <th> Restore </th>
                     <th> Range </th>
-                    <th> Edit </th>
+                    <th></th>
                     <th style="display: none;"> ID </th>
                 </tr>
                 </thead>
@@ -33,7 +33,10 @@
                         <td> {{ .Restore }} </td>
                         <td> {{ if .Range.Min }} Min: {{ .Range.Min }} {{ end }} {{ if .Range.Max }} Max: {{ .Range.Max }} {{ end }}</td>
                         <td>
-                            <button class="btn" onclick="upsertItem('{{ .Id }}')" style="height: 2.5em; width: 2.5em">
+                            <button title="Show Item Details" class="btn" onclick="showItemDetails('{{ .Id }}')" style="height: 2.5em; width: 2.5em">
+                                <b><i class="bi bi-search"></i></b>
+                            </button>
+                            <button title="Edit Item" class="btn" onclick="upsertItem('{{ .Id }}')" style="height: 2.5em; width: 2.5em">
                                 <b><i class="bi bi-pencil"></i></b>
                             </button>
                         </td>

@@ -1,6 +1,6 @@
 {{define "manageMapSelectionBox"}}
     <div class="border" style="display: flex; flex-flow: row nowrap; min-height: 6em; height: 100%;">
-        <div style="flex: 1 1 0; background-image: url('{{ .ActiveImage.Url }}'); width: 100%; background-size: 100%;
+        <div title="Show Map" style="flex: 1 1 0; background-image: url('{{ .ActiveImage.Url }}'); width: 100%; background-size: 100%;
                 background-repeat: no-repeat; cursor: pointer; background-color: #333333"
              onclick="requestMapLoadFromServer('{{.Id}}')">
         </div>
