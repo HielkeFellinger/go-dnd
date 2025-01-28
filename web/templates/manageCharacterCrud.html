@@ -50,17 +50,17 @@
         <div style="display: flex; flex-flow: row nowrap; align-content: center; width: 100%;">
             <div class="form-group" style="flex: 1 1 0;">
                 <label for="healthDamage">Current Damage</label><br>
-                <input id="healthDamage" name="healthDamage" type="number" style="font-size: 2em; max-width: 4em"
+                <input id="healthDamage" name="healthDamage" min=0  type="number" style="font-size: 2em; max-width: 4em"
                     value="{{ if and .Character .Character.Health }}{{ .Character.Health.Damage }}{{end}}" />
             </div>
             <div class="form-group" style="flex: 1 1 0;">
                 <label for="healthTmp">Temp HP</label><br>
-                <input id="healthTmp" name="healthTmp" type="number" style="font-size: 2em; max-width: 4em"
+                <input id="healthTmp" name="healthTmp" min=0 type="number" style="font-size: 2em; max-width: 4em"
                     value="{{ if and .Character .Character.Health }}{{ .Character.Health.TemporaryHitPoints }}{{end}}" />
             </div>
             <div class="form-group" style="flex: 1 1 0;">
                 <label for="healthMax">Max HP</label><br>
-                <input id="healthMax" name="healthMax" type="number" style="font-size: 2em; max-width: 4em"
+                <input id="healthMax" name="healthMax" min=0 type="number" style="font-size: 2em; max-width: 4em"
                     value="{{ if and .Character .Character.Health }}{{ .Character.Health.MaximumHitPoints }}{{end}}" />
             </div>
         </div>

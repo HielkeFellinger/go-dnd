@@ -693,6 +693,10 @@
                 let addItemRequest = {};
                 addItemRequest.InventoryId = inventoryId;
                 addItemRequest.ItemId = itemIdToAdd;
+                if (rightBarIdHistory.length > 0 && rightBarIdHistoryIndex >= 0 &&
+                    rightBarIdHistoryIndex <= rightBarIdHistory.length) {
+                    addItemRequest.Type = rightBarIdHistory[rightBarIdHistoryIndex-1].type;
+                }
                 sendEvent(wrapMessage(JSON.stringify(addItemRequest), 5535));
             }
         }
@@ -720,6 +724,27 @@
                     updateItemCountRequest.Type = rightBarIdHistory[rightBarIdHistoryIndex-1].type;
                 }
                 sendEvent(wrapMessage(JSON.stringify(updateItemCountRequest), 5537));
+            }
+        }
+    }
+
+    let transferItemBetweenInventories = (inventoryId) => {
+        if (inventoryId) {
+            let transferCountInput = document.getElementById("transferCount" + inventoryId);
+            let moveItemIdFromInventoryInput = document.getElementById("moveItemIdFromInventory" + inventoryId);
+            let moveItemToInventoryInput = document.getElementById("moveItemToInventoryId" + inventoryId);
+
+            console.warn(transferCountInput);
+            console.warn(moveItemIdFromInventoryInput);
+            console.warn(moveItemToInventoryInput);
+
+            if (transferCountInput && moveItemIdFromInventoryInput && moveItemToInventoryInput) {
+                let transferItemsBetweenInventories = {};
+                transferItemsBetweenInventories.SourceInventoryId = inventoryId;
+                transferItemsBetweenInventories.TargetInventoryId = moveItemToInventoryInput["value"];
+                transferItemsBetweenInventories.ItemId = moveItemIdFromInventoryInput["value"];
+                transferItemsBetweenInventories.Amount = transferCountInput["value"];
+                sendEvent(wrapMessage(JSON.stringify(transferItemsBetweenInventories), 5538));
             }
         }
     }

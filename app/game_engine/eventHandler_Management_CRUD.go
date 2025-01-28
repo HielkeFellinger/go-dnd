@@ -310,10 +310,6 @@ func (e *baseEventMessageHandler) typeAddItemToInventory(message EventMessage, p
 }
 
 func (e *baseEventMessageHandler) typeRemoveItemFromInventory(message EventMessage, pool CampaignPool) error {
-	// Check if user is lead
-	if message.Source != pool.GetLeadId() {
-		return errors.New("modifying Inventory details and ownership is not allowed as non-lead")
-	}
 
 	// Undo escaping
 	clearedBody := html.UnescapeString(message.Body)
@@ -351,10 +347,22 @@ func (e *baseEventMessageHandler) typeRemoveItemFromInventory(message EventMessa
 
 	// Find owning characters
 	owningPcCharIds := make([]string, 0)
+	owningPcNames := make([]string, 0)
 	for _, characterEntity := range pool.GetEngine().GetWorld().GetCharacterEntities() {
 		if characterEntity.HasRelationWithEntityByUuid(inventory.GetId()) && characterEntity.HasComponentType(ecs.PlayerComponentType) {
 			owningPcCharIds = append(owningPcCharIds, characterEntity.GetId().String())
+			for _, rawPlayerComponents := range characterEntity.GetAllComponentsOfType(ecs.PlayerComponentType) {
+				playerComponents := rawPlayerComponents.(*ecs_components.PlayerComponent)
+				if playerComponents.Name != "" && !slices.Contains(owningPcCharIds, playerComponents.Name) {
+					owningPcNames = append(owningPcNames, playerComponents.Name)
+				}
+			}
 		}
+	}
+
+	// Check if user is allowed to make modification
+	if message.Source != pool.GetLeadId() && !slices.Contains(owningPcNames, message.Source) {
+		return errors.New("modifying Inventory details is not allowed as non-lead and non-owner")
 	}
 
 	// Remove Item
@@ -383,11 +391,15 @@ func (e *baseEventMessageHandler) typeRemoveItemFromInventory(message EventMessa
 			return loadCharErr
 		}
 	}
-	loadUpsertInventoryMessage := NewEventMessage()
-	loadUpsertInventoryMessage.Source = pool.GetLeadId()
-	loadUpsertInventoryMessage.Body = inventory.GetId().String()
-	if typeLoadUpsertInventoryErr := e.typeLoadUpsertInventory(loadUpsertInventoryMessage, pool); typeLoadUpsertInventoryErr != nil {
-		return SendManagementError("Error", typeLoadUpsertInventoryErr.Error(), pool)
+	if rawType, err := strconv.Atoi(inventRemoveItemRequest.Type); err == nil && rawType >= 0 && message.Source == pool.GetLeadId() {
+		if message.Source == pool.GetLeadId() && rawType == int(TypeLoadUpsertInventory) {
+			loadUpsertInventoryMessage := NewEventMessage()
+			loadUpsertInventoryMessage.Source = pool.GetLeadId()
+			loadUpsertInventoryMessage.Body = inventory.GetId().String()
+			if typeLoadUpsertInventoryErr := e.typeLoadUpsertInventory(loadUpsertInventoryMessage, pool); typeLoadUpsertInventoryErr != nil {
+				return SendManagementError("Error", typeLoadUpsertInventoryErr.Error(), pool)
+			}
+		}
 	}
 
 	return nil
@@ -461,6 +473,7 @@ func (e *baseEventMessageHandler) typeUpdateItemCountInventory(message EventMess
 		// Update the count
 		if hasRelation.Entity.GetId() == item.GetId() {
 			hasRelation.Count = Amount
+			break
 		}
 	}
 
@@ -483,6 +496,132 @@ func (e *baseEventMessageHandler) typeUpdateItemCountInventory(message EventMess
 			if typeLoadUpsertInventoryErr := e.typeLoadUpsertInventory(loadUpsertInventoryMessage, pool); typeLoadUpsertInventoryErr != nil {
 				return SendManagementError("Error", typeLoadUpsertInventoryErr.Error(), pool)
 			}
+		}
+	}
+
+	return nil
+}
+
+func (e *baseEventMessageHandler) typeMoveItemCountBetweenInventories(message EventMessage, pool CampaignPool) error {
+	// Undo escaping
+	clearedBody := html.UnescapeString(message.Body)
+
+	var request moveItemCountBetweenInventoriesRequest
+	if err := json.Unmarshal([]byte(clearedBody), &request); err != nil {
+		return err
+	}
+
+	// Parse Amount; ensure fallback to zero
+	var Amount uint = 0
+	if rawAmount, err := strconv.Atoi(request.Amount); err == nil && rawAmount >= 0 {
+		Amount = uint(rawAmount)
+	} else {
+		return SendManagementError("Warning", "This Specific Item amount is not parsable as number", pool)
+	}
+	if Amount < 1 {
+		return errors.New("no item need to be moved")
+	}
+
+	// Check if there is an item and an inventory that match the request
+	var item ecs.Entity = nil
+	if uuidItemFilter, errItem := helpers.ParseStringToUuid(request.ItemId); errItem == nil {
+		if entityFound, ok := pool.GetEngine().GetWorld().GetEntityByUuid(uuidItemFilter); ok {
+			if entityFound.HasComponentType(ecs.ItemComponentType) {
+				item = entityFound
+			}
+		}
+	}
+	var sourceInventory ecs.Entity = nil
+	if uuidInventoryFilter, errInv := helpers.ParseStringToUuid(request.SourceInventoryId); errInv == nil {
+		if entityFound, ok := pool.GetEngine().GetWorld().GetEntityByUuid(uuidInventoryFilter); ok {
+			if entityFound.HasComponentType(ecs.InventoryComponentType) {
+				sourceInventory = entityFound
+			}
+		}
+	}
+	var targetInventory ecs.Entity = nil
+	if uuidInventoryFilter, errInv := helpers.ParseStringToUuid(request.TargetInventoryId); errInv == nil {
+		if entityFound, ok := pool.GetEngine().GetWorld().GetEntityByUuid(uuidInventoryFilter); ok {
+			if entityFound.HasComponentType(ecs.InventoryComponentType) {
+				targetInventory = entityFound
+			}
+		}
+	}
+
+	// Check integrity
+	if item == nil || sourceInventory == nil || targetInventory == nil {
+		return errors.New("no item and/or inventory found with matching identifier")
+	}
+	if !sourceInventory.HasRelationWithEntityByUuid(item.GetId()) {
+		return SendManagementError("Warning", "This Specific Item is not present in inventory", pool)
+	}
+
+	// Find owning characters
+	owningPcCharIds := make([]string, 0)
+	owningBothInventoriesPcNames := make([]string, 0)
+	for _, characterEntity := range pool.GetEngine().GetWorld().GetCharacterEntities() {
+		if characterEntity.HasComponentType(ecs.PlayerComponentType) {
+			if characterEntity.HasRelationWithEntityByUuid(sourceInventory.GetId()) ||
+				characterEntity.HasRelationWithEntityByUuid(targetInventory.GetId()) {
+				owningPcCharIds = append(owningPcCharIds, characterEntity.GetId().String())
+				// Check if ownership of both inventories
+				if characterEntity.HasRelationWithEntityByUuid(sourceInventory.GetId()) &&
+					characterEntity.HasRelationWithEntityByUuid(targetInventory.GetId()) {
+					for _, rawPlayerComponents := range characterEntity.GetAllComponentsOfType(ecs.PlayerComponentType) {
+						playerComponents := rawPlayerComponents.(*ecs_components.PlayerComponent)
+						if playerComponents.Name != "" && !slices.Contains(owningPcCharIds, playerComponents.Name) {
+							owningBothInventoriesPcNames = append(owningBothInventoriesPcNames, playerComponents.Name)
+						}
+					}
+				}
+			}
+		}
+	}
+	// Check if user is allowed to make modification (ownership of both inventories)
+	if message.Source != pool.GetLeadId() && !slices.Contains(owningBothInventoriesPcNames, message.Source) {
+		return errors.New("modifying Inventory details is not allowed as non-lead and non-owner")
+	}
+
+	// Attempt to Move Amount of Item
+	for _, rawHasRelation := range sourceInventory.GetAllComponentsOfType(ecs.HasRelationComponentType) {
+		hasRelation := rawHasRelation.(*ecs_components.HasRelationComponent)
+		// Check the count
+		if hasRelation.Entity.GetId() == item.GetId() {
+			if hasRelation.Count >= Amount {
+				// Update the count
+				hasRelation.Count -= Amount
+			} else {
+				return SendManagementError("Warning", "Requested Amount of Item is higher than availability", pool)
+			}
+			break
+		}
+	}
+	if !targetInventory.HasRelationWithEntityByUuid(item.GetId()) {
+		hasRelationComponent := ecs_components.NewHasRelationComponent().(*ecs_components.HasRelationComponent)
+		hasRelationComponent.Count = Amount
+		hasRelationComponent.Entity = item
+		if err := targetInventory.AddComponent(hasRelationComponent); err != nil {
+			return SendManagementError("Warning", err.Error(), pool)
+		}
+	} else {
+		for _, rawHasRelation := range targetInventory.GetAllComponentsOfType(ecs.HasRelationComponentType) {
+			hasRelation := rawHasRelation.(*ecs_components.HasRelationComponent)
+			// Update the count
+			if hasRelation.Entity.GetId() == item.GetId() {
+				hasRelation.Count += Amount
+				break
+			}
+		}
+	}
+
+	// Trigger Visual Updates on chars (details)
+	for _, charId := range owningPcCharIds {
+		var reloadCharDetailMessage = NewEventMessage()
+		reloadCharDetailMessage.Source = ServerUser
+		reloadCharDetailMessage.Body = charId
+		loadCharErr := e.loadCharactersDetails(reloadCharDetailMessage, pool)
+		if loadCharErr != nil {
+			return loadCharErr
 		}
 	}
 
@@ -864,6 +1003,7 @@ func (e *baseEventMessageHandler) typeUpsertItem(message EventMessage, pool Camp
 type inventoryAddRemoveItemRequest struct {
 	InventoryId string `json:"InventoryId"`
 	ItemId      string `json:"ItemId"`
+	Type        string `json:"Type"`
 }
 
 type inventoryUpdateItemCountRequest struct {
@@ -871,6 +1011,13 @@ type inventoryUpdateItemCountRequest struct {
 	ItemId      string `json:"ItemId"`
 	Type        string `json:"Type"`
 	Amount      string `json:"Amount"`
+}
+
+type moveItemCountBetweenInventoriesRequest struct {
+	SourceInventoryId string `json:"SourceInventoryId"`
+	TargetInventoryId string `json:"TargetInventoryId"`
+	ItemId            string `json:"ItemId"`
+	Amount            string `json:"Amount"`
 }
 
 type inventoryUpsertRequest struct {

@@ -201,3 +201,37 @@ div .nav-link {
 #entity-details-holder .form-control {
     font-size: inherit;
 }
+
+/* Inventories */
+
+#inventories > summary {
+    display: block;
+}
+
+#inventories details > summary {
+    display: block;
+}
+
+#inventories summary::before {
+    margin-right: 1em;
+    display: inline-block;
+    content: '📁';
+}
+
+#inventories #transferItems summary::before {
+    margin-right: 1em;
+    display: inline-block;
+    content: '🔁';
+}
+
+#inventories[open] > summary::before {
+    content: '📂';
+}
+
+#inventories details[open] > summary::before {
+    content: '📂';
+}
+
+#inventories #transferItems[open] > summary::before {
+    content: '🔃';
+}

@@ -73,8 +73,22 @@ func CharacterEntityToCampaignCharacterModel(rawCharacterEntity ecs.Entity) mode
 				character.Inventories = append(character.Inventories,
 					InventoryEntityToCampaignInventoryModel(hasRelationComponent.Entity))
 			}
-
 			// @todo stats?
+		}
+
+		// Check and update linked inventories (Used in trading)
+		for id, inventory := range character.Inventories {
+			linkedInv := models.CampaignLinkedInventory{
+				Id:          inventory.Id,
+				Name:        inventory.Name,
+				Description: inventory.Description,
+			}
+			for index, _ := range character.Inventories {
+				if index != id {
+					character.Inventories[index].LinkedInventories =
+						append(character.Inventories[index].LinkedInventories, linkedInv)
+				}
+			}
 		}
 
 		// @todo spells & slots?

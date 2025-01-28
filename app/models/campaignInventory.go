@@ -9,7 +9,14 @@ type CampaignInventory struct {
 	ReadOnly          bool
 	ShowDetailButtons bool
 	Items             []CampaignInventoryItem
+	LinkedInventories []CampaignLinkedInventory
 	Characters        CampaignCharacters
+}
+
+type CampaignLinkedInventory struct {
+	Id          string
+	Description string
+	Name        string
 }
 
 type CampaignInventoryItem struct {
