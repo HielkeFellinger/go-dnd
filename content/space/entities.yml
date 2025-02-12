@@ -98,6 +98,74 @@ base_maps:
           base64: ""
           name: docked_shuttle_space_station_40x30
           url: /images/space/docked_shuttle_space_station_40x30.png
+  - id: 1dc509e2-4f7f-42c3-8333-c95681cde157
+    name: Shuttle Top
+    description: Shuttle Top
+    components:
+      - type: Map
+        params:
+          active: "false"
+      - type: Area
+        params:
+          length: "10"
+          width: "15"
+      - type: Image
+        params:
+          active: "true"
+          base64: ""
+          name: shuttle_top_lvl_15x10
+          url: /images/space/shuttle_top_lvl_15x10.png
+  - id: 3e70f4f3-a6b7-4ada-95c7-0df6dbd257c5
+    name: Shuttle Control
+    description: Shuttle Control
+    components:
+      - type: Map
+        params:
+          active: "false"
+      - type: Area
+        params:
+          length: "10"
+          width: "15"
+      - type: Image
+        params:
+          active: "true"
+          base64: ""
+          name: shuttle_control_lvl_15x10
+          url: /images/space/shuttle_control_lvl_15x10.png
+  - id: 2ddaa4f8-865e-4f0f-b795-81ac0d9f476d
+    name: Shuttle Storage
+    description: Shuttle Storage
+    components:
+      - type: Map
+        params:
+          active: "false"
+      - type: Area
+        params:
+          length: "10"
+          width: "15"
+      - type: Image
+        params:
+          active: "true"
+          base64: ""
+          name: shuttle_storage_lvl_15x10
+          url: /images/space/shuttle_storage_lvl_15x10.png
+  - id: 85c2b15d-a0ab-4d9d-98e0-bd51c516d02e
+    name: Shuttle Engine
+    description: Shuttle Engine
+    components:
+      - type: Map
+        params:
+          active: "false"
+      - type: Area
+        params:
+          length: "10"
+          width: "15"
+      - type: Image
+        params:
+          active: "true"
+          base64: ""
+          name: shuttle_engine_lvl
+          url: /images/space/shuttle_engine_lvl_15x10.png
   - id: 1f984588-dce3-47b4-9f64-4bbfcf4df736
     name: plane_0
     description: ""
