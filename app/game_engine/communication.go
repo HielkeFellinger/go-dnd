@@ -20,8 +20,9 @@ const (
 
 	TypeLoadFullGame EventType = 500
 
-	TypeLoadCharacters        EventType = 501
-	TypeLoadCharactersDetails EventType = 504
+	TypeLoadCharacters                   EventType = 501
+	TypeLoadCharactersDetails            EventType = 504
+	TypeLoadCharactersDetailsInventories EventType = 505
 
 	TypeUpdateCharacterHealth EventType = 511
 	TypeUpdateCharacterUsers  EventType = 512

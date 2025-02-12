@@ -100,7 +100,7 @@ func (e *baseEventMessageHandler) typeManageInventory(message EventMessage, pool
 			if characterEntity.HasRelationWithEntityByUuid(inventoryEntity.GetId()) {
 				isOwnedByPc = isOwnedByPc || characterEntity.HasComponentType(ecs.PlayerComponentType)
 				inventoryModel.Characters = append(inventoryModel.Characters,
-					ecs_model_translation.CharacterEntityToCampaignCharacterModel(characterEntity))
+					ecs_model_translation.CharacterEntityToCampaignCharacterModel(characterEntity, ecs_model_translation.DEFAULT))
 			}
 		}
 		sort.Sort(inventoryModel.Characters)

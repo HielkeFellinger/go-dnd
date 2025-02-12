@@ -203,7 +203,7 @@
         else if (payLoad.type >= 500 && payLoad.type < 510) {
             if (payLoad.type === 501) {
                 setCharRibbon(payLoad)
-            } else if (payLoad.type === 504) {
+            } else if (payLoad.type === 504 || payLoad.type === 505) {
                 handleRightBarCrudHtml(payLoad)
             } else {
                 console.error("Type '" + payLoad.type + "' not handled by 'Parse Character Events'")
@@ -516,6 +516,10 @@
         sendEvent(wrapMessage(JSON.stringify(id), 504));
     }
 
+    let charDetailsInventories = (id) => {
+        sendEvent(wrapMessage(JSON.stringify(id), 505));
+    }
+
     let loadCharDetailsByMapItem = (mapItemId) => {
         if (mapItemIdToEntityId.has(mapItemId)) {
             sendEvent(wrapMessage(JSON.stringify(mapItemIdToEntityId.get(mapItemId)), 504));
@@ -763,13 +767,11 @@
                 parsedFile.Size = file.size;
                 parsedFile.Type = file.type;
                 let reader = new FileReader();
-                let rawData = new ArrayBuffer();
                 reader.onload = (e) => {
-                    rawData = e.target.result;
-                    parsedFile.FileBase64 = btoa(String.fromCharCode.apply(null, new Uint8Array(rawData)));
+                    parsedFile.FileBase64 = e.target.result;
                     doneFunction(parsedFile);
                 }
-                reader.readAsArrayBuffer(file);
+                reader.readAsDataURL(file);
             } catch (e) {
                 // ignore; send empty
                 stopLoadSpinner();

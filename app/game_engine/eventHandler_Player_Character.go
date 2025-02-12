@@ -15,9 +15,10 @@ import (
 	"strconv"
 )
 
-func (e *baseEventMessageHandler) loadCharactersDetails(message EventMessage, pool CampaignPool) error {
+func (e *baseEventMessageHandler) loadCharactersDetailBasics(message EventMessage, pool CampaignPool, eventType EventType,
+	mode ecs_model_translation.CharModelType, htmlFiles []string, templateName string) error {
 	var transmitMessage = NewEventMessage()
-	transmitMessage.Type = TypeLoadCharactersDetails
+	transmitMessage.Type = eventType
 	transmitMessage.Source = message.Source
 
 	isLead := message.Source == pool.GetLeadId()
@@ -37,7 +38,7 @@ func (e *baseEventMessageHandler) loadCharactersDetails(message EventMessage, po
 	}
 
 	// Parse and check if the character could be parsed
-	campaignCharacter := ecs_model_translation.CharacterEntityToCampaignCharacterModel(charEntity)
+	campaignCharacter := ecs_model_translation.CharacterEntityToCampaignCharacterModel(charEntity, mode)
 	messageIdBody := EventMessageIdBody{
 		Id: charEntity.GetId().String(),
 	}
@@ -53,8 +54,7 @@ func (e *baseEventMessageHandler) loadCharactersDetails(message EventMessage, po
 	if len(transmitMessage.Destinations) > 0 && len(campaignCharacter.Id) > 0 {
 		data := make(map[string]any)
 		data["character"] = campaignCharacter
-		messageIdBody.Html = e.handleLoadHtmlBodyMultipleTemplateFiles(
-			[]string{"characterDetails.html", "inventory.html"}, "characterDetails", data)
+		messageIdBody.Html = e.handleLoadHtmlBodyMultipleTemplateFiles(htmlFiles, templateName, data)
 	} else {
 		transmitMessage.Destinations = append(transmitMessage.Destinations, message.Source)
 	}
@@ -62,6 +62,16 @@ func (e *baseEventMessageHandler) loadCharactersDetails(message EventMessage, po
 	transmitMessage.Body = messageIdBody.ToBodyString()
 	pool.TransmitEventMessage(transmitMessage)
 	return nil
+}
+
+func (e *baseEventMessageHandler) loadCharactersDetails(message EventMessage, pool CampaignPool) error {
+	return e.loadCharactersDetailBasics(message, pool, TypeLoadCharactersDetails, ecs_model_translation.DEFAULT,
+		[]string{"characterDetails.html"}, "characterDetails")
+}
+
+func (e *baseEventMessageHandler) typeLoadCharactersDetailsInventories(message EventMessage, pool CampaignPool) error {
+	return e.loadCharactersDetailBasics(message, pool, TypeLoadCharactersDetailsInventories, ecs_model_translation.INVENTORY,
+		[]string{"characterDetailsInventories.html", "inventory.html"}, "characterDetailsInventories")
 }
 
 func (e *baseEventMessageHandler) loadCharacters(message EventMessage, pool CampaignPool) error {

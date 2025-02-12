@@ -39,13 +39,15 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 	}
 
 	// Player Character Load Events
-	if message.Type >= TypeLoadCharacters && message.Type <= TypeLoadCharactersDetails {
+	if message.Type >= TypeLoadCharacters && message.Type <= TypeLoadCharactersDetailsInventories {
 		log.Printf("- Char. Load Event Type: '%d' Message: '%s'", message.Type, message.Id)
 
 		if message.Type == TypeLoadCharacters {
 			return e.loadCharacters(message, pool)
 		} else if message.Type == TypeLoadCharactersDetails {
 			return e.loadCharactersDetails(message, pool)
+		} else if message.Type == TypeLoadCharactersDetailsInventories {
+			return e.typeLoadCharactersDetailsInventories(message, pool)
 		}
 		return errors.New(fmt.Sprintf("message of type '%d' is not recognised by 'handleLoadCharacterEvents()'", message.Type))
 	}

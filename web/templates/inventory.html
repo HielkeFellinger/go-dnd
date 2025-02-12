@@ -70,18 +70,19 @@
     </table>
     {{ $linkedInventoryCount := len .LinkedInventories }}
     {{ if and (gt $itemCount 0) (not .ReadOnly) (gt $linkedInventoryCount 0) }}
-    <details id="transferItems" style="padding-top: 0.1em; padding-left: 1em;">
-        <summary>Transfer Items</summary>
-        <div style="display: flex; flex-direction: row; flex-grow: 2;  flex-wrap: wrap; padding-top: 1em;">
+    <details id="transferItems" style="padding-top: 0.1em;">
+        <summary class="btn-primary" style="max-width: 10em; line-height: 2em; border-radius: 0.25em; padding-left: 1em;">Transfer Items</summary>
+        <div style="display: flex; flex-direction: row; flex-grow: 2; flex-wrap: wrap; padding-top: 1em; padding-left: 1em;">
             <div class="form-group" style="flex: 1 1 0; max-width: 5em;">
                 <label for="transferCount{{.Id}}">Move #</label>
                 <input id="transferCount{{.Id}}" name="transferCount{{.Id}}" min=1 type="number" value="1"
-                       style="height: calc(2.25rem + 2px); max-width: 5em;"/>
+                       style="height: calc(1.75rem + 2px); max-width: 5em;"/>
             </div>
             <div style="flex: 3 3 0;">
                 <div class="form-group">
                     <label for="moveItemIdFromInventory{{.Id}}">of Item</label>
-                    <select id="moveItemIdFromInventory{{.Id}}" name="moveItemIdFromInventory{{.Id}}" class="form-control">
+                    <select id="moveItemIdFromInventory{{.Id}}" name="moveItemIdFromInventory{{.Id}}" class="form-control"
+                            style="height: calc(1.75rem + 2px);">
                         <option>(None)</option>
                         {{ range $item := .Items}}
                             <option value="{{$item.Id}}">{{$item.Name}}</option>
@@ -92,7 +93,8 @@
             <div style="flex: 3 3 0;">
                 <div class="form-group">
                     <label for="moveItemToInventoryId{{.Id}}">to Inventory</label>
-                    <select id="moveItemToInventoryId{{.Id}}" name="moveItemToInventoryId{{.Id}}" class="form-control">
+                    <select id="moveItemToInventoryId{{.Id}}" name="moveItemToInventoryId{{.Id}}" class="form-control"
+                            style="height: calc(1.75rem + 2px);">
                         <option>(None)</option>
                         {{ range $linkedInventory := .LinkedInventories}}
                             <option value="{{$linkedInventory.Id}}">{{$linkedInventory.Name}}</option>
@@ -101,7 +103,7 @@
                 </div>
             </div>
             <div style="flex: 1 1 0;">
-                <button type="submit" class="btn btn-primary" style="margin-top: 1.75em;"
+                <button type="submit" class="btn btn-primary" style="height: calc(1.75rem + 2px); margin-top: 1.75em; padding: 0 1em;"
                         onclick="transferItemBetweenInventories('{{.Id}}')">
                     <i class="bi bi-arrow-down-up"></i>
                 </button>

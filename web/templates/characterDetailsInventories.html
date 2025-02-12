@@ -1,0 +1,38 @@
+{{ define "characterDetailsInventories" }}
+
+<div>
+
+    <div style="width: 100%;">
+        <button id="goBackToLastDetails" class="btn btn-primary" title="Go Back" onclick="goBackInRightBarHistory()" style="height: 2.4em; width: 2.4em">
+            <b><i class="bi bi-arrow-left"></i></b>
+        </button>
+        <button id="goForwardToLastDetails" class="btn btn-primary" title="Go Forward" onclick="goForwardInRightBarHistory()" style="height: 2.4em; width: 2.4em">
+            <b><i class="bi bi-arrow-right"></i></b>
+        </button>
+    </div>
+    <div style="display: flex; flex-flow: row nowrap; align-content: center; width: 100%; padding-top: 0.25em;">
+        <div style="flex: 1 1 0; background-image: url('{{ .character.Image.Url }}'); width: 100%; background-size: 75%; background-repeat: no-repeat; min-height: 5em;">
+
+        </div>
+        <div style="flex: 4 4 0;">
+            <h2>{{ .character.Name }}</h2>
+            <p style="word-break: break-all;">{{ .character.Description }}</p>
+        </div>
+    </div>
+
+    <!-- Just Dump inventories  -->
+    <div id="inventories" open="" style="padding-top: 1em;">
+        <h3 style="font-size: 1.5em;">Inventories</h3>
+        {{ range .character.Inventories }}
+        <details open="" style="padding-top: 1em; padding-left: 1em;">
+            <summary style="font-size: 1.5em;">{{ .Name }}</summary>
+            <div style="display: flex; flex-flow: row nowrap; align-content: center; width: 100%;">
+                {{ template "inventory" . }}
+            </div>
+        </details>
+        {{ end }}
+    </div>
+
+</div>
+
+{{ end }}

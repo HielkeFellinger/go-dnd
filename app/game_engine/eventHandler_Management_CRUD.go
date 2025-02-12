@@ -294,7 +294,7 @@ func (e *baseEventMessageHandler) typeAddItemToInventory(message EventMessage, p
 		var reloadCharDetailMessage = NewEventMessage()
 		reloadCharDetailMessage.Source = ServerUser
 		reloadCharDetailMessage.Body = charId
-		loadCharErr := e.loadCharactersDetails(reloadCharDetailMessage, pool)
+		loadCharErr := e.typeLoadCharactersDetailsInventories(reloadCharDetailMessage, pool)
 		if loadCharErr != nil {
 			return loadCharErr
 		}
@@ -386,7 +386,7 @@ func (e *baseEventMessageHandler) typeRemoveItemFromInventory(message EventMessa
 		var reloadCharDetailMessage = NewEventMessage()
 		reloadCharDetailMessage.Source = ServerUser
 		reloadCharDetailMessage.Body = charId
-		loadCharErr := e.loadCharactersDetails(reloadCharDetailMessage, pool)
+		loadCharErr := e.typeLoadCharactersDetailsInventories(reloadCharDetailMessage, pool)
 		if loadCharErr != nil {
 			return loadCharErr
 		}
@@ -482,12 +482,11 @@ func (e *baseEventMessageHandler) typeUpdateItemCountInventory(message EventMess
 		var reloadCharDetailMessage = NewEventMessage()
 		reloadCharDetailMessage.Source = ServerUser
 		reloadCharDetailMessage.Body = charId
-		loadCharErr := e.loadCharactersDetails(reloadCharDetailMessage, pool)
+		loadCharErr := e.typeLoadCharactersDetailsInventories(reloadCharDetailMessage, pool)
 		if loadCharErr != nil {
 			return loadCharErr
 		}
 	}
-
 	if rawType, err := strconv.Atoi(inventUpdateItemCountRequest.Type); err == nil && rawType >= 0 {
 		if message.Source == pool.GetLeadId() && rawType == int(TypeLoadUpsertInventory) {
 			loadUpsertInventoryMessage := NewEventMessage()
@@ -619,7 +618,7 @@ func (e *baseEventMessageHandler) typeMoveItemCountBetweenInventories(message Ev
 		var reloadCharDetailMessage = NewEventMessage()
 		reloadCharDetailMessage.Source = ServerUser
 		reloadCharDetailMessage.Body = charId
-		loadCharErr := e.loadCharactersDetails(reloadCharDetailMessage, pool)
+		loadCharErr := e.typeLoadCharactersDetailsInventories(reloadCharDetailMessage, pool)
 		if loadCharErr != nil {
 			return loadCharErr
 		}
@@ -645,7 +644,7 @@ func (e *baseEventMessageHandler) typeLoadUpsertCharacter(message EventMessage, 
 	if err == nil {
 		charCandidate, match := pool.GetEngine().GetWorld().GetEntityByUuid(uuidItemFilter)
 		if match && charCandidate.HasComponentType(ecs.CharacterComponentType) {
-			model := ecs_model_translation.CharacterEntityToCampaignCharacterModel(charCandidate)
+			model := ecs_model_translation.CharacterEntityToCampaignCharacterModel(charCandidate, ecs_model_translation.ALL)
 			messageIdBody.Id = model.Id
 			data["Character"] = model
 		} else {

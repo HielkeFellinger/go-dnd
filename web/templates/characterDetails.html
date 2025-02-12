@@ -39,26 +39,15 @@
         </div>
     </div>
 
-    <!-- Stats -->
-    <details open="" style="padding-top: 1em;">
-        <summary style="font-size: 1.5em;">Stats</summary>
-        <div>
-            ...
-        </div>
-    </details>
-
-    <!-- Just Dump inventories  -->
-    <details id="inventories" open="" style="padding-top: 1em;">
-        <summary style="font-size: 1.5em;">Inventories:</summary>
-        {{ range .character.Inventories }}
-        <details open="" style="padding-top: 1em; padding-left: 1em;">
-            <summary style="font-size: 1.5em;">{{ .Name }}</summary>
-            <div style="display: flex; flex-flow: row nowrap; align-content: center; width: 100%;">
-                {{ template "inventory" . }}
-            </div>
-        </details>
-        {{ end }}
-    </details>
+    <div style="width: 100%; padding-top: 1em; flex-flow: column nowrap; align-content: center; width: 100%;">
+        <button id="charDetailsStatus" class="btn btn-primary" title="Stats" onclick="" disabled style="width: 100%; text-align: left">
+            <b><i class="bi bi-arrow-right"></i> Status</b>
+        </button> <br>
+        <button id="charDetailsInventories" class="btn btn-primary" title="Inventories" style="width: 100%; text-align: left"
+                onclick="charDetailsInventories('{{ .character.Id }}')">
+            <b><i class="bi bi-arrow-right"></i> Inventory</b>
+        </button>
+    </div>
 
 </div>
 

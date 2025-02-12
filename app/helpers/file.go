@@ -26,7 +26,12 @@ func SaveImageToCampaign(image FileUpload, campaignId uint, rawnNewFileName stri
 	strippedFileName := reg.ReplaceAllString(rawnNewFileName, "")
 
 	// Decode base64 content
-	newImageContent, err := base64.StdEncoding.DecodeString(image.FileBase64)
+	startIndex := 0
+	endOfMimeTypePart := strings.Index(image.FileBase64, ",")
+	if endOfMimeTypePart != -1 {
+		startIndex = endOfMimeTypePart + 1
+	}
+	newImageContent, err := base64.StdEncoding.DecodeString(image.FileBase64[startIndex:])
 	if err != nil {
 		return "", err
 	}
@@ -34,14 +39,14 @@ func SaveImageToCampaign(image FileUpload, campaignId uint, rawnNewFileName stri
 	// Check mimetype and get extension
 	mimeType := http.DetectContentType(newImageContent)
 	if !strings.HasPrefix(mimeType, "image/") {
-		return "", errors.New("not an image")
+		return "", errors.New(" not an image: '" + mimeType + "'")
 	}
 	fileExtensions, err := mime.ExtensionsByType(mimeType)
 	if err != nil {
 		return "", err
 	}
 	if len(fileExtensions) == 0 {
-		return "", errors.New("not an image")
+		return "", errors.New("not an image: 'no extension'")
 	}
 
 	// Attempt to write to storage; do not override

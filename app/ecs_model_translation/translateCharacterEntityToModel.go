@@ -7,7 +7,16 @@ import (
 	"strconv"
 )
 
-func CharacterEntityToCampaignCharacterModel(rawCharacterEntity ecs.Entity) models.CampaignCharacter {
+type CharModelType int
+
+const (
+	DEFAULT   CharModelType = 0
+	ALL       CharModelType = 1
+	INVENTORY CharModelType = 2
+	STATUS    CharModelType = 3
+)
+
+func CharacterEntityToCampaignCharacterModel(rawCharacterEntity ecs.Entity, mode CharModelType) models.CampaignCharacter {
 	character := models.GetNewCampaignCharacter()
 
 	// Test If it is a character
@@ -35,17 +44,6 @@ func CharacterEntityToCampaignCharacterModel(rawCharacterEntity ecs.Entity) mode
 			Url:  imagePlaceholder.Url,
 		}
 
-		// Check for Health
-		healthComponents := rawCharacterEntity.GetAllComponentsOfType(ecs.HealthComponentType)
-		if len(healthComponents) >= 1 {
-			healthComponent := healthComponents[0].(*ecs_components.HealthComponent)
-			character.Health = models.CampaignCharacterHealth{
-				Damage:             strconv.Itoa(int(healthComponent.Damage)),
-				TemporaryHitPoints: strconv.Itoa(int(healthComponent.Temporary)),
-				MaximumHitPoints:   strconv.Itoa(int(healthComponent.Maximum)),
-			}
-		}
-
 		// Check Ownership
 		for _, rawPlayerComponent := range rawCharacterEntity.GetAllComponentsOfType(ecs.PlayerComponentType) {
 			playerComponent := rawPlayerComponent.(*ecs_components.PlayerComponent)
@@ -58,40 +56,57 @@ func CharacterEntityToCampaignCharacterModel(rawCharacterEntity ecs.Entity) mode
 			character.Level = strconv.Itoa(int(levelComponent.Level))
 		}
 
-		// Check Total Visibility
-		for _, rawVisibilityComponent := range rawCharacterEntity.GetAllComponentsOfType(ecs.VisibilityComponentType) {
-			visibilityComponent := rawVisibilityComponent.(*ecs_components.VisibilityComponent)
-			character.Hidden = visibilityComponent.Hidden
+		if mode == ALL || mode == DEFAULT {
+			// Check for Health
+			healthComponents := rawCharacterEntity.GetAllComponentsOfType(ecs.HealthComponentType)
+			if len(healthComponents) >= 1 {
+				healthComponent := healthComponents[0].(*ecs_components.HealthComponent)
+				character.Health = models.CampaignCharacterHealth{
+					Damage:             strconv.Itoa(int(healthComponent.Damage)),
+					TemporaryHitPoints: strconv.Itoa(int(healthComponent.Temporary)),
+					MaximumHitPoints:   strconv.Itoa(int(healthComponent.Maximum)),
+				}
+			}
+
+			// Check Total Visibility
+			for _, rawVisibilityComponent := range rawCharacterEntity.GetAllComponentsOfType(ecs.VisibilityComponentType) {
+				visibilityComponent := rawVisibilityComponent.(*ecs_components.VisibilityComponent)
+				character.Hidden = visibilityComponent.Hidden
+			}
 		}
 
-		// Check for hasRelation to InventoryEntity
-		hasRelationComponents := rawCharacterEntity.GetAllComponentsOfType(ecs.HasRelationComponentType)
-		for _, rawHasRelationComponent := range hasRelationComponents {
-			hasRelationComponent := rawHasRelationComponent.(*ecs_components.HasRelationComponent)
-			// Test if relation is an Inventory
-			if hasRelationComponent.Entity.HasComponentType(ecs.InventoryComponentType) {
-				character.Inventories = append(character.Inventories,
-					InventoryEntityToCampaignInventoryModel(hasRelationComponent.Entity))
+		if mode == INVENTORY || mode == ALL {
+			// Check for hasRelation to InventoryEntity
+			hasRelationComponents := rawCharacterEntity.GetAllComponentsOfType(ecs.HasRelationComponentType)
+			for _, rawHasRelationComponent := range hasRelationComponents {
+				hasRelationComponent := rawHasRelationComponent.(*ecs_components.HasRelationComponent)
+				// Test if relation is an Inventory
+				if hasRelationComponent.Entity.HasComponentType(ecs.InventoryComponentType) {
+					character.Inventories = append(character.Inventories,
+						InventoryEntityToCampaignInventoryModel(hasRelationComponent.Entity))
+				}
+				// @todo stats?
 			}
-			// @todo stats?
-		}
 
-		// Check and update linked inventories (Used in trading)
-		for id, inventory := range character.Inventories {
-			linkedInv := models.CampaignLinkedInventory{
-				Id:          inventory.Id,
-				Name:        inventory.Name,
-				Description: inventory.Description,
-			}
-			for index, _ := range character.Inventories {
-				if index != id {
-					character.Inventories[index].LinkedInventories =
-						append(character.Inventories[index].LinkedInventories, linkedInv)
+			// Check and update linked inventories (Used in trading)
+			for id, inventory := range character.Inventories {
+				linkedInv := models.CampaignLinkedInventory{
+					Id:          inventory.Id,
+					Name:        inventory.Name,
+					Description: inventory.Description,
+				}
+				for index, _ := range character.Inventories {
+					if index != id {
+						character.Inventories[index].LinkedInventories =
+							append(character.Inventories[index].LinkedInventories, linkedInv)
+					}
 				}
 			}
 		}
 
-		// @todo spells & slots?
+		if mode == STATUS {
+			// @todo spells & slots?
+		}
 	}
 
 	return character

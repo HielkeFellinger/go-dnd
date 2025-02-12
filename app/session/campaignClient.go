@@ -6,6 +6,7 @@ import (
 	"github.com/hielkefellinger/go-dnd/app/game_engine"
 	"html"
 	"log"
+	"math"
 )
 
 type campaignClient struct {
@@ -45,7 +46,8 @@ func (c *campaignClient) Read() {
 			return
 		}
 
-		log.Println(string(rawEvent))
+		maxLength := int(math.Min(float64(len(rawEvent)), 1024))
+		log.Println(string(rawEvent[0:maxLength]))
 
 		// Check the rights handle lead actions
 		var rawMessage game_engine.EventMessage
