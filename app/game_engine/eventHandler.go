@@ -100,6 +100,8 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 			return e.typeSignalMapItem(message, pool)
 		} else if message.Type == TypeChangeMapBackgroundImage {
 			return e.typeChangeMapBackgroundImage(message, pool)
+		} else if message.Type == TypeMapInteraction {
+			return e.typeSignalMapItem(message, pool)
 		}
 		return errors.New(fmt.Sprintf("message of type '%d' is not recognised as a 'Player Map Update/Interaction Event'", message.Type))
 	}

@@ -312,6 +312,22 @@ func (e *baseEventMessageHandler) typeSignalMapItem(message EventMessage, pool C
 	return nil
 }
 
+func (e *baseEventMessageHandler) typeMapInteraction(message EventMessage, pool CampaignPool) error {
+	// Undo escaping @ TODO: Interaction!
+	//clearedBody := html.UnescapeString(message.Body)
+
+	// Check if user is lead
+	//if message.Source != pool.GetLeadId() {
+	//	return errors.New("removing items to map is not allowed as non-lead")
+	//}
+
+	// Add Stuff
+
+	// Interact with stuff
+
+	return nil
+}
+
 func (e *baseEventMessageHandler) typeRemoveMapItem(message EventMessage, pool CampaignPool) error {
 	// Undo escaping
 	clearedBody := html.UnescapeString(message.Body)

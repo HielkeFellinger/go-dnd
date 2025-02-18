@@ -39,6 +39,7 @@ const (
 	TypeRemoveMapItem            EventType = 546
 	TypeSignalMapItem            EventType = 547
 	TypeChangeMapBackgroundImage EventType = 548
+	TypeMapInteraction           EventType = 549
 
 	// Management Events
 	TypeManagementOverviewStart EventType = 550
