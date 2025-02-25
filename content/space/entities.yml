@@ -80,7 +80,7 @@ base_maps:
           active: "true"
           base64: ""
           name: space_background
-          url: /images/space/images/space_background_20x20.png
+          url: /images/space/space_background_20x20.png
   - id: f54fc004-1030-46ac-a8cf-e3cc2990f56b
     name: Spaceship Docked to Space Station
     description: Spaceship Docked to Space Station

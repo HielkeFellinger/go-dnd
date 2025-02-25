@@ -881,6 +881,26 @@ func (e *baseEventMessageHandler) typeLoadUpsertMap(message EventMessage, pool C
 	return nil
 }
 
+func (e *baseEventMessageHandler) typeRemoveMap(message EventMessage, pool CampaignPool) error {
+	//// Check if user is lead
+	//if message.Source != pool.GetLeadId() {
+	//	return errors.New("modifying maps is not allowed as non-lead")
+	//}
+	//
+	//// Undo escaping
+	//clearedBody := html.UnescapeString(message.Body)
+	//
+	//uuidMapFilter, err := helpers.ParseStringToUuid(clearedBody)
+	//
+	//if err != nil {
+	//
+	//} else {
+	//
+	//}
+
+	return nil
+}
+
 func (e *baseEventMessageHandler) typeUpsertMap(message EventMessage, pool CampaignPool) error {
 	// Check if user is lead
 	if message.Source != pool.GetLeadId() {

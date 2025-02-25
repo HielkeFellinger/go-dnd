@@ -131,6 +131,8 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 			return e.typeLoadUpsertMap(message, pool)
 		} else if message.Type == TypeUpsertMap {
 			return e.typeUpsertMap(message, pool)
+		} else if message.Type == TypeRemoveMap {
+			return e.typeRemoveMap(message, pool)
 		} else if message.Type == TypeLoadUpsertItem { // Items
 			return e.typeLoadUpsertItem(message, pool)
 		} else if message.Type == TypeUpsertItem {
