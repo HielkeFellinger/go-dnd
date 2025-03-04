@@ -3,6 +3,7 @@ package ecs_components
 import (
 	"github.com/google/uuid"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
+	"golang.org/x/net/html"
 )
 
 type FactionComponent struct {
@@ -41,9 +42,9 @@ func (c *FactionComponent) ParseToRawComponent() (ecs.RawComponent, error) {
 	rawComponent := ecs.RawComponent{
 		ComponentType: ecs.TypeNameToNthBit[c.ComponentType()].Name,
 		Params: map[string]string{
-			"name":        c.Name,
-			"description": c.Description,
-			"colour_hex":  c.ColourHex,
+			"name":        html.EscapeString(c.Name),
+			"description": html.EscapeString(c.Description),
+			"colour_hex":  html.EscapeString(c.ColourHex),
 		},
 	}
 	return rawComponent, nil

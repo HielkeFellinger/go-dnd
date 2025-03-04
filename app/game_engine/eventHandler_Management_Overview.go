@@ -6,6 +6,7 @@ import (
 	"github.com/hielkefellinger/go-dnd/app/ecs"
 	"github.com/hielkefellinger/go-dnd/app/ecs_components"
 	"github.com/hielkefellinger/go-dnd/app/ecs_model_translation"
+	"github.com/hielkefellinger/go-dnd/app/helpers"
 	"github.com/hielkefellinger/go-dnd/app/models"
 	"golang.org/x/net/html"
 	"slices"
@@ -216,6 +217,43 @@ func (e *baseEventMessageHandler) typeManageCampaign(message EventMessage, pool 
 	return nil
 }
 
+func (e *baseEventMessageHandler) typeManageImages(message EventMessage, pool CampaignPool) error {
+	if message.Source != pool.GetLeadId() {
+		return errors.New("managing game Characters elements is not allowed as non-lead")
+	}
+
+	// Undo escaping
+	clearedBody := html.UnescapeString(message.Body)
+
+	// Get the filter, if no valid filter has been found use empty
+	var overviewFilter OverviewFilter
+	if err := json.Unmarshal([]byte(clearedBody), &overviewFilter); err != nil {
+		overviewFilter = OverviewFilter{}
+	}
+
+	// Retrieve all Images
+	campaignImages := helpers.RetrieveAllCampaignImages(pool.GetId(), overviewFilter.Filter)
+
+	// @todo: Check for ownership
+
+	data := make(map[string]any)
+	data["Images"] = campaignImages
+	data["Filter"] = overviewFilter.Filter
+
+	rawJsonBytes, err := json.Marshal(
+		e.handleLoadHtmlBodyMultipleTemplateFiles([]string{"manageImages.html"}, "manageImages", data))
+	if err != nil {
+		return err
+	}
+
+	manageMaps := NewEventMessage()
+	manageMaps.Source = message.Source
+	manageMaps.Type = TypeManageImages
+	manageMaps.Body = string(rawJsonBytes)
+	manageMaps.Destinations = append(manageMaps.Destinations, pool.GetLeadId())
+	pool.TransmitEventMessage(manageMaps)
+	return nil
+}
 func (e *baseEventMessageHandler) typeManageCharacters(message EventMessage, pool CampaignPool) error {
 	if message.Source != pool.GetLeadId() {
 		return errors.New("managing game Characters elements is not allowed as non-lead")

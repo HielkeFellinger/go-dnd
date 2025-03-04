@@ -4,6 +4,7 @@ import (
 	"github.com/hielkefellinger/go-dnd/app/ecs"
 	"github.com/hielkefellinger/go-dnd/app/ecs_components"
 	"github.com/hielkefellinger/go-dnd/app/helpers"
+	"golang.org/x/net/html"
 	"slices"
 	"strconv"
 )
@@ -48,11 +49,11 @@ func upsertInventory(inventUpdateRequest inventoryUpsertRequest, pool CampaignPo
 
 	// Update Basis Entity Properties
 	if !isNewEntry && rawInventoryEntity != nil {
-		rawInventoryEntity.SetName(inventUpdateRequest.Name)
-		rawInventoryEntity.SetDescription(inventUpdateRequest.Description)
+		rawInventoryEntity.SetName(html.EscapeString(inventUpdateRequest.Name))
+		rawInventoryEntity.SetDescription(html.EscapeString(inventUpdateRequest.Description))
 	} else {
-		inventoryEntity.Name = inventUpdateRequest.Name
-		inventoryEntity.Description = inventUpdateRequest.Description
+		inventoryEntity.Name = html.EscapeString(inventUpdateRequest.Name)
+		inventoryEntity.Description = html.EscapeString(inventUpdateRequest.Description)
 
 		// Add to world
 		if addErr := pool.GetEngine().GetWorld().AddEntity(&inventoryEntity); addErr != nil {
@@ -102,13 +103,13 @@ func upsertCharacter(charUpdateRequest characterUpsertRequest, pool CampaignPool
 		if !match || charEntityFromWorld == nil {
 			return ecs.BaseEntity{}, SendManagementError("Error", "failure of loading Char by UUID", pool)
 		}
-		charEntityFromWorld.SetName(charUpdateRequest.Name)
-		charEntityFromWorld.SetDescription(charUpdateRequest.Description)
+		charEntityFromWorld.SetName(html.EscapeString(charUpdateRequest.Name))
+		charEntityFromWorld.SetDescription(html.EscapeString(charUpdateRequest.Description))
 		charEntity = *charEntityFromWorld.(*ecs.BaseEntity)
 	} else {
 		charEntity = ecs.NewEntity()
-		charEntity.Name = charUpdateRequest.Name
-		charEntity.Description = charUpdateRequest.Description
+		charEntity.Name = html.EscapeString(charUpdateRequest.Name)
+		charEntity.Description = html.EscapeString(charUpdateRequest.Description)
 		if addErr := charEntity.AddComponent(ecs_components.NewCharacterComponent()); addErr != nil {
 			return ecs.BaseEntity{}, SendManagementError("Error", addErr.Error(), pool)
 		}
@@ -117,8 +118,8 @@ func upsertCharacter(charUpdateRequest characterUpsertRequest, pool CampaignPool
 	// Update Character Details
 	if charDetails := charEntity.GetAllComponentsOfType(ecs.CharacterComponentType); len(charDetails) > 0 {
 		charDetail := charDetails[0].(*ecs_components.CharacterComponent)
-		charDetail.Name = charUpdateRequest.Name
-		charDetail.Description = charUpdateRequest.Description
+		charDetail.Name = html.EscapeString(charUpdateRequest.Name)
+		charDetail.Description = html.EscapeString(charUpdateRequest.Description)
 	}
 
 	// Add Health
@@ -224,7 +225,7 @@ func upsertCharacter(charUpdateRequest characterUpsertRequest, pool CampaignPool
 			return ecs.BaseEntity{}, SendManagementError("Error", imageErr.Error(), pool)
 		}
 		imageComponent := ecs_components.NewImageComponent().(*ecs_components.ImageComponent)
-		imageComponent.Name = charUpdateRequest.ImageName
+		imageComponent.Name = html.EscapeString(charUpdateRequest.ImageName)
 		imageComponent.Active = isNewEntry
 		imageComponent.Url = link
 		imageComponent.Version = 1
@@ -312,7 +313,7 @@ func upsertMap(mapUpdateRequest mapUpsertRequest, pool CampaignPool) (ecs.BaseEn
 			return ecs.BaseEntity{}, SendManagementError("Error", imageErr.Error(), pool)
 		}
 		imageComponent := ecs_components.NewImageComponent().(*ecs_components.ImageComponent)
-		imageComponent.Name = mapUpdateRequest.ImageName
+		imageComponent.Name = html.EscapeString(mapUpdateRequest.ImageName)
 		imageComponent.Active = isNewEntry
 		imageComponent.Url = link
 		imageComponent.Version = 1
@@ -355,11 +356,11 @@ func upsertMap(mapUpdateRequest mapUpsertRequest, pool CampaignPool) (ecs.BaseEn
 
 	// Update Basis Entity Properties
 	if !isNewEntry {
-		rawMapEntity.SetName(mapUpdateRequest.Name)
-		rawMapEntity.SetDescription(mapUpdateRequest.Description)
+		rawMapEntity.SetName(html.EscapeString(mapUpdateRequest.Name))
+		rawMapEntity.SetDescription(html.EscapeString(mapUpdateRequest.Description))
 	} else {
-		mapEntity.SetName(mapUpdateRequest.Name)
-		mapEntity.SetDescription(mapUpdateRequest.Description)
+		mapEntity.SetName(html.EscapeString(mapUpdateRequest.Name))
+		mapEntity.SetDescription(html.EscapeString(mapUpdateRequest.Description))
 	}
 
 	// Update Area
@@ -431,8 +432,8 @@ func upsertItem(itemUpsertRequest itemUpsertRequest, pool CampaignPool) (ecs.Bas
 	// Upsert Fields
 	if components := itemEntity.GetAllComponentsOfType(ecs.ItemComponentType); len(components) > 0 {
 		itemComponent := components[0].(*ecs_components.ItemComponent)
-		itemComponent.Name = itemUpsertRequest.Name
-		itemComponent.Description = itemUpsertRequest.Description
+		itemComponent.Name = html.EscapeString(itemUpsertRequest.Name)
+		itemComponent.Description = html.EscapeString(itemUpsertRequest.Description)
 	}
 	if itemUpsertRequest.Damage != "" {
 		components := itemEntity.GetAllComponentsOfType(ecs.DamageComponentType)
@@ -485,7 +486,7 @@ func upsertItem(itemUpsertRequest itemUpsertRequest, pool CampaignPool) (ecs.Bas
 		} else {
 			weightComponent = components[0].(*ecs_components.WeightComponent)
 		}
-		weightComponent.Amount = itemUpsertRequest.Weight
+		weightComponent.Amount = html.EscapeString(itemUpsertRequest.Weight)
 	}
 
 	// Add new Item Entity

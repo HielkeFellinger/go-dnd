@@ -82,6 +82,9 @@
         <div style="min-height: 4em; width: 12em; display: flex; flex-flow: row; margin-top: 0.25em">
             <div style="flex: 1 1 0;">
                 <button id="mapUpsertSubmit" type="submit" class="btn btn-primary" onclick="loadSpinner();submitUpsertMap()">Save</button>
+                {{ if and .Map .Map.Id }}
+                    <button class="btn btn-danger" onclick="loadSpinner();submitRemoveMap('{{.Map.Id}}', '{{.Map.Name}}')">Delete</button>
+                {{end}}
             </div>
             <div id="spinner" style="flex: 1 1 0; display: none">
                 {{ template "diceSpinnerSvg.html" .}}

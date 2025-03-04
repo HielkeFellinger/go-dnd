@@ -115,7 +115,6 @@ func (e *baseEventMessageHandler) typeLoadMapEntities(message EventMessage, pool
 
 		// load models
 		mapItems := mapEntity.GetAllComponentsOfType(ecs.MapItemRelationComponentType)
-		log.Printf("The mapItems: %v", mapItems)
 		mapItemsModel := models.CampaignScreenMapItems{
 			MapId:    componentMap.Id,
 			Elements: make(map[string]models.CampaignScreenMapItemElement, len(mapItems)),

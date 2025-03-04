@@ -5,6 +5,7 @@ import (
 	"github.com/hielkefellinger/go-dnd/app/helpers"
 	"github.com/hielkefellinger/go-dnd/app/models"
 	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/net/html"
 	"net/http"
 )
 
@@ -73,6 +74,7 @@ func Register(c *gin.Context) {
 		c.HTML(http.StatusBadRequest, template, templateMap)
 		return
 	}
+	user.Name = html.EscapeString(user.Name)
 
 	// Attempt to insert user
 	var service = models.UserService{}

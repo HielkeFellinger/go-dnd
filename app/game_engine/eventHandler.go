@@ -120,6 +120,8 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 			return e.typeManageItems(message, pool)
 		} else if message.Type == TypeManageCampaign {
 			return e.typeManageCampaign(message, pool)
+		} else if message.Type == TypeManageImages {
+			return e.typeManageImages(message, pool)
 		}
 		return errors.New(fmt.Sprintf("message of type '%d' is not recognised as a 'Management Overview Event'", message.Type))
 	}

@@ -3,6 +3,7 @@ package helpers
 import (
 	"encoding/base64"
 	"errors"
+	"log"
 	"mime"
 	"net/http"
 	"os"
@@ -11,19 +12,19 @@ import (
 	"strings"
 )
 
-func SaveImageToCampaign(image FileUpload, campaignId uint, rawnNewFileName string) (string, error) {
+func SaveImageToCampaign(image FileUpload, campaignId uint, rawNewFileName string) (string, error) {
 	baseLocation := os.Getenv("CAMPAIGN_DATA_DIR") + "/" + strconv.Itoa(int(campaignId))
 
 	// Ensure Campaign dir exists
-	if _, err := os.Stat(baseLocation + "/images"); os.IsNotExist(err) {
-		if err := os.MkdirAll(baseLocation+"/images", os.ModePerm); err != nil {
-			return "", err
+	if _, iErr := os.Stat(baseLocation + "/images"); os.IsNotExist(iErr) {
+		if mkdErr := os.MkdirAll(baseLocation+"/images", os.ModePerm); mkdErr != nil {
+			return "", mkdErr
 		}
 	}
 
 	// Clean filename
 	reg, _ := regexp.Compile("\\s+")
-	strippedFileName := reg.ReplaceAllString(rawnNewFileName, "")
+	strippedFileName := reg.ReplaceAllString(rawNewFileName, "")
 
 	// Decode base64 content
 	startIndex := 0
@@ -52,9 +53,9 @@ func SaveImageToCampaign(image FileUpload, campaignId uint, rawnNewFileName stri
 	// Attempt to write to storage; do not override
 	fileShortName := strippedFileName + fileExtensions[0]
 	newImageFileName := baseLocation + "/images/" + fileShortName
-	if _, err := os.Stat(newImageFileName); os.IsNotExist(err) {
-		if err := os.WriteFile(newImageFileName, newImageContent, 0644); err != nil {
-			return "", err
+	if _, iErr := os.Stat(newImageFileName); os.IsNotExist(iErr) {
+		if wrErr := os.WriteFile(newImageFileName, newImageContent, 0644); wrErr != nil {
+			return "", wrErr
 		}
 
 		// Return the external (Relative) URL
@@ -62,6 +63,24 @@ func SaveImageToCampaign(image FileUpload, campaignId uint, rawnNewFileName stri
 	} else {
 		return "", errors.New("file already exists")
 	}
+}
+
+func RetrieveAllCampaignImages(campaignId uint, filter string) []string {
+	campaignImageLocation := os.Getenv("CAMPAIGN_DATA_DIR") + "/" + strconv.Itoa(int(campaignId)) + "/images/"
+
+	images := make([]string, 0)
+
+	// Add all files for dir
+	if entries, err := os.ReadDir(campaignImageLocation); err == nil {
+		for _, dirEntry := range entries {
+			log.Printf("- Images: '%v'", dirEntry.Name())
+			if !dirEntry.IsDir() && strings.Contains(dirEntry.Name(), filter) {
+				images = append(images, "/"+campaignImageLocation+dirEntry.Name())
+			}
+		}
+	}
+
+	return images
 }
 
 type FileUpload struct {

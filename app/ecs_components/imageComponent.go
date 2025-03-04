@@ -3,6 +3,7 @@ package ecs_components
 import (
 	"github.com/google/uuid"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
+	"golang.org/x/net/html"
 	"strconv"
 )
 
@@ -56,8 +57,8 @@ func (c *ImageComponent) ParseToRawComponent() (ecs.RawComponent, error) {
 	rawComponent := ecs.RawComponent{
 		ComponentType: ecs.TypeNameToNthBit[c.ComponentType()].Name,
 		Params: map[string]string{
-			"name":   c.Name,
-			"url":    c.Url,
+			"name":   html.EscapeString(c.Name),
+			"url":    html.EscapeString(c.Url),
 			"active": strconv.FormatBool(c.Active),
 			"base64": c.Base64,
 		},

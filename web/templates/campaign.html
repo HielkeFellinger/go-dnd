@@ -48,22 +48,39 @@
                 <ul id="campaign-tabs" class="nav nav-tabs" style="font-size: smaller;">
                     {{ if .campaign.UserIsLead }}
                     <li class="nav-item" id="manageMapsList">
-                        <button id="manageMapsLink" class="nav-link" onclick="openTab('manageMaps');" style="color: goldenrod"><i class="bi bi-pencil"></i> Maps</button>
+                        <button id="manageMapsLink" class="nav-link" onclick="openTab('manageMaps');" style="color: goldenrod">
+                            <i class="bi bi-pencil"></i><b> Maps</b>
+                        </button>
                     </li>
                     <li class="nav-item" id="manageCharactersList">
-                        <button id="manageCharactersLink" class="nav-link" onclick="openTab('manageCharacters');" style="color: goldenrod"><i class="bi bi-pencil"></i> Characters</button>
+                        <button id="manageCharactersLink" class="nav-link" onclick="openTab('manageCharacters');" style="color: goldenrod">
+                            <i class="bi bi-pencil"></i><b> Characters</b>
+                        </button>
                     </li>
                     <li class="nav-item" id="manageInventoryList">
-                        <button id="manageInventoryLink" class="nav-link" onclick="openTab('manageInventory');" style="color: goldenrod"><i class="bi bi-pencil"></i> Inventory</button>
+                        <button id="manageInventoryLink" class="nav-link" onclick="openTab('manageInventory');" style="color: goldenrod">
+                            <i class="bi bi-pencil"></i><b> Inventory</b>
+                        </button>
                     </li>
                     <li class="nav-item" id="manageItemsList">
-                        <button id="manageItemsLink" class="nav-link" onclick="openTab('manageItems');" style="color: goldenrod"><i class="bi bi-pencil"></i> Items</button>
+                        <button id="manageItemsLink" class="nav-link" onclick="openTab('manageItems');" style="color: goldenrod">
+                            <i class="bi bi-pencil"></i><b> Items</b>
+                        </button>
                     </li>
                     <li class="nav-item" id="manageCampaignList">
-                        <button id="manageCampaignLink" class="nav-link" onclick="openTab('manageCampaign');" style="color: goldenrod"><i class="bi bi-pencil"></i> Campaign</button>
+                        <button id="manageCampaignLink" class="nav-link" onclick="openTab('manageCampaign');" style="color: goldenrod">
+                            <i class="bi bi-pencil"></i><b> Campaign</b>
+                        </button>
+                    </li>
+                    <li class="nav-item" id="manageImagesList">
+                        <button id="manageImagesLink" class="nav-link" onclick="openTab('manageImages');" style="color: goldenrod">
+                            <i class="bi bi-file-image"></i><b> Images</b>
+                        </button>
                     </li>
                     <li class="nav-item" id="manageAuditEventsList">
-                        <button id="manageAuditEventsLink" class="nav-link" onclick="openTab('manageAuditEvents');" style="color: goldenrod"><i class="bi bi-eye"></i> Audit</button>
+                        <button id="manageAuditEventsLink" class="nav-link" onclick="openTab('manageAuditEvents');" style="color: goldenrod">
+                            <i class="bi bi-eye"></i><b> Audit</b>
+                        </button>
                     </li>
                     {{ end }}
                     <li class="nav-item" id="currentList">
@@ -89,8 +106,11 @@
                     <div id="manageCampaign" class="tab-content" style="display: none">
                         <div id="manageCampaignContent" style="margin-top: 0.5em;"></div>
                     </div>
+                    <div id="manageImages" class="tab-content" style="display: none">
+                        <div id="manageImagesContent" style="margin-top: 0.5em;"></div>
+                    </div>
                     <div id="manageAuditEvents" class="tab-content" style="display: none">
-                        <div id="manageCampaignContent" style="margin-top: 0.5em;">
+                        <div id="manageAuditEventsContent" style="margin-top: 0.5em;">
                             {{ if .campaign.UserIsLead }}
                                 <div style="min-height: 15em;">
                                     <h4> Audit Events </h4>
@@ -255,6 +275,8 @@
                 document.getElementById('manageItemsContent').innerHTML = html;
             } else if (payLoad.type === 555) {
                 document.getElementById('manageCampaignContent').innerHTML = html;
+            } else if (payLoad.type === 556) {
+                document.getElementById('manageImagesContent').innerHTML = html;
             } else {
                 console.error("Type '" + payLoad.type + "' not handled by 'Parse Management Events'")
             }
@@ -645,6 +667,14 @@
     let submitRemoveCharacter = (characterId, characterName) => {
         if (characterId && confirm("Are you sure you want to delete Character: '" + characterName + "'?")) {
             sendEvent(wrapMessage(JSON.stringify(characterId), 5523));
+        } else {
+            stopLoadSpinner();
+        }
+    }
+
+    let submitRemoveMap = (mapId, mapName) => {
+        if (mapId && confirm("Are you sure you want to delete Map: '" + mapName + "'?")) {
+            sendEvent(wrapMessage(JSON.stringify(mapId), 5512));
         } else {
             stopLoadSpinner();
         }
@@ -1258,6 +1288,9 @@
         }
         if (targetId === 'manageCampaign') {
             sendEvent(wrapMessage(JSON.stringify({}), 555));
+        }
+        if (targetId === 'manageImages') {
+            sendEvent(wrapMessage(JSON.stringify({}), 556));
         }
         {{ end }}
     }

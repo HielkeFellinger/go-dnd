@@ -882,6 +882,7 @@ func (e *baseEventMessageHandler) typeLoadUpsertMap(message EventMessage, pool C
 }
 
 func (e *baseEventMessageHandler) typeRemoveMap(message EventMessage, pool CampaignPool) error {
+	// TODO
 	//// Check if user is lead
 	//if message.Source != pool.GetLeadId() {
 	//	return errors.New("modifying maps is not allowed as non-lead")
