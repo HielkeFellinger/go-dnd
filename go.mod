@@ -1,6 +1,7 @@
 module github.com/hielkefellinger/go-dnd
 
 go 1.22
+toolchain go1.23.7
 
 require (
 	github.com/gin-gonic/gin v1.10.0
@@ -9,7 +10,7 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/joho/godotenv v1.5.1
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/crypto v0.33.0
+	golang.org/x/crypto v0.35.0
 	golang.org/x/net v0.35.0
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/postgres v1.5.11
