@@ -3,6 +3,7 @@ package ecs_components
 import (
 	"github.com/google/uuid"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
+	"golang.org/x/net/html"
 )
 
 type DamageComponent struct {
@@ -30,7 +31,7 @@ func (c *DamageComponent) ParseToRawComponent() (ecs.RawComponent, error) {
 	rawComponent := ecs.RawComponent{
 		ComponentType: ecs.TypeNameToNthBit[c.ComponentType()].Name,
 		Params: map[string]string{
-			"amount": c.Amount,
+			"amount": html.EscapeString(html.UnescapeString(c.Amount)),
 		},
 	}
 	return rawComponent, nil

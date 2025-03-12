@@ -64,7 +64,7 @@ func (e *baseEventMessageHandler) loadCharactersDetailBasics(message EventMessag
 	return nil
 }
 
-func (e *baseEventMessageHandler) loadCharactersDetails(message EventMessage, pool CampaignPool) error {
+func (e *baseEventMessageHandler) typeLoadCharactersDetails(message EventMessage, pool CampaignPool) error {
 	return e.loadCharactersDetailBasics(message, pool, TypeLoadCharactersDetails, ecs_model_translation.DEFAULT,
 		[]string{"characterDetails.html"}, "characterDetails")
 }
@@ -74,7 +74,7 @@ func (e *baseEventMessageHandler) typeLoadCharactersDetailsInventories(message E
 		[]string{"characterDetailsInventories.html", "inventory.html"}, "characterDetailsInventories")
 }
 
-func (e *baseEventMessageHandler) loadCharacters(message EventMessage, pool CampaignPool) error {
+func (e *baseEventMessageHandler) typeLoadCharacters(message EventMessage, pool CampaignPool) error {
 	var transmitMessage = NewEventMessage()
 	transmitMessage.Type = TypeLoadCharacters
 	transmitMessage.Source = message.Source
@@ -205,11 +205,11 @@ func (e *baseEventMessageHandler) typeUpdateCharacterUsers(message EventMessage,
 		var reloadCharRibbon = NewEventMessage()
 		reloadCharRibbon.Source = ServerUser
 		reloadCharRibbon.Type = TypeLoadCharacters
-		e.loadCharacters(reloadCharRibbon, pool)
+		_ = e.typeLoadCharacters(reloadCharRibbon, pool)
 
 		// Update possible maps with this char
-		if err := e.updateAllPossibleMapsOfChar(pool, uuidCharFilter); err != nil {
-			return err
+		if uErr := e.updateAllPossibleMapsOfChar(pool, uuidCharFilter); uErr != nil {
+			return uErr
 		}
 
 		// Remove Char details on players who should not see it anymore
@@ -218,8 +218,8 @@ func (e *baseEventMessageHandler) typeUpdateCharacterUsers(message EventMessage,
 			closeCharDetailMessage.Source = characterToPlayerLink.PlayerName
 			closeCharDetailMessage.Type = TypeLoadCharactersDetails
 			closeCharDetailMessage.Body = charEntity.GetId().String()
-			if err := e.loadCharactersDetails(closeCharDetailMessage, pool); err != nil {
-				return err
+			if sendErr := e.typeLoadCharactersDetails(closeCharDetailMessage, pool); sendErr != nil {
+				return sendErr
 			}
 		}
 	}
@@ -303,14 +303,14 @@ func (e *baseEventMessageHandler) typeUpdateCharacterHealth(message EventMessage
 	var reloadCharDetailMessage = NewEventMessage()
 	reloadCharDetailMessage.Source = ServerUser
 	reloadCharDetailMessage.Body = characterHealth.Id
-	loadCharErr := e.loadCharactersDetails(reloadCharDetailMessage, pool)
+	loadCharErr := e.typeLoadCharactersDetails(reloadCharDetailMessage, pool)
 	if loadCharErr != nil {
 		return loadCharErr
 	}
 
 	// Update all maps with char
-	if err := e.updateAllPossibleMapsOfChar(pool, uuidCharFilter); err != nil {
-		return err
+	if updateErr := e.updateAllPossibleMapsOfChar(pool, uuidCharFilter); updateErr != nil {
+		return updateErr
 	}
 
 	return nil

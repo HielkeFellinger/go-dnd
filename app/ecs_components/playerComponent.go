@@ -31,7 +31,7 @@ func (c *PlayerComponent) ParseToRawComponent() (ecs.RawComponent, error) {
 	rawComponent := ecs.RawComponent{
 		ComponentType: ecs.TypeNameToNthBit[c.ComponentType()].Name,
 		Params: map[string]string{
-			"name": html.EscapeString(c.Name),
+			"name": html.EscapeString(html.UnescapeString(c.Name)),
 		},
 	}
 	return rawComponent, nil

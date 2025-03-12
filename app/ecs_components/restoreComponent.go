@@ -31,7 +31,7 @@ func (c *RestoreComponent) ParseToRawComponent() (ecs.RawComponent, error) {
 	rawComponent := ecs.RawComponent{
 		ComponentType: ecs.TypeNameToNthBit[c.ComponentType()].Name,
 		Params: map[string]string{
-			"amount": html.EscapeString(c.Amount),
+			"amount": html.EscapeString(html.UnescapeString(c.Amount)),
 		},
 	}
 	return rawComponent, nil

@@ -37,8 +37,8 @@ func saveGame(world ecs.World, gameFile string) error {
 
 	// Save the file
 	log.Println("Attempting to save campaign to file")
-	if err := os.WriteFile(gameFile, gameFileContent, 0644); err != nil {
-		return err
+	if writeErr := os.WriteFile(gameFile, gameFileContent, 0644); writeErr != nil {
+		return writeErr
 	}
 	log.Println("Saved the game")
 
@@ -46,9 +46,9 @@ func saveGame(world ecs.World, gameFile string) error {
 }
 
 func parseEntityIntoRawEntity(entities []ecs.Entity) []ecs.RawEntity {
-	rawEntities := make([]ecs.RawEntity, len(entities))
+	rawEntities := make([]ecs.RawEntity, 0)
 
-	for index, entity := range entities {
+	for _, entity := range entities {
 		// Skip nil entity; may be a leftover of slices.delete not reducing the total size of the underlying array.
 		if entity == nil {
 			continue
@@ -60,21 +60,25 @@ func parseEntityIntoRawEntity(entities []ecs.Entity) []ecs.RawEntity {
 			Description: entity.GetDescription(),
 			Components:  parseComponentsToRawComponents(entity.GetAllComponents()),
 		}
-		rawEntities[index] = rawEntity
+		rawEntities = append(rawEntities, rawEntity)
 	}
 	return rawEntities
 }
 
 func parseComponentsToRawComponents(components []ecs.Component) []ecs.RawComponent {
-	rawComponents := make([]ecs.RawComponent, len(components))
-	for index, component := range components {
+	rawComponents := make([]ecs.RawComponent, 0)
+
+	log.Printf("-!@#!@#!@# components: '%v'", components)
+	for _, component := range components {
 		// Skip nil components; may be a leftover of slices.delete not reducing the total size of the underlying array.
 		if component == nil {
 			continue
 		}
 
 		if rawComponent, err := component.ParseToRawComponent(); err == nil {
-			rawComponents[index] = rawComponent
+			rawComponents = append(rawComponents, rawComponent)
+		} else {
+			log.Printf("Error parsing component of type: '%v' with error message: '%s'", component, err.Error())
 		}
 	}
 	return rawComponents

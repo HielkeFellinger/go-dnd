@@ -39,7 +39,7 @@ func (c *StatComponent) ParseToRawComponent() (ecs.RawComponent, error) {
 	rawComponent := ecs.RawComponent{
 		ComponentType: ecs.TypeNameToNthBit[c.ComponentType()].Name,
 		Params: map[string]string{
-			"name":  html.EscapeString(c.Name),
+			"name":  html.EscapeString(html.UnescapeString(c.Name)),
 			"value": strconv.Itoa(int(c.Value)),
 		},
 	}

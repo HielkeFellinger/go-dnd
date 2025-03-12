@@ -42,9 +42,9 @@ func (c *FactionComponent) ParseToRawComponent() (ecs.RawComponent, error) {
 	rawComponent := ecs.RawComponent{
 		ComponentType: ecs.TypeNameToNthBit[c.ComponentType()].Name,
 		Params: map[string]string{
-			"name":        html.EscapeString(c.Name),
-			"description": html.EscapeString(c.Description),
-			"colour_hex":  html.EscapeString(c.ColourHex),
+			"name":        html.EscapeString(html.UnescapeString(c.Name)),
+			"description": html.EscapeString(html.UnescapeString(c.Description)),
+			"colour_hex":  html.EscapeString(html.UnescapeString(c.ColourHex)),
 		},
 	}
 	return rawComponent, nil

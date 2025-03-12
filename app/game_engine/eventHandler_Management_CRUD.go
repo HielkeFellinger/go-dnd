@@ -730,13 +730,13 @@ func (e *baseEventMessageHandler) typeUpsertCharacter(message EventMessage, pool
 	var reloadCharRibbon = NewEventMessage()
 	reloadCharRibbon.Source = ServerUser
 	reloadCharRibbon.Type = TypeLoadCharacters
-	_ = e.loadCharacters(reloadCharRibbon, pool)
+	_ = e.typeLoadCharacters(reloadCharRibbon, pool)
 
 	var closeCharDetailMessage = NewEventMessage()
 	closeCharDetailMessage.Source = ServerUser
 	closeCharDetailMessage.Type = TypeLoadCharactersDetails
 	closeCharDetailMessage.Body = charEntity.GetId().String()
-	if err := e.loadCharactersDetails(closeCharDetailMessage, pool); err != nil {
+	if err := e.typeLoadCharactersDetails(closeCharDetailMessage, pool); err != nil {
 		return err
 	}
 
@@ -835,7 +835,7 @@ func (e *baseEventMessageHandler) typeRemoveCharacter(message EventMessage, pool
 				var reloadCharRibbon = NewEventMessage()
 				reloadCharRibbon.Source = ServerUser
 				reloadCharRibbon.Type = TypeLoadCharacters
-				_ = e.loadCharacters(reloadCharRibbon, pool)
+				_ = e.typeLoadCharacters(reloadCharRibbon, pool)
 			}
 
 		} else {
@@ -882,24 +882,63 @@ func (e *baseEventMessageHandler) typeLoadUpsertMap(message EventMessage, pool C
 }
 
 func (e *baseEventMessageHandler) typeRemoveMap(message EventMessage, pool CampaignPool) error {
-	// TODO
-	//// Check if user is lead
-	//if message.Source != pool.GetLeadId() {
-	//	return errors.New("modifying maps is not allowed as non-lead")
-	//}
-	//
-	//// Undo escaping
-	//clearedBody := html.UnescapeString(message.Body)
-	//
-	//uuidMapFilter, err := helpers.ParseStringToUuid(clearedBody)
-	//
-	//if err != nil {
-	//
-	//} else {
-	//
-	//}
+	// Check if user is lead
+	if message.Source != pool.GetLeadId() {
+		return errors.New("modifying maps is not allowed as non-lead")
+	}
 
-	return nil
+	// Undo escaping
+	clearedBody := html.UnescapeString(message.Body)
+	if uuidMapFilter, err := helpers.ParseStringToUuid(clearedBody); err == nil {
+		if mapInstance, match := pool.GetEngine().GetWorld().GetMapEntityByUuid(uuidMapFilter); match {
+			// Check if map is allowed to be removed
+			rawMapComponents := mapInstance.GetAllComponentsOfType(ecs.MapComponentType)
+			rawMapItemRelComponents := mapInstance.GetAllComponentsOfType(ecs.MapItemRelationComponentType)
+			if len(rawMapComponents) > 0 {
+				mapComponent := rawMapComponents[0].(*ecs_components.MapComponent)
+				// Map is only allowed to be deleted if not active and contains no refs to other items
+				if !mapComponent.Active && len(rawMapItemRelComponents) == 0 {
+
+					// Delete
+					if remErr := pool.GetEngine().GetWorld().RemoveEntity(mapInstance); remErr != nil {
+						return SendManagementError("Error", remErr.Error(), pool)
+					}
+
+					// Ensure hiding of map
+					mapActivity := SetActivity{
+						Id:     uuidMapFilter.String(),
+						Active: false,
+					}
+					if rawJsonBytes, marshalErr := json.Marshal(mapActivity); marshalErr == nil {
+						var updateMessage = NewEventMessage()
+						updateMessage.Type = TypeUpdateMapVisibility
+						updateMessage.Body = string(rawJsonBytes)
+						updateMessage.Destinations = pool.GetAllClientIds()
+						pool.TransmitEventMessage(updateMessage)
+					}
+
+					// Reload Maps overview and empty right bar.
+					eventMessageIdBody := EventMessageIdBody{
+						Id: uuidMapFilter.String(),
+					}
+					removeMapMessage := NewEventMessage()
+					removeMapMessage.Type = TypeRemoveMap
+					removeMapMessage.Source = pool.GetLeadId()
+					removeMapMessage.Body = eventMessageIdBody.ToBodyString()
+					removeMapMessage.Destinations = append(message.Destinations, pool.GetLeadId())
+					pool.TransmitEventMessage(removeMapMessage)
+					if typeManageMapsErr := e.typeManageMaps(removeMapMessage, pool); typeManageMapsErr != nil {
+						return SendManagementError("Error", typeManageMapsErr.Error(), pool)
+					}
+					return nil
+				} else {
+					return SendManagementError("Error", "Can not delete map if it is active and or "+
+						"contains items; please remove first", pool)
+				}
+			}
+		}
+	}
+	return SendManagementError("Error", "Could not find requested map to delete", pool)
 }
 
 func (e *baseEventMessageHandler) typeUpsertMap(message EventMessage, pool CampaignPool) error {

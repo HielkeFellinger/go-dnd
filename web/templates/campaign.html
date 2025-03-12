@@ -292,16 +292,18 @@
 
             if (payLoad.type === 5511) {
                 handleRightBarCrudHtml(payLoad); // Maps
+            } else if (payLoad.type === 5512) {
+                clearRightBarContent(); // Remove Maps
             } else if (payLoad.type === 5521) {
                 handleRightBarCrudHtml(payLoad); // Character
-            } else if (payLoad.type === 5531) {
-                handleRightBarCrudHtml(payLoad); // Inventory
-            } else if (payLoad.type === 5541) {
-                handleRightBarCrudHtml(payLoad); // Items
             } else if (payLoad.type === 5523) {
                 clearRightBarContent(); // Remove Character
+            } else if (payLoad.type === 5531) {
+                handleRightBarCrudHtml(payLoad); // Inventory
             } else if (payLoad.type === 5533) {
                 clearRightBarContent(); // Remove Inventory
+            } else if (payLoad.type === 5541) {
+                handleRightBarCrudHtml(payLoad); // Items
             } else {
                 console.error("Type '" + payLoad.type + "' not handled by 'Parse Management Events'")
             }

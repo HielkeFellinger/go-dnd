@@ -36,8 +36,8 @@ func (c *CharacterComponent) ParseToRawComponent() (ecs.RawComponent, error) {
 	rawComponent := ecs.RawComponent{
 		ComponentType: ecs.TypeNameToNthBit[c.ComponentType()].Name,
 		Params: map[string]string{
-			"name":        html.EscapeString(c.Name),
-			"description": html.EscapeString(c.Description),
+			"name":        html.EscapeString(html.UnescapeString(c.Name)),
+			"description": html.EscapeString(html.UnescapeString(c.Description)),
 		},
 	}
 	return rawComponent, nil

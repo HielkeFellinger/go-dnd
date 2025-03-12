@@ -57,8 +57,8 @@ func (c *ImageComponent) ParseToRawComponent() (ecs.RawComponent, error) {
 	rawComponent := ecs.RawComponent{
 		ComponentType: ecs.TypeNameToNthBit[c.ComponentType()].Name,
 		Params: map[string]string{
-			"name":   html.EscapeString(c.Name),
-			"url":    html.EscapeString(c.Url),
+			"name":   html.EscapeString(html.UnescapeString(c.Name)),
+			"url":    html.EscapeString(html.UnescapeString(c.Url)),
 			"active": strconv.FormatBool(c.Active),
 			"base64": c.Base64,
 		},

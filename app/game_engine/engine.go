@@ -9,7 +9,7 @@ import (
 
 type Engine interface {
 	GetWorld() ecs.World
-	SaveWorld(campaignId uint) error
+	SaveWorld(world ecs.World, campaignId uint) error
 	GetEventMessageHandler() EventMessageHandler
 }
 
@@ -26,7 +26,7 @@ func (e *baseEngine) GetEventMessageHandler() EventMessageHandler {
 	return e.EventHandler
 }
 
-func (e *baseEngine) SaveWorld(campaignId uint) error {
+func (e *baseEngine) SaveWorld(world ecs.World, campaignId uint) error {
 	baseLocation := os.Getenv("CAMPAIGN_DATA_DIR") + "/" + strconv.Itoa(int(campaignId))
 
 	if _, err := os.Stat(baseLocation + "/save"); os.IsNotExist(err) {
@@ -42,7 +42,7 @@ func (e *baseEngine) SaveWorld(campaignId uint) error {
 
 	gameFile := baseLocation + "/save/" + "campaign.yml"
 
-	return saveGame(e.World, gameFile)
+	return saveGame(world, gameFile)
 }
 
 func InitGameEngine(campaign models.Campaign) Engine {

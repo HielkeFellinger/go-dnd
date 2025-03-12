@@ -26,7 +26,7 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 
 	if message.Type == TypeLoadFullGame {
 		log.Printf("- Load Full Game Type: '%d' Message: '%s'", message.Type, message.Id)
-		if err := e.loadCharacters(message, pool); err != nil {
+		if err := e.typeLoadCharacters(message, pool); err != nil {
 			return err
 		}
 		if err := e.typeLoadMap(message, pool); err != nil {
@@ -43,9 +43,9 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 		log.Printf("- Char. Load Event Type: '%d' Message: '%s'", message.Type, message.Id)
 
 		if message.Type == TypeLoadCharacters {
-			return e.loadCharacters(message, pool)
+			return e.typeLoadCharacters(message, pool)
 		} else if message.Type == TypeLoadCharactersDetails {
-			return e.loadCharactersDetails(message, pool)
+			return e.typeLoadCharactersDetails(message, pool)
 		} else if message.Type == TypeLoadCharactersDetailsInventories {
 			return e.typeLoadCharactersDetailsInventories(message, pool)
 		}
@@ -181,8 +181,7 @@ func (e *baseEventMessageHandler) handleLoadHtmlBodyMultipleTemplateFiles(fileNa
 
 	var buf bytes.Buffer
 	tmpl := template.Must(template.ParseFiles(files...))
-	err := tmpl.ExecuteTemplate(&buf, templateName, data)
-	if err != nil {
+	if err := tmpl.ExecuteTemplate(&buf, templateName, data); err != nil {
 		log.Printf("Error parsing %v `%s`", fileNames, err.Error())
 	}
 	return string(buf.Bytes())

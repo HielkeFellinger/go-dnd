@@ -134,8 +134,7 @@ func (e *BaseEntity) AddComponent(c Component) error {
 	}
 
 	// Check Nesting
-	err := e.checkIfRelationalComponentIsAllowedToBeAdded(c)
-	if err != nil {
+	if err := e.checkIfRelationalComponentIsAllowedToBeAdded(c); err != nil {
 		return err
 	}
 
@@ -224,7 +223,8 @@ func (e *BaseEntity) GetAllComponents() []Component {
 func (e *BaseEntity) isComponentTypeAllowedToBeAdded(c Component) bool {
 	if !c.AllowMultipleOfType() {
 		for _, component := range e.Components {
-			if component.ComponentType() == c.ComponentType() {
+			// Skip nil components; may be a leftover of slices.delete not reducing the total size of the underlying array.
+			if component != nil && component.ComponentType() == c.ComponentType() {
 				return false
 			}
 		}

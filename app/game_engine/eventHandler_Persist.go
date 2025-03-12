@@ -22,7 +22,7 @@ func (e *baseEventMessageHandler) typeGameSave(message EventMessage, pool Campai
 		return errors.New("saving game is not allowed as non-lead")
 	}
 
-	if err := pool.GetEngine().SaveWorld(pool.GetId()); err != nil {
+	if err := pool.GetEngine().SaveWorld(pool.GetEngine().GetWorld(), pool.GetId()); err != nil {
 		return err
 	}
 
