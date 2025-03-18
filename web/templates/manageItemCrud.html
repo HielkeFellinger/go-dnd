@@ -32,6 +32,32 @@
             <label for="description">Description</label>
             <textarea name="description" class="form-control" id="description" placeholder="Description">{{ if and .Item .Item.Description }}{{.Item.Description}}{{end}}</textarea>
         </div>
+        <div class="form-group">
+            <label for="image">{{ if not .Item }}Set{{else}}Update{{end}} Item Image</label>
+            <input type="file" name="image" accept="image/svg+xml,image/png,image/gif,image/jpeg" class="form-control"
+                   id="image" placeholder="Image">
+        </div>
+        <div class="form-group">
+            <label for="imageName">Item Image Name</label>
+            <input type="text" name="imageName" class="form-control" id="imageName" placeholder="Image Name">
+        </div>
+        {{ if .Item }}
+        <div style="display: flex; flex-direction: row; flex-grow: 3; flex-shrink: 1; flex-wrap: wrap">
+            {{ range $image := .Item.Images }}
+                <div style="flex: 1 1 0;">
+                    <div id="image_title_{{$image.Id}}" style="width: 100%; align-content: center">{{$image.Name}}</div>
+                    <div id="image_{{$image.Id}}" style="background-image:url('{{$image.Url}}'); min-width: 10em; min-height: 10em;
+                            max-width: 10em; max-height: 10em; background-size: 100%; background-repeat: no-repeat; margin-right: 0.5em">
+                        <button id="btn_remove_{{$image.Id}}" class="btn btn-danger" onclick="handleRemovalOfImagesRequest('{{$image.Id}}')"
+                                title="Remove Image" style="margin-top: auto; height: 2.5em; width: 2.5em; margin-top: 0.3em; margin-left: 0.35em;">
+                            <b>x</b>
+                        </button>
+                    </div>
+                </div>
+            {{end}}
+            <input id="removeImages" name="removeImages" hidden>
+        </div>
+        {{end}}
         <div style="display: flex; flex-direction: row; flex-grow: 2;  flex-wrap: wrap">
             <div class="form-group" style="margin-right: 2em;">
                 <label for="damage">Damage</label>

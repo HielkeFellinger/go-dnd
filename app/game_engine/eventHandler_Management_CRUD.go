@@ -55,7 +55,7 @@ func (e *baseEventMessageHandler) typeLoadUpsertInventory(message EventMessage, 
 			return errors.New("no inventories found with matching identifier")
 		}
 	}
-	parsedItems := make([]*models.CampaignInventoryItem, 0)
+	parsedItems := make([]models.CampaignInventoryItem, 0)
 	allItemEntities := pool.GetEngine().GetWorld().GetItemEntities()
 	for _, itemEntity := range allItemEntities {
 		parsedItems = append(parsedItems, ecs_model_translation.ItemEntityToCampaignInventoryItem(itemEntity, 0))
@@ -1100,6 +1100,7 @@ type characterUpsertRequest struct {
 	PlayerPlayable bool               `json:"PlayerPlayable"`
 	AddInventory   bool               `json:"AddInventory"`
 	Hidden         bool               `json:"Hidden"`
+	RemoveImages   []string           `json:"RemoveImages"`
 }
 
 type mapUpsertRequest struct {
@@ -1114,12 +1115,15 @@ type mapUpsertRequest struct {
 }
 
 type itemUpsertRequest struct {
-	Id          string `json:"Id"`
-	Name        string `json:"Name"`
-	Description string `json:"Description"`
-	Damage      string `json:"Damage"`
-	Restore     string `json:"Restore"`
-	RangeMin    string `json:"RangeMin"`
-	RangeMax    string `json:"RangeMax"`
-	Weight      string `json:"Weight"`
+	Id           string             `json:"Id"`
+	Name         string             `json:"Name"`
+	Description  string             `json:"Description"`
+	Damage       string             `json:"Damage"`
+	Restore      string             `json:"Restore"`
+	RangeMin     string             `json:"RangeMin"`
+	RangeMax     string             `json:"RangeMax"`
+	Weight       string             `json:"Weight"`
+	Image        helpers.FileUpload `json:"Image"`
+	ImageName    string             `json:"ImageName"`
+	RemoveImages []string           `json:"RemoveImages"`
 }

@@ -232,6 +232,32 @@ func upsertCharacter(charUpdateRequest characterUpsertRequest, pool CampaignPool
 		}
 	}
 
+	// Update the needed removal of images
+	if !isNewEntry && len(charUpdateRequest.RemoveImages) > 0 {
+		var imageComponents = rawCharEntity.GetAllComponentsOfType(ecs.ImageComponentType)
+		for index := range imageComponents {
+			imageComponent := imageComponents[index].(*ecs_components.ImageComponent)
+			if slices.Contains(charUpdateRequest.RemoveImages, imageComponent.GetId().String()) {
+				rawCharEntity.RemoveComponentByUuid(imageComponent.GetId())
+			}
+		}
+
+		// Reload minus removed; set at least one of the leftover image to active
+		imageComponents = rawCharEntity.GetAllComponentsOfType(ecs.ImageComponentType)
+		var firstImageComponent *ecs_components.ImageComponent
+		var hasActive = false
+		for index := range imageComponents {
+			imageComponent := imageComponents[index].(*ecs_components.ImageComponent)
+			if index == 0 {
+				firstImageComponent = imageComponent
+			}
+			hasActive = hasActive || imageComponent.Active
+		}
+		if firstImageComponent != nil && !hasActive {
+			firstImageComponent.Active = true
+		}
+	}
+
 	// Add Char Entity
 	if isNewEntry {
 		if addErr := pool.GetEngine().GetWorld().AddEntity(rawCharEntity); addErr != nil {
@@ -346,7 +372,7 @@ func upsertMap(mapUpdateRequest mapUpsertRequest, pool CampaignPool) (ecs.Entity
 			}
 			hasActive = hasActive || imageComponent.Active
 		}
-		if !hasActive {
+		if firstImageComponent != nil && !hasActive {
 			firstImageComponent.Active = true
 		}
 	}
@@ -480,6 +506,49 @@ func upsertItem(itemUpsertRequest itemUpsertRequest, pool CampaignPool) (ecs.Ent
 			weightComponent = components[0].(*ecs_components.WeightComponent)
 		}
 		weightComponent.Amount = html.EscapeString(html.UnescapeString(itemUpsertRequest.Weight))
+	}
+
+	// Update Image if needed
+	if itemUpsertRequest.Image != (helpers.FileUpload{}) && itemUpsertRequest.ImageName != "" {
+		// Handle file-upload
+		link, imageErr := helpers.SaveImageToCampaign(itemUpsertRequest.Image, pool.GetId(), itemUpsertRequest.ImageName)
+		if imageErr != nil {
+			return nil, SendManagementError("Error", imageErr.Error(), pool)
+		}
+		imageComponent := ecs_components.NewImageComponent().(*ecs_components.ImageComponent)
+		imageComponent.Name = html.EscapeString(html.UnescapeString(itemUpsertRequest.ImageName))
+		imageComponent.Active = isNewEntity
+		imageComponent.Url = link
+		imageComponent.Version = 1
+		if addErr := rawItemEntity.AddComponent(imageComponent); addErr != nil {
+			return nil, SendManagementError("Error", addErr.Error(), pool)
+		}
+	}
+
+	// Update the needed removal of images
+	if !isNewEntity && len(itemUpsertRequest.RemoveImages) > 0 {
+		var imageComponents = rawItemEntity.GetAllComponentsOfType(ecs.ImageComponentType)
+		for index := range imageComponents {
+			imageComponent := imageComponents[index].(*ecs_components.ImageComponent)
+			if slices.Contains(itemUpsertRequest.RemoveImages, imageComponent.GetId().String()) {
+				rawItemEntity.RemoveComponentByUuid(imageComponent.GetId())
+			}
+		}
+
+		// Reload minus removed; set at least one of the leftover image to active
+		imageComponents = rawItemEntity.GetAllComponentsOfType(ecs.ImageComponentType)
+		var firstImageComponent *ecs_components.ImageComponent
+		var hasActive = false
+		for index := range imageComponents {
+			imageComponent := imageComponents[index].(*ecs_components.ImageComponent)
+			if index == 0 {
+				firstImageComponent = imageComponent
+			}
+			hasActive = hasActive || imageComponent.Active
+		}
+		if firstImageComponent != nil && !hasActive {
+			firstImageComponent.Active = true
+		}
 	}
 
 	// Add new Item Entity

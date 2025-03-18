@@ -63,6 +63,23 @@
                     value="{{ if and .Character .Character.Health }}{{ .Character.Health.MaximumHitPoints }}{{end}}" />
             </div>
         </div>
+        {{ if .Character }}
+        <div style="display: flex; flex-direction: row; flex-grow: 3; flex-shrink: 1; flex-wrap: wrap">
+            {{ range $image := .Character.Images }}
+                <div style="flex: 1 1 0;">
+                    <div id="image_title_{{$image.Id}}" style="width: 100%; align-content: center">{{$image.Name}}</div>
+                    <div id="image_{{$image.Id}}" style="background-image:url('{{$image.Url}}'); min-width: 10em; min-height: 10em;
+                            max-width: 10em; max-height: 10em; background-size: 100%; background-repeat: no-repeat; margin-right: 0.5em">
+                        <button id="btn_remove_{{$image.Id}}" class="btn btn-danger" onclick="handleRemovalOfImagesRequest('{{$image.Id}}')"
+                                title="Remove Image" style="margin-top: auto; height: 2.5em; width: 2.5em; margin-top: 0.3em; margin-left: 0.35em;">
+                            <b>x</b>
+                        </button>
+                    </div>
+                </div>
+            {{end}}
+            <input id="removeImages" name="removeImages" hidden>
+        </div>
+       {{end}}
         <div style="display: flex; flex-direction: row; flex-grow: 2;  flex-wrap: wrap; padding-top: 1em;">
             <div class="form-group">
                 <label for="playerPlayable"> Player Playable </label>

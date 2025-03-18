@@ -1,5 +1,15 @@
 package models
 
+func GetCampaignInventory() CampaignInventory {
+	return CampaignInventory{
+		Size:              0,
+		Slots:             "0",
+		ShowDetailButtons: true,
+		Items:             make([]CampaignInventoryItem, 0),
+		LinkedInventories: make([]CampaignLinkedInventory, 0),
+	}
+}
+
 type CampaignInventory struct {
 	Id                string
 	Description       string
@@ -19,6 +29,12 @@ type CampaignLinkedInventory struct {
 	Name        string
 }
 
+func GetCampaignInventoryItem() CampaignInventoryItem {
+	return CampaignInventoryItem{
+		Images: make([]CampaignImage, 0),
+	}
+}
+
 type CampaignInventoryItem struct {
 	Id          string
 	Count       uint
@@ -29,6 +45,7 @@ type CampaignInventoryItem struct {
 	Range       CampaignInventoryItemRange
 	Weight      string
 	Image       CampaignImage
+	Images      []CampaignImage
 }
 
 type CampaignInventoryItemRange struct {

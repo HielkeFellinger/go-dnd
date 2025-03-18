@@ -118,7 +118,6 @@ func (e *BaseEntity) RemoveComponentByUuid(uuid uuid.UUID) bool {
 		}
 		return true
 	}
-
 	return false
 }
 

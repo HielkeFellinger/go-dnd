@@ -68,7 +68,6 @@ func parseEntityIntoRawEntity(entities []ecs.Entity) []ecs.RawEntity {
 func parseComponentsToRawComponents(components []ecs.Component) []ecs.RawComponent {
 	rawComponents := make([]ecs.RawComponent, 0)
 
-	log.Printf("-!@#!@#!@# components: '%v'", components)
 	for _, component := range components {
 		// Skip nil components; may be a leftover of slices.delete not reducing the total size of the underlying array.
 		if component == nil {

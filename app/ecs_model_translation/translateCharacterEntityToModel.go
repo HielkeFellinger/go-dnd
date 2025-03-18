@@ -33,15 +33,20 @@ func CharacterEntityToCampaignCharacterModel(rawCharacterEntity ecs.Entity, mode
 			character.Description = characterComponent.Description
 		}
 
-		// Get Possible Image
-		imagePlaceholder := ecs_components.NewMissingImageComponent()
+		// Get Possible Images
 		characterImages := rawCharacterEntity.GetAllComponentsOfType(ecs.ImageComponentType)
-		if len(characterImages) >= 1 {
-			imagePlaceholder = characterImages[0].(*ecs_components.ImageComponent)
-		}
-		character.Image = models.CampaignImage{
-			Name: imagePlaceholder.Name,
-			Url:  imagePlaceholder.Url,
+		for index, image := range characterImages {
+			currentImage := image.(*ecs_components.ImageComponent)
+			charImage := models.CampaignImage{
+				Id:   currentImage.Id.String(),
+				Name: currentImage.Name,
+				Url:  currentImage.Url,
+			}
+
+			if index == 0 || currentImage.Active {
+				character.Image = charImage
+			}
+			character.Images = append(character.Images, charImage)
 		}
 
 		// Check Ownership

@@ -12,6 +12,7 @@ type CampaignCharacter struct {
 	Health      CampaignCharacterHealth
 	Inventories []CampaignInventory
 	Controllers []string
+	Images      []CampaignImage
 }
 
 type CampaignDropdownCharacter struct {
@@ -39,6 +40,7 @@ func GetNewCampaignCharacter() CampaignCharacter {
 	return CampaignCharacter{
 		Inventories: make([]CampaignInventory, 0),
 		Controllers: make([]string, 0),
+		Images:      make([]CampaignImage, 0),
 	}
 }
 

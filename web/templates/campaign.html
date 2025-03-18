@@ -604,7 +604,29 @@
             item.RangeMin = formData.get('rangeMin');
             item.RangeMax = formData.get('rangeMax');
             item.Weight = formData.get('weight');
-            sendEvent(wrapMessage(JSON.stringify(item), 5542));
+            item.RemoveImages = [];
+            if (document.getElementById("removeImages") && document.getElementById("removeImages")["value"]) {
+                let images = document.getElementById("removeImages")["value"];
+                let split = images.split('_');
+                for (const key in split) {
+                    if (split[key]) {
+                        item.RemoveImages.push(split[key]);
+                    }
+                }
+            }
+
+            if (formData.get('image')) {
+                item.ImageName = formData.get('imageName');
+                let sendFunction = (image) => {
+                    item.Image = image;
+                    sendEvent(wrapMessage(JSON.stringify(item), 5542));
+                    stopLoadSpinner();
+                }
+                parseFormFileToBase64(formData.get('image'), sendFunction);
+            } else {
+                // Send without image
+                sendEvent(wrapMessage(JSON.stringify(item), 5542));
+            }
         } else {
             stopLoadSpinner();
         }
@@ -649,6 +671,17 @@
             char.Hidden = "on" === formData.get('hidden');
             char.PlayerPlayable = "on" === formData.get('playerPlayable');
             char.AddInventory = "on" === formData.get('addInventory');
+            char.RemoveImages = [];
+            if (document.getElementById("removeImages") && document.getElementById("removeImages")["value"]) {
+                let images = document.getElementById("removeImages")["value"];
+                let split = images.split('_');
+                for (const key in split) {
+                    if (split[key]) {
+                        char.RemoveImages.push(split[key]);
+                    }
+                }
+            }
+
             if (formData.get('image')) {
                 char.ImageName = formData.get('imageName');
                 let sendFunction = (image) => {

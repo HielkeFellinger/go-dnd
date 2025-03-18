@@ -30,7 +30,7 @@ func (e *baseEventMessageHandler) typeManageItems(message EventMessage, pool Cam
 
 	// Get all Items and parse them to CampaignInventoryItem's
 	data := make(map[string]any)
-	parsedItems := make([]*models.CampaignInventoryItem, 0)
+	parsedItems := make([]models.CampaignInventoryItem, 0)
 	allItemEntities := pool.GetEngine().GetWorld().GetItemEntities()
 	for _, itemEntity := range allItemEntities {
 		if overviewFilter.Filter != "" {
