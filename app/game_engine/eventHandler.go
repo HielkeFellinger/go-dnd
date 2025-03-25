@@ -139,6 +139,8 @@ func (e *baseEventMessageHandler) HandleEventMessage(message EventMessage, pool 
 			return e.typeLoadUpsertItem(message, pool)
 		} else if message.Type == TypeUpsertItem {
 			return e.typeUpsertItem(message, pool)
+		} else if message.Type == TypeRemoveItem {
+			return e.typeRemoveItem(message, pool)
 		} else if message.Type == TypeLoadUpsertCharacter { // Characters
 			return e.typeLoadUpsertCharacter(message, pool)
 		} else if message.Type == TypeUpsertCharacter {

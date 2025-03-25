@@ -304,6 +304,8 @@
                 clearRightBarContent(); // Remove Inventory
             } else if (payLoad.type === 5541) {
                 handleRightBarCrudHtml(payLoad); // Items
+            } else if (payLoad.type === 5543) {
+                clearRightBarContent(); // Remove Items
             } else {
                 console.error("Type '" + payLoad.type + "' not handled by 'Parse Management Events'")
             }
@@ -627,6 +629,14 @@
                 // Send without image
                 sendEvent(wrapMessage(JSON.stringify(item), 5542));
             }
+        } else {
+            stopLoadSpinner();
+        }
+    }
+
+    let submitRemoveItem = (itemId, itemName) => {
+        if (itemId && confirm("Are you sure you want to delete Item: '" + itemName + "'?")) {
+            sendEvent(wrapMessage(JSON.stringify(itemId), 5543));
         } else {
             stopLoadSpinner();
         }

@@ -310,7 +310,6 @@ func (e *baseEventMessageHandler) typeAddItemToInventory(message EventMessage, p
 }
 
 func (e *baseEventMessageHandler) typeRemoveItemFromInventory(message EventMessage, pool CampaignPool) error {
-
 	// Undo escaping
 	clearedBody := html.UnescapeString(message.Body)
 
@@ -1056,6 +1055,63 @@ func (e *baseEventMessageHandler) typeUpsertItem(message EventMessage, pool Camp
 	if typeManageMapsErr := e.typeManageItems(loadUpsertItemMessage, pool); typeManageMapsErr != nil {
 		return SendManagementError("Error", typeManageMapsErr.Error(), pool)
 	}
+	return nil
+}
+
+func (e *baseEventMessageHandler) typeRemoveItem(message EventMessage, pool CampaignPool) error {
+
+	// Check if user is lead
+	if message.Source != pool.GetLeadId() {
+		return errors.New("modifying items is not allowed as non-lead")
+	}
+
+	// Undo escaping
+	clearedBody := html.UnescapeString(message.Body)
+
+	// Check if there is an existing item with the supplied uuid
+	uuidItemFilter, err := helpers.ParseStringToUuid(clearedBody)
+	if err != nil {
+		return SendManagementError("Error", err.Error(), pool)
+	}
+
+	itemEntity, match := pool.GetEngine().GetWorld().GetItemEntityByUuid(uuidItemFilter)
+	if !match || !itemEntity.HasComponentType(ecs.ItemComponentType) {
+		return SendManagementError("Error", "Requested Item could not be found", pool)
+	}
+
+	// Check the removal from all inventories (will not update inventories)
+	for _, inventory := range pool.GetEngine().GetWorld().GetInventoryEntities() {
+		if inventory.HasRelationWithEntityByUuid(itemEntity.GetId()) {
+			// Remove Item from inventory
+			for _, hasRelations := range inventory.GetAllComponentsOfType(ecs.HasRelationComponentType) {
+				hasRelationComponent := hasRelations.(*ecs_components.HasRelationComponent)
+				if hasRelationComponent.Entity.GetId() == itemEntity.GetId() {
+					hasRelationComponent.Entity = nil
+					inventory.RemoveComponentByUuid(hasRelationComponent.Id)
+				}
+			}
+		}
+	}
+
+	// Remove from world
+	if remErr := pool.GetEngine().GetWorld().RemoveEntity(itemEntity); remErr != nil {
+		return SendManagementError("Error", remErr.Error(), pool)
+	}
+
+	// Update screen
+	messageBody := EventMessageIdBody{
+		Id: itemEntity.GetId().String(),
+	}
+	removeItemMessage := NewEventMessage()
+	removeItemMessage.Type = TypeRemoveCharacter
+	removeItemMessage.Source = pool.GetLeadId()
+	removeItemMessage.Body = messageBody.ToBodyString()
+	removeItemMessage.Destinations = append(message.Destinations, pool.GetLeadId())
+	pool.TransmitEventMessage(removeItemMessage)
+	if typeManageItemErr := e.typeManageItems(removeItemMessage, pool); typeManageItemErr != nil {
+		return SendManagementError("Error", typeManageItemErr.Error(), pool)
+	}
+
 	return nil
 }
 

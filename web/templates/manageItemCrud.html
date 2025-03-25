@@ -88,6 +88,9 @@
         <div style="min-height: 4em; width: 12em; display: flex; flex-flow: row;">
             <div style="flex: 1 1 0;">
                 <button id="itemUpsertSubmit" type="submit" class="btn btn-primary" onclick="loadSpinner();submitUpsertItem()">Save</button>
+                {{ if and .Item .Item.Id }}
+                    <button class="btn btn-danger" onclick="loadSpinner();submitRemoveItem('{{.Item.Id}}', '{{.Item.Name}}')">Delete</button>
+                {{end}}
             </div>
             <div id="spinner" style="flex: 1 1 0; display: none">
                 {{ template "diceSpinnerSvg.html" .}}

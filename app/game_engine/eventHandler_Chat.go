@@ -20,9 +20,7 @@ func (e *baseEventMessageHandler) handleChatEventMessage(message EventMessage, p
 
 			if strings.HasPrefix(clearedBody, "/roll") {
 				justPassTroughMessage = false
-				if err := chatCom.handleRollChatCommand(message, pool, clearedBody); err != nil {
-					return err
-				}
+				return chatCom.handleRollChatCommand(message, pool, clearedBody)
 			}
 		}
 
