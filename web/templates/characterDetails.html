@@ -10,7 +10,7 @@
             <b><i class="bi bi-arrow-right"></i></b>
         </button>
     </div>
-    <div style="display: flex; flex-flow: row nowrap; align-content: center; width: 100%; padding-top: 0.25em;">
+    <div style="display: flex; flex-flow: row nowrap; align-content: center; width: 100%; margin-top: 0.5em;">
         <div style="flex: 1 1 0; background-image: url('{{ .character.Image.Url }}'); width: 100%; background-size: 75%; background-repeat: no-repeat; min-height: 5em;">
 
         </div>
@@ -20,8 +20,54 @@
         </div>
     </div>
 
+    <!-- Stats  -->
+    <div style="display: flex; flex-flow: row nowrap; align-content: center; width: 100%; margin-top: 1.5em; min-height: 8.5em; background-color: #222222;">
+        <div style="flex: 1 1 0; position: relative; text-align: center;">
+            <h1>0</h1>
+            <div style="text-align: center; position: absolute; bottom: -0.75em; left: -0.5em; min-width: 100%; max-width: 100%; font-size: smaller;">
+                <input id="statStrength" type="number" style="font-size: 2em; max-width: 3em" min=0 value="0" onchange="updateCharacterStat('{{ .character.Id }}')" disabled /><br>
+                <label for="statStrength">Strength</label>
+            </div>
+        </div>
+        <div style="flex: 1 1 0; position: relative; text-align: center;">
+            <h1>0</h1>
+            <div style="text-align: center; position: absolute; bottom: -0.75em; left: -0.5em; min-width: 100%; max-width: 100%; font-size: smaller;">
+                <input id="statDexterity" type="number" style="font-size: 2em; max-width: 3em" min=0 max=20 value="0" onchange="updateCharacterStat('{{ .character.Id }}')" disabled /><br>
+                <label for="statDexterity">Dexterity</label>
+            </div>
+        </div>
+        <div style="flex: 1 1 0; position: relative; text-align: center;">
+            <h1>0</h1>
+            <div style="text-align: center; position: absolute; bottom: -0.75em; left: -0.5em; min-width: 100%; max-width: 100%; font-size: smaller;">
+                <input id="statConstitution" type="number" style="font-size: 2em; max-width: 3em" min=0 max=20 value="0" onchange="updateCharacterStat('{{ .character.Id }}')" disabled /><br>
+                <label for="statConstitution">Constitution</label>
+            </div>
+        </div>
+        <div style="flex: 1 1 0; position: relative; text-align: center;">
+            <h1>0</h1>
+            <div style="text-align: center; position: absolute; bottom: -0.75em; left: -0.5em; min-width: 100%; max-width: 100%; font-size: smaller;">
+                <input id="statIntelligence" type="number" style="font-size: 2em; max-width: 3em" min=0 max=20 value="0" onchange="updateCharacterStat('{{ .character.Id }}')" disabled /><br>
+                <label for="statIntelligence">Intelligence</label>
+            </div>
+        </div>
+        <div style="flex: 1 1 0; position: relative; text-align: center;">
+            <h1>0</h1>
+            <div style="text-align: center; position: absolute; bottom: -0.75em; left: -0.5em; min-width: 100%; max-width: 100%; font-size: smaller;">
+                <input id="statWisdom" type="number" style="font-size: 2em; max-width: 3em" min=0 max=20 value="0" onchange="updateCharacterStat('{{ .character.Id }}')" disabled /><br>
+                <label for="statWisdom">Wisdom</label>
+            </div>
+        </div>
+        <div style="flex: 1 1 0; position: relative; text-align: center;">
+            <h1>0</h1>
+            <div style="text-align: center; position: absolute; bottom: -0.75em; left: -0.5em; min-width: 100%; max-width: 100%; font-size: smaller;">
+                <input id="statCharisma" type="number" style="font-size: 2em; max-width: 3em" min=0 max=20 value="0" onchange="updateCharacterStat('{{ .character.Id }}')" disabled /><br>
+                <label for="statCharisma">Charisma</label>
+            </div>
+        </div>
+    </div>
+
     <!-- Health  -->
-    <div style="display: flex; flex-flow: row nowrap; align-content: center; width: 100%; padding-top: 0.5em;">
+    <div style="display: flex; flex-flow: row nowrap; align-content: center; width: 100%; padding-top: 1.5em;">
         <div style="flex: 1 1 0;">
             <label for="healthDamage">Current Damage</label><br>
             <input id="healthDamage" type="number" style="font-size: 2em; max-width: 4em" min=0 value="{{ .character.Health.Damage }}"
@@ -39,14 +85,82 @@
         </div>
     </div>
 
+    <!-- Dice and Saves  -->
+    <div style="display: flex; flex-flow: row nowrap; align-content: center; width: 100%; padding-top: 1.5em;">
+        <div style="flex: 1 1 0;">
+            <p>Hit Dice</p>
+            <div style="display: flex; flex-flow: row nowrap; align-content: center;">
+                <div style="flex: 1 1 0;">
+                    <div style="display: flex; flex-flow: column nowrap; align-content: center;">
+                        <div style="flex: 1 1 0; padding-top: 0.75em;">
+                            <label for="hitDiceMax">Max</label>
+                        </div>
+                        <div style="flex: 1 1 0; padding-top: 0.75em;">
+                            <label for="hitDiceCurrent">Current</label>
+                        </div>
+                    </div>
+                </div>
+                <div style="flex: 1 1 0;">
+                    <div style="display: flex; flex-flow: column nowrap; align-content: center;">
+                        <div style="flex: 1 1 0;">
+                            <input id="hitDiceMax" type="number" style="font-size: 1.5em; max-width: 4em" min=0 value="0" disabled />
+                        </div>
+                        <div style="flex: 1 1 0;">
+                            <input id="hitDiceCurrent" type="number" style="font-size: 1.5em; max-width: 4em" min=0 value="0" disabled />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="flex: 1 1 0;">
+            <p>Death Saves</p>
+            <div style="display: flex; flex-flow: row nowrap; align-content: center;">
+                <div style="flex: 1 1 0;">
+                    <div style="display: flex; flex-flow: column nowrap; align-content: center;">
+                        <div style="flex: 1 1 0; padding-top: 0.75em;">
+                            <label for="savesPassed">Passed</label>
+                        </div>
+                        <div style="flex: 1 1 0; padding-top: 0.75em;">
+                            <label for="savesFailed">Failed</label>
+                        </div>
+                    </div>
+                </div>
+                <div style="flex: 1 1 0;">
+                    <div style="display: flex; flex-flow: column nowrap; align-content: center;">
+                        <div style="flex: 1 1 0; padding-top: 1em;">
+                            <input id="savesPassed" type="checkbox" style="font-size: 1.5em; max-width: 4em" min=0 value="0" disabled />
+                            <input id="savesPassed1" type="checkbox" style="font-size: 1.5em; max-width: 4em" min=0 value="0" disabled />
+                            <input id="savesPassed2" type="checkbox" style="font-size: 1.5em; max-width: 4em" min=0 value="0" disabled />
+                        </div>
+                        <div style="flex: 1 1 0; padding-top: 1em;">
+                            <input id="savesFailed" type="checkbox" style="font-size: 1.5em; max-width: 4em" min=0 value="0" disabled />
+                            <input id="savesFailed1" type="checkbox" style="font-size: 1.5em; max-width: 4em" min=0 value="0" disabled />
+                            <input id="savesFailed2" type="checkbox" style="font-size: 1.5em; max-width: 4em" min=0 value="0" disabled />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="flex: 1 1 0;">
+            <label for="armourClass">Armour Class</label><br>
+            <input id="armourClass" type="number" style="font-size: 2em; max-width: 4em; margin-top: 0.25em;" min=0 value="0" disabled />
+        </div>
+    </div>
+
     <div style="width: 100%; padding-top: 1em; flex-flow: column nowrap; align-content: center; width: 100%;">
         <button id="charDetailsStatus" class="btn btn-primary" title="Stats" onclick="" disabled style="width: 100%; text-align: left">
             <b><i class="bi bi-arrow-right"></i> Status</b>
+        </button> <br>
+        <button id="charDetailsSkills" class="btn btn-primary" title="Skills" onclick="" disabled style="width: 100%; text-align: left">
+            <b><i class="bi bi-arrow-right"></i> Skills</b>
         </button> <br>
         <button id="charDetailsInventories" class="btn btn-primary" title="Inventories" style="width: 100%; text-align: left"
                 onclick="charDetailsInventories('{{ .character.Id }}')">
             <b><i class="bi bi-arrow-right"></i> Inventory</b>
         </button>
+        <button id="charDetailsNotes" class="btn btn-primary" title="Notes" onclick="" disabled style="width: 100%; text-align: left">
+            <b><i class="bi bi-arrow-right"></i> Notes</b>
+        </button> <br>
     </div>
 
 </div>
