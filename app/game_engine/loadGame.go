@@ -10,8 +10,8 @@ import (
 	"os"
 )
 
-const SpaceGameTest string = "../../content/space/entities.yml"
-const SpaceGame string = "./content/space/entities.yml"
+const SpaceGameTest string = "../../content/default/entities.yml"
+const SpaceGame string = "./content/default/entities.yml"
 
 func loadGame(gameFile string) ecs.World {
 

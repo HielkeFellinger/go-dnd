@@ -233,11 +233,13 @@ func (e *baseEventMessageHandler) typeManageImages(message EventMessage, pool Ca
 
 	// Retrieve all Images
 	campaignImages := helpers.RetrieveAllCampaignImages(pool.GetId(), overviewFilter.Filter)
+	defaultImages := helpers.RetrieveAllDefaultImages(overviewFilter.Filter)
 
 	// @todo: Check for ownership
 
 	data := make(map[string]any)
-	data["Images"] = campaignImages
+	data["CampaignImages"] = campaignImages
+	data["DefaultImages"] = defaultImages
 	data["Filter"] = overviewFilter.Filter
 
 	rawJsonBytes, err := json.Marshal(

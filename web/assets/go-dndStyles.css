@@ -154,8 +154,8 @@ div .nav-link {
     position: absolute;
     bottom: -0.75em;
     left: -0.5em;
-    min-width: 100%;
-    max-width: 100%;
+    min-width: 125%;
+    max-width: 125%;
     font-size: smaller;
 }
 

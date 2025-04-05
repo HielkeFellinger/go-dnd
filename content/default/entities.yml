@@ -80,7 +80,7 @@ base_maps:
           active: "true"
           base64: ""
           name: space_background
-          url: /images/space/space_background_20x20.png
+          url: /images/default/space_background_20x20.png
   - id: f54fc004-1030-46ac-a8cf-e3cc2990f56b
     name: Spaceship Docked to Space Station
     description: Spaceship Docked to Space Station
@@ -97,7 +97,7 @@ base_maps:
           active: "true"
           base64: ""
           name: docked_shuttle_space_station_40x30
-          url: /images/space/docked_shuttle_space_station_40x30.png
+          url: /images/default/docked_shuttle_space_station_40x30.png
   - id: 1dc509e2-4f7f-42c3-8333-c95681cde157
     name: Shuttle Top
     description: Shuttle Top
@@ -114,7 +114,7 @@ base_maps:
           active: "true"
           base64: ""
           name: shuttle_top_lvl_15x10
-          url: /images/space/shuttle_top_lvl_15x10.png
+          url: /images/default/shuttle_top_lvl_15x10.png
   - id: 3e70f4f3-a6b7-4ada-95c7-0df6dbd257c5
     name: Shuttle Control
     description: Shuttle Control
@@ -131,7 +131,7 @@ base_maps:
           active: "true"
           base64: ""
           name: shuttle_control_lvl_15x10
-          url: /images/space/shuttle_control_lvl_15x10.png
+          url: /images/default/shuttle_control_lvl_15x10.png
   - id: 2ddaa4f8-865e-4f0f-b795-81ac0d9f476d
     name: Shuttle Storage
     description: Shuttle Storage
@@ -148,7 +148,7 @@ base_maps:
           active: "true"
           base64: ""
           name: shuttle_storage_lvl_15x10
-          url: /images/space/shuttle_storage_lvl_15x10.png
+          url: /images/default/shuttle_storage_lvl_15x10.png
   - id: 85c2b15d-a0ab-4d9d-98e0-bd51c516d02e
     name: Shuttle Engine
     description: Shuttle Engine
@@ -165,7 +165,7 @@ base_maps:
           active: "true"
           base64: ""
           name: shuttle_engine_lvl
-          url: /images/space/shuttle_engine_lvl_15x10.png
+          url: /images/default/shuttle_engine_lvl_15x10.png
   - id: 1f984588-dce3-47b4-9f64-4bbfcf4df736
     name: plane_0
     description: ""
@@ -181,7 +181,7 @@ base_maps:
         params:
           base64: ""
           name: background_plane_0_A
-          url: /images/space/map_30x29.png
+          url: /images/default/map_30x29.png
       - type: MapItemRelation
         params:
           entity: 614eac41-7184-43d5-aa19-fe6f687fcc8a
@@ -213,13 +213,13 @@ base_maps:
           base64: ""
           active: "false"
           name: background_plane_1_A
-          url: /images/space/map_33x27.png
+          url: /images/default/map_33x27.png
       - type: Image
         params:
           active: "true"
           base64: ""
           name: background_plane_1_B
-          url: /images/space/map_33x27B.png
+          url: /images/default/map_33x27B.png
 base_factions:
   - id: 0f4505513-bd22-419e-bd80-b3eec3fb6f3e
     name: United Earth

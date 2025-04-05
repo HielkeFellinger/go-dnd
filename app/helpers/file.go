@@ -67,15 +67,23 @@ func SaveImageToCampaign(image FileUpload, campaignId uint, rawNewFileName strin
 
 func RetrieveAllCampaignImages(campaignId uint, filter string) []string {
 	campaignImageLocation := os.Getenv("CAMPAIGN_DATA_DIR") + "/" + strconv.Itoa(int(campaignId)) + "/images/"
+	return retrieveAllImagesFromDirectory(campaignImageLocation, campaignImageLocation, filter)
+}
 
+func RetrieveAllDefaultImages(filter string) []string {
+	defaultImageLocation := os.Getenv("CAMPAIGN_WEB_DIR") + "/images/default/"
+	return retrieveAllImagesFromDirectory(defaultImageLocation, "images/default/", filter)
+}
+
+func retrieveAllImagesFromDirectory(directory string, baseUrl string, filter string) []string {
 	images := make([]string, 0)
 
 	// Add all files for dir
-	if entries, err := os.ReadDir(campaignImageLocation); err == nil {
+	if entries, err := os.ReadDir(directory); err == nil {
 		for _, dirEntry := range entries {
 			log.Printf("- Images: '%v'", dirEntry.Name())
 			if !dirEntry.IsDir() && strings.Contains(dirEntry.Name(), filter) {
-				images = append(images, "/"+campaignImageLocation+dirEntry.Name())
+				images = append(images, "/"+baseUrl+dirEntry.Name())
 			}
 		}
 	}

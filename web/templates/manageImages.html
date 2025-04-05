@@ -6,10 +6,11 @@
             <input type="text" id="imagesContentFilter" placeholder="filter" onchange="filterTab('imagesContentFilter', 556)"
                    {{ if .Filter }} value="{{.Filter}}" {{ end }} style="margin-left: 0.5em; height: 2.4em; border-radius:.25rem;">
         </div>
+        <h3>Campaign Images</h3>
         <div style="display: flex; flex-flow: row; flex-wrap: wrap;">
-            {{ range .Images }}
+            {{ range .CampaignImages }}
                 <div class="border" style="display: flex; flex-flow: row nowrap; min-height: 10em; height: 100%;">
-                    <div title="Show Map" style="flex: 3 3 0; background-image: url('{{ . }}'); min-width: 10em; background-size: 100%;
+                    <div style="flex: 3 3 0; background-image: url('{{ . }}'); min-width: 10em; background-size: 100%;
                             background-repeat: no-repeat; cursor: pointer; background-color: #333333">
                     </div>
                     <div style="flex: 1 1 0; align-content: flex-start">
@@ -19,6 +20,22 @@
                         </button>
                     </div>
                 </div>
+            {{ end }}
+        </div>
+        <h3>Default Images</h3>
+        <div style="display: flex; flex-flow: row; flex-wrap: wrap;">
+            {{ range .DefaultImages }}
+            <div class="border" style="display: flex; flex-flow: row nowrap; min-height: 10em; height: 100%;">
+                <div style="flex: 3 3 0; background-image: url('{{ . }}'); min-width: 10em; background-size: 100%;
+                            background-repeat: no-repeat; cursor: pointer; background-color: #333333">
+                </div>
+                <div style="flex: 1 1 0; align-content: flex-start">
+                    <button class="btn" style="height: 2.5em; width: 2.5em; margin-top: 0.3em;
+                            margin-right: 0.35em; float: right" disabled>
+                        <b><i class="bi bi-pencil"></i></b>
+                    </button>
+                </div>
+            </div>
             {{ end }}
         </div>
     </div>

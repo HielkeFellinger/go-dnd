@@ -437,7 +437,7 @@ func (e *baseEventMessageHandler) typeAddMapItem(message EventMessage, pool Camp
 	newMapItemRelation := ecs_components.NewMapItemRelationComponent().(*ecs_components.MapItemRelationComponent)
 	newMapItemRelation.Entity = characterEntity
 
-	// Get an empty space on grid
+	// Get an empty default on grid
 	for x := 0; x < int(mapArea.Width); x++ {
 		for y := 0; y < int(mapArea.Length); y++ {
 			if !slices.Contains(positions, fmt.Sprintf("%d-%d", x, y)) {
