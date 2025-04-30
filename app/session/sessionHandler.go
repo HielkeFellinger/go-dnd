@@ -11,7 +11,7 @@ import (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
-	// SEC FAIL/DANGER THIS DOES BYPASS ORIGIN CHECK!!
+	// @TODO: SEC FAIL/DANGER THIS DOES BYPASS ORIGIN CHECK!!
 	CheckOrigin: func(r *http.Request) bool { return true },
 }
 

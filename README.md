@@ -20,3 +20,4 @@ Art:
   - Individual elements are still property of inkarnate
 - Black and white maps are made using [dungeonscrawl](https://www.dungeonscrawl.com/)
 - AI "Art" is used to temp. fill in some holes (player tokens) and will be removed asap
+- System parsing will be done by https://expr-lang.org 
