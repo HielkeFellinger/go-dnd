@@ -11,26 +11,26 @@ import (
 	"slices"
 )
 
-const FailedAuthMessage = "Failed authenticate user"
-const CampaignSelectHtmlFile = "campaignSelect.html"
-
 func CampaignSelectPage(c *gin.Context) {
-	templateMap := gin.H{}
-	templateMap["title"] = "GO-DND Campaign Select"
-
-	rawUser, exists := c.Get("user")
-	if !exists {
-		templateMap[errMessage], templateMap[errTitle] = FailedAuthMessage, "Error"
-		c.HTML(http.StatusUnauthorized, CampaignSelectHtmlFile, templateMap)
+	user := getUserFromContextOrRedirectToLoginPage(c)
+	if user.ID == 0 {
+		return
 	}
-	templateMap["user"] = rawUser.(models.User)
+
+	campaignSelectPage(c, http.StatusOK, gin.H{}, user)
+}
+
+func campaignSelectPage(c *gin.Context, code int, templateMap gin.H, user models.User) {
+	templateMap["title"] = "GO-DND Campaign Select"
+	templateMap["user"] = user
 
 	// Retrieve campaigns
 	var service = models.CampaignService{}
-	userCampaigns, err := service.RetrieveCampaignsLinkedToUser(rawUser.(models.User))
+	userCampaigns, err := service.RetrieveCampaignsLinkedToUser(user)
 	if err != nil {
-		templateMap[errMessage], templateMap[errTitle] = err.Error(), "Error"
-		c.HTML(http.StatusUnauthorized, CampaignSelectHtmlFile, templateMap)
+		templateMap[errMessage], templateMap[errTitle] = "Could not retrieve campaigns", "Error"
+		c.HTML(http.StatusUnauthorized, "campaignSelect.html", templateMap)
+		return
 	}
 
 	// Test if active sessions linked to user are active
@@ -38,7 +38,7 @@ func CampaignSelectPage(c *gin.Context) {
 	for key, campaign := range userCampaigns {
 		userCampaignIds[key] = campaign.ID
 		userCampaigns[key].Active = session.IsCampaignRunning(campaign.ID)
-		userCampaigns[key].UserIsLead = campaign.LeadID == rawUser.(models.User).ID
+		userCampaigns[key].UserIsLead = campaign.LeadID == user.ID
 	}
 	templateMap["userCampaigns"] = userCampaigns
 
@@ -50,19 +50,18 @@ func CampaignSelectPage(c *gin.Context) {
 	}
 	templateMap["otherCampaigns"] = otherActiveCampaigns
 
-	c.HTML(http.StatusOK, CampaignSelectHtmlFile, templateMap)
+	c.HTML(code, "campaignSelect.html", templateMap)
 }
 
 func CampaignNewPage(c *gin.Context) {
 	templateMap := gin.H{}
 	templateMap["title"] = "GO-DND Create a Campaign"
 
-	rawUser, exists := c.Get("user")
-	if !exists {
-		templateMap[errMessage], templateMap[errTitle] = FailedAuthMessage, "Error"
-		c.HTML(http.StatusUnauthorized, "index.html", templateMap)
+	user := getUserFromContextOrRedirectToLoginPage(c)
+	if user.ID == 0 {
+		return
 	}
-	templateMap["user"] = rawUser.(models.User)
+	templateMap["user"] = user
 
 	c.HTML(http.StatusOK, "campaignAdd.html", templateMap)
 }
@@ -79,12 +78,11 @@ func CampaignNew(c *gin.Context) {
 		return
 	}
 
-	rawUser, exists := c.Get("user")
-	if !exists {
-		templateMap[errMessage], templateMap[errTitle] = FailedAuthMessage, "Error"
-		c.HTML(http.StatusUnauthorized, CampaignSelectHtmlFile, templateMap)
+	user := getUserFromContextOrRedirectToLoginPage(c)
+	if user.ID == 0 {
+		return
 	}
-	templateMap["user"] = rawUser.(models.User)
+	templateMap["user"] = user
 
 	// Parse body to model
 	var campaign models.Campaign
@@ -98,7 +96,7 @@ func CampaignNew(c *gin.Context) {
 
 	// Attempt to insert campaign
 	var service = models.CampaignService{}
-	campaign.Lead = rawUser.(models.User)
+	campaign.Lead = user
 	campaign.Private = false
 	if err := service.InsertCampaign(&campaign); err != nil {
 		templateMap[errMessage], templateMap[errTitle] = err.Error(), "Error"
@@ -113,47 +111,41 @@ func CampaignNew(c *gin.Context) {
 func CampaignSessionPage(c *gin.Context) {
 	templateMap := gin.H{}
 
-	// Retrieve campaign & user (set by middleware)
-	rawUser, exists := c.Get("user")
-	if !exists {
-		templateMap[errMessage], templateMap[errTitle] = FailedAuthMessage, "Error"
-		c.HTML(http.StatusUnauthorized, CampaignSelectHtmlFile, templateMap)
+	// Retrieve user (set by middleware)
+	user := getUserFromContextOrRedirectToLoginPage(c)
+	if user.ID == 0 {
 		return
 	}
-	user := rawUser.(models.User)
 	templateMap["user"] = user
 
-	rawCampaign, exists := c.Get("campaign")
-	if !exists {
+	var campaign models.Campaign
+	id := c.Params.ByName("id")
+	models.DB.Preload("Users").Preload("Lead").First(&campaign, id)
+	if campaign.ID == 0 {
 		templateMap[errMessage], templateMap[errTitle] = "Failed find campaign", "Error"
-		c.HTML(http.StatusNotFound, CampaignSelectHtmlFile, templateMap)
+		campaignSelectPage(c, http.StatusNotFound, templateMap, user)
 		return
 	}
-	campaign := rawCampaign.(models.Campaign)
 	if user.ID == campaign.LeadID {
 		campaign.UserIsLead = true
 	}
 	templateMap["campaign"] = campaign
 
-	// Check if user is linked to campaign
+	// Check if user is linked to campaign, if not redirect
 	if !campaign.UserIsLead && !slices.Contains(campaign.Users, user) {
-		templateMap["ID"] = campaign.ID
-		templateMap["campaignTitle"] = campaign.Title
-		templateMap["title"] = fmt.Sprintf("GO-DND Campaign %s", campaign.Title)
-		c.HTML(http.StatusUnauthorized, "campaignLogin.html", templateMap)
+		c.Redirect(http.StatusFound, fmt.Sprintf("/campaign/login/%d", campaign.ID))
 		return
 	}
-
-	templateMap["blockMenu"] = true
-	templateMap["title"] = fmt.Sprintf("GO-DND Campaign %s", rawCampaign.(models.Campaign).Title)
 
 	if !campaign.UserIsLead && !session.IsCampaignRunning(campaign.ID) {
-		c.Redirect(http.StatusFound, "/campaign/select")
+		redirectTemplateMap := gin.H{}
+		redirectTemplateMap[errMessage], redirectTemplateMap[errTitle] = "Selected campaign is currently inactive!", "Error"
+		campaignSelectPage(c, http.StatusBadRequest, redirectTemplateMap, user)
 		return
 	}
 
 	templateMap["blockMenu"] = true
-	templateMap["title"] = fmt.Sprintf("GO-DND Campaign %s", rawCampaign.(models.Campaign).Title)
+	templateMap["title"] = fmt.Sprintf("GO-DND Campaign %s", campaign.Title)
 	c.HTML(http.StatusOK, "campaign.html", templateMap)
 }
 
@@ -165,26 +157,32 @@ func CampaignSessionAuthorize(c *gin.Context) {
 	templateMap := gin.H{}
 
 	// Retrieve campaign & user (set by middleware)
-	rawUser, exists := c.Get("user")
-	if !exists {
-		templateMap[errMessage], templateMap[errTitle] = FailedAuthMessage, "Error"
-		c.HTML(http.StatusUnauthorized, CampaignSelectHtmlFile, templateMap)
+	user := getUserFromContextOrRedirectToLoginPage(c)
+	if user.ID == 0 {
 		return
 	}
-	user := rawUser.(models.User)
 	templateMap["user"] = user
 
-	rawCampaign, exists := c.Get("campaign")
-	if !exists {
-		templateMap[errMessage], templateMap[errTitle] = "Failed find campaign", "Error"
-		c.HTML(http.StatusNotFound, CampaignSelectHtmlFile, templateMap)
+	var campaign models.Campaign
+	id := c.Params.ByName("id")
+	models.DB.Preload("Users").Preload("Lead").First(&campaign, id)
+	if campaign.ID == 0 {
+		templateMap[errMessage], templateMap[errTitle] = "Failed to find campaign", "Error"
+		campaignSelectPage(c, http.StatusNotFound, templateMap, user)
 		return
 	}
-	campaign := rawCampaign.(models.Campaign)
 	if user.ID == campaign.LeadID {
 		campaign.UserIsLead = true
 	}
 	templateMap["campaign"] = campaign
+
+	// Check if campaign is currently running
+	if !session.IsCampaignRunning(campaign.ID) {
+		redirectTemplateMap := gin.H{}
+		redirectTemplateMap[errMessage], redirectTemplateMap[errTitle] = "Selected campaign is currently inactive!", "Error"
+		campaignSelectPage(c, http.StatusBadRequest, redirectTemplateMap, user)
+		return
+	}
 
 	// Only check if user is not already linked
 	failure := false
@@ -212,7 +210,6 @@ func CampaignSessionAuthorize(c *gin.Context) {
 				failure = true
 			}
 		}
-
 		if failure {
 			templateMap["ID"] = campaign.ID
 			templateMap["campaignTitle"] = campaign.Title
@@ -223,11 +220,22 @@ func CampaignSessionAuthorize(c *gin.Context) {
 	}
 
 	if !campaign.UserIsLead && !session.IsCampaignRunning(campaign.ID) {
-		c.Redirect(http.StatusFound, "/campaign/select")
+		redirectTemplateMap := gin.H{}
+		redirectTemplateMap[errMessage], redirectTemplateMap[errTitle] = "Authorized, but campaign is currently inactive!", "Error"
+		campaignSelectPage(c, http.StatusBadRequest, redirectTemplateMap, user)
 		return
 	}
 
-	templateMap["blockMenu"] = true
-	templateMap["title"] = fmt.Sprintf("GO-DND Campaign %s", rawCampaign.(models.Campaign).Title)
-	c.HTML(http.StatusOK, "campaign.html", templateMap)
+	// Redirect  (After auth successful authorisation)
+	c.Redirect(http.StatusFound, fmt.Sprintf("/campaign/session/%d", campaign.ID))
+}
+
+func getUserFromContextOrRedirectToLoginPage(c *gin.Context) models.User {
+	rawUser, exists := c.Get("user")
+	if !exists {
+		c.Redirect(http.StatusFound, "/u/login")
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return models.User{}
+	}
+	return rawUser.(models.User)
 }

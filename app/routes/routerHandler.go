@@ -29,9 +29,9 @@ func HandleControllerRoutes(router *gin.Engine) {
 		campaignRoutes.GET("/select", middelware.RequireAuth, controller.CampaignSelectPage)
 		campaignRoutes.GET("/new", middelware.RequireAuth, controller.CampaignNewPage)
 		campaignRoutes.POST("/new", middelware.RequireAuth, controller.CampaignNew)
-		campaignRoutes.GET("/login/:id", middelware.RequireAuthAndCampaign, controller.CampaignSessionAuthorize)
-		campaignRoutes.POST("/login/:id", middelware.RequireAuthAndCampaign, controller.CampaignSessionAuthorize)
-		campaignRoutes.GET("/session/:id", middelware.RequireAuthAndCampaign, controller.CampaignSessionPage)
+		campaignRoutes.GET("/login/:id", middelware.RequireAuth, controller.CampaignSessionAuthorize)
+		campaignRoutes.POST("/login/:id", middelware.RequireAuth, controller.CampaignSessionAuthorize)
+		campaignRoutes.GET("/session/:id", middelware.RequireAuth, controller.CampaignSessionPage)
 		campaignRoutes.GET("/session/:id/ws", middelware.RequireAuthAndCampaign, session.ServeSessionWS)
 	}
 }

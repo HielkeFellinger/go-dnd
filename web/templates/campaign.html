@@ -242,7 +242,7 @@
         }
 
         // Parse Map Events
-        else if (payLoad.type >= 530 && payLoad.type < 549) {
+        else if (payLoad.type >= 530 && payLoad.type <= 549) {
             if (payLoad.type === 531) {
                 handleCampaignContentMapEvents(payLoad);
             } else if (payLoad.type === 532) {

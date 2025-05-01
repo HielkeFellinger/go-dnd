@@ -7,6 +7,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/html"
 	"net/http"
+	"time"
 )
 
 func LoginPage(c *gin.Context) {
@@ -37,6 +38,15 @@ func Login(c *gin.Context) {
 	var user models.User
 	models.DB.First(&user, "name = ?", body.Username)
 
+	// Check the validity of the password hash; if no user match, the password is an invalid hash or has a cost of 0
+	if cost, err := bcrypt.Cost([]byte(user.Password)); err != nil || cost == 0 {
+		time.Sleep(5 * time.Second) // Ensures minimal duration in auth attempt
+		templateMap[errMessage], templateMap[errTitle] = "Invalid username and or password", "Error"
+		c.HTML(http.StatusBadRequest, template, templateMap)
+		return
+	}
+
+	// bcrypt.CompareHashAndPassword will only take time if hash is valid
 	if errBcrypt := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password)); errBcrypt != nil {
 		templateMap[errMessage], templateMap[errTitle] = "Invalid username and or password", "Error"
 		c.HTML(http.StatusBadRequest, template, templateMap)

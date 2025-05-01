@@ -359,7 +359,7 @@ func (e *baseEventMessageHandler) typeRemoveMapItem(message EventMessage, pool C
 	if component, ok := mapEntity.GetComponentByUuid(mapItemUuid); ok {
 		if component.ComponentType() == ecs.MapItemRelationComponentType {
 			mapItemRelComponent := component.(*ecs_components.MapItemRelationComponent)
-			if ok := mapEntity.RemoveComponentByUuid(mapItemRelComponent.Id); ok {
+			if oke := mapEntity.RemoveComponentByUuid(mapItemRelComponent.Id); oke {
 				removeMapItemMessage := NewEventMessage()
 				removeMapItemMessage.Source = ServerUser
 				removeMapItemMessage.Type = TypeRemoveMapItem
