@@ -3,16 +3,19 @@
 <!--Embed the header.html template at this location-->
 {{ template "header.html" .}}
 
-<h1>Key required to access Campaign</h1>
-<h3>{{.campaignTitle}}</h3>
-
-<div class="panel panel-default col-sm-6">
-    <div class="panel-body">
+<div style="display: flex; align-items: center; justify-content: center; margin-top: 2em; min-height: 50em; padding: 1em;">
+    <div class="panel panel-default col-sm-3" style="flex: 1; min-height: 40em; border-radius: 2em;
+            border: 0.25em solid #333333;">
+        <div class="panel-heading" style="color: #007bff; font-size: 2.5rem; padding-top: 0.25em;
+            text-align: center; border-radius: 2em 2em 0 0"><b>Key required to access Campaign</b>
+        </div>
+        <br>
+        <div class="panel-body">
         <!--If there's an error, display the error-->
         {{ if .ErrorTitle}}
-        <p class="bg-danger">
-            {{.ErrorTitle}}: {{.ErrorMessage}}
-        </p>
+            <div class="alert alert-danger" role="alert">
+                {{.ErrorTitle}}: {{.ErrorMessage}}
+            </div>
         {{end}}
 
         <!--Create a form that POSTs to the `/campaign/login/{{.ID}}` route-->
@@ -21,11 +24,11 @@
                 <label for="key">key</label>
                 <input class="form-control" type="password" id="key" name="key" required>
             </div>
-            <div style="min-height: 4em; width: 12em; display: flex; flex-flow: row;" >
+            <div style="min-height: 4em; min-width: 12em; display: flex; flex-flow: row;" >
                 <div style="flex: 1 1 0;">
-                    <button id="submit" type="submit" class="btn btn-primary" onclick="loadSpinner()">Login</button>
+                    <button id="submit" type="submit" class="btn btn-primary" style="width: 100%" onclick="loadSpinner()">Login</button>
                 </div>
-                <div id="spinner" style="flex: 1 1 0; display: none">
+                <div id="spinner" style="flex: 1 1 0; width: 100%; display: none; margin-top: 1em; text-align: center;">
                     {{ template "diceSpinnerSvg.html" .}}
                 </div>
             </div>

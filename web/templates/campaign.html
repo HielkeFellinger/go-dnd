@@ -7,9 +7,9 @@
     <div class="row g-4" style="overflow: hidden;">
         <!--If there's an error, display the error-->
         {{ if .ErrorTitle}}
-        <p class="bg-danger">
-            {{.ErrorTitle}}: {{.ErrorMessage}}
-        </p>
+            <div class="alert alert-danger" role="alert">
+                {{.ErrorTitle}}: {{.ErrorMessage}}
+            </div>
         {{end}}
 
         <div id="ui-left-bar" class="chat-screen">

@@ -3,37 +3,46 @@
 <!--Embed the header.html template at this location-->
 {{ template "header.html" .}}
 
-<h1> Login</h1>
+<div style="display: flex; align-items: center; justify-content: center; margin-top: 2em; min-height: 50em; padding: 1em;">
+    <div class="panel panel-default col-sm-2" style="flex: 1; min-height: 35em; border-radius: 2em 0 0 2em;
+        background-image: url('/images/default/game_grid_station.png');  border: 0.25em solid #333333;
+        border-right: none; background-position: center; background-repeat: no-repeat; background-size: 150%">
 
-<div class="panel panel-default col-sm-6">
-    <div class="panel-body">
-        <!--If there's an error, display the error-->
-        {{ if .ErrorTitle}}
-        <p class="bg-danger">
-            {{.ErrorTitle}}: {{.ErrorMessage}}
-        </p>
-        {{end}}
-
-        <!--Create a form that POSTs to the `/u/login` route-->
-        <form class="form" action="/u/login" method="POST">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <div style="min-height: 4em; width: 12em; display: flex; flex-flow: row;" >
-                <div style="flex: 1 1 0;">
-                    <button id="submit" type="submit" class="btn btn-primary" onclick="loadSpinner()">Login</button>
+    </div>
+    <div class="panel panel-default col-sm-2" style="flex: 1; min-height: 35em; border-radius: 0 2em 2em 0;
+        border: 0.25em solid #333333;">
+        <div class="panel-heading" style="color: #007bff; font-size: 2.5rem; padding-top: 0.25em;
+            text-align: center; border-radius: 0 2em 0 0"><b>LOGIN</b></div>
+        <br>
+        <div class="panel-body">
+            <!--If there's an error, display the error-->
+            {{ if .ErrorTitle}}
+                <div class="alert alert-danger" role="alert">
+                    {{.ErrorTitle}}: {{.ErrorMessage}}
                 </div>
-                <div id="spinner" style="flex: 1 1 0; display: none">
-                    {{ template "diceSpinnerSvg.html" .}}
+            {{end}}
+            <!--Create a form that POSTs to the `/u/login` route-->
+            <form class="form" action="/u/login" method="POST">
+                <div class="form-group">
+                    <label for="username">Username <b style="color: #007bff">*</b></label>
+                    <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
                 </div>
-            </div>
-        </form>
-        <a href="/u/register">Register a new user?</a>
+                <div class="form-group">
+                    <label for="password">Password <b style="color: #007bff">*</b></label>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                </div>
+                <br>
+                <div style="min-height: 4em; min-width: 12em; display: flex; flex-flow: column;" >
+                    <div style="flex: 1 1 0;">
+                        <button id="submit" type="submit" class="btn btn-primary" onclick="loadSpinner()" style="width: 100%">Login</button>
+                    </div>
+                    <div id="spinner" style="flex: 1 1 0; width: 100%; display: none; margin-top: 1em; text-align: center;">
+                        {{ template "diceSpinnerSvg.html" .}}
+                    </div>
+                </div>
+            </form>
+            <a href="/u/register">Register a new user?</a>
+        </div>
     </div>
 </div>
 

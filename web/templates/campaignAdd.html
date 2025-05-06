@@ -3,44 +3,49 @@
 <!--Embed the header.html template at this location-->
 {{ template "header.html" . }}
 
-<h1> Create a new campaign </h1>
-
-<div class="panel panel-default col-sm-6">
-    <div class="panel-body">
-        <!--If there's an error, display the error-->
-        {{ if .ErrorTitle}}
-        <div class="alert alert-danger" role="alert">
-            {{.ErrorTitle}}: {{.ErrorMessage}}
+<div style="display: flex; align-items: center; justify-content: center; margin-top: 2em; min-height: 50em; padding: 1em;">
+    <div class="panel panel-default col-sm-3" style="flex: 1; min-height: 40em; border-radius: 2em;
+            border: 0.25em solid #333333;">
+        <div class="panel-heading" style="color: #007bff; font-size: 2.5rem; padding-top: 0.25em;
+            text-align: center; border-radius: 2em 2em 0 0"><b>Create a new campaign</b>
         </div>
-        {{end}}
+        <br>
+        <div class="panel-body">
+            <!--If there's an error, display the error-->
+            {{ if .ErrorTitle}}
+                <div class="alert alert-danger" role="alert">
+                    {{.ErrorTitle}}: {{.ErrorMessage}}
+                </div>
+            {{end}}
 
-        <!--Create a form that POSTs to the `/campaign/new` route. @todo make dynamic-->
-        <form class="form" action="/campaign/new" method="POST">
-            <div class="form-group">
-                <label for="title">Title</label>
-                <input type="text" name="title" class="form-control" id="title" placeholder="Title" required>
-            </div>
-            <div class="form-group">
-                <label for="description">Description</label>
-                <textarea name="description" class="form-control" id="description" placeholder="Description"></textarea>
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" name="password" class="form-control" id="password" placeholder="Password" required>
-            </div>
-            <div class="form-group">
-                <label for="passwordCheck">Password (Check)</label>
-                <input type="password" name="passwordCheck" class="form-control" id="passwordCheck" placeholder="Password (Again)" required>
-            </div>
-            <div style="min-height: 4em; width: 12em; display: flex; flex-flow: row;" >
-                <div style="flex: 1 1 0;">
-                    <button id="submit" type="submit" class="btn btn-primary" onclick="loadSpinner()">Create</button>
+            <!--Create a form that POSTs to the `/campaign/new` route. @todo make dynamic-->
+            <form class="form" action="/campaign/new" method="POST">
+                <div class="form-group">
+                    <label for="title">Title <b style="color: #007bff">*</b></label>
+                    <input type="text" name="title" class="form-control" id="title" placeholder="Title" required>
                 </div>
-                <div id="spinner" style="flex: 1 1 0; display: none">
-                    {{ template "diceSpinnerSvg.html" .}}
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea name="description" class="form-control" id="description" placeholder="Description"></textarea>
                 </div>
-            </div>
-        </form>
+                <div class="form-group">
+                    <label for="password">Password <b style="color: #007bff">*</b></label>
+                    <input type="password" name="password" class="form-control" id="password" placeholder="Password" required>
+                </div>
+                <div class="form-group">
+                    <label for="passwordCheck">Password (Check) <b style="color: #007bff">*</b></label>
+                    <input type="password" name="passwordCheck" class="form-control" id="passwordCheck" placeholder="Password (Again)" required>
+                </div>
+                <div style="min-height: 4em; min-width: 12em; display: flex; flex-flow: column;" >
+                    <div style="flex: 1 1 0;">
+                        <button id="submit" type="submit" class="btn btn-primary" style="width: 100%" onclick="loadSpinner()">Create</button>
+                    </div>
+                    <div id="spinner" style="flex: 1 1 0; width: 100%; display: none; margin-top: 1em; text-align: center;">
+                        {{ template "diceSpinnerSvg.html" .}}
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 

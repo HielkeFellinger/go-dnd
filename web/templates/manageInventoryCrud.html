@@ -52,7 +52,7 @@
                 <button class="btn btn-danger" onclick="loadSpinner();submitRemoveInventory('{{.Inventory.Id}}', '{{.Inventory.Name}}')">Delete</button>
                 {{end}}
             </div>
-            <div id="spinner" style="flex: 1 1 0; display: none">
+            <div id="spinner" style="flex: 1 1 0; width: 100%; display: none; margin-top: 1em; text-align: center;">
                 {{ template "diceSpinnerSvg.html" .}}
             </div>
         </div>

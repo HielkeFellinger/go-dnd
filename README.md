@@ -8,7 +8,7 @@
 
 This will, most likely, be nothing more than a simple gui+engine for a ""D&D""/TTRPG oneshot, 
 Build for entertainment (On LAN), with friends and getting familiar with Go.
-Do NOT look at this software as an example for anything.
+Do NOT look at this software as an example of anything.
 
 - Some Security features will be used; but will not be sufficient for more than "localhost" LAN use
 - A Clean separation html/js/css will be done later if at all

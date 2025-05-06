@@ -3,32 +3,44 @@
 <!--Embed the header.html template at this location-->
 {{ template "header.html" .}}
 
-<h1>Register</h1>
+<div style="display: flex; align-items: center; justify-content: center; margin-top: 2em; min-height: 50em; padding: 1em;">
+    <div class="panel panel-default col-sm-2" style="flex: 1; min-height: 35em; border-radius: 2em 0 0 2em;
+        background-image: url('/images/default/game_grid_recycle.png'); border: 0.25em solid #333333;
+        border-right: none; background-position: center; background-repeat: no-repeat; background-size: 135%">
 
-<div class="panel panel-default col-sm-6">
-    <div class="panel-body">
-        <!--If there's an error, display the error-->
-        {{ if .ErrorTitle}}
-        <div class="alert alert-danger" role="alert">
-            {{.ErrorTitle}}: {{.ErrorMessage}}
+    </div>
+    <div class="panel panel-default col-sm-2" style="flex: 1; min-height: 35em; border-radius: 0 2em 2em 0;
+        border: 0.25em solid #333333;">
+        <div class="panel-heading" style="color: #007bff; font-size: 2.5rem; padding-top: 0.25em;
+            text-align: center; border-radius: 0 2em 0 0"><b>REGISTER</b></div>
+        <br>
+        <div class="panel-body">
+            <!--If there's an error, display the error-->
+            {{ if .ErrorTitle}}
+            <div class="alert alert-danger" role="alert">
+                {{.ErrorTitle}}: {{.ErrorMessage}}
+            </div>
+            {{end}}
+            <!--Create a form that POSTs to the `/u/register` route-->
+            <form class="form" action="/u/register" method="POST">
+                <div class="form-group">
+                    <label for="username">Username <b style="color: #007bff">*</b></label>
+                    <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password <b style="color: #007bff">*</b></label>
+                    <input type="password" name="password" class="form-control" id="password" placeholder="Password" required>
+                </div>
+                <div class="form-group">
+                    <label for="passwordCheck">Password (Check) <b style="color: #007bff">*</b></label>
+                    <input type="password" name="passwordCheck" class="form-control" id="passwordCheck" placeholder="Password" required>
+                </div>
+                <br>
+                <button type="submit" class="btn btn-primary" style="width: 100%">Register</button>
+            </form>
+            <br>
+            <a href="/u/login">Already have a user?</a>
         </div>
-        {{end}}
-        <!--Create a form that POSTs to the `/u/register` route-->
-        <form class="form" action="/u/register" method="POST">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" class="form-control" id="username" name="username" placeholder="Username">
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" name="password" class="form-control" id="password" placeholder="Password">
-            </div>
-            <div class="form-group">
-                <label for="passwordCheck">Password (Check)</label>
-                <input type="password" name="passwordCheck" class="form-control" id="passwordCheck" placeholder="Password">
-            </div>
-            <button type="submit" class="btn btn-primary">Register</button>
-        </form>
     </div>
 </div>
 

@@ -3,7 +3,43 @@
 <!--Embed the header.html template at this location-->
 {{ template "header.html" .}}
 
-<h1> Test the world </h1>
+<div style="display: flex; align-items: center; justify-content: center; margin-top: 2em; min-height: 50em; padding: 1em;">
+    <div class="panel panel-default col-sm-2" style="flex: 1; min-height: 35em; border-radius: 2em 0 0 2em;
+        background-image: url('/images/default/game_grid.png'); background-position: center; border: 0.25em solid #333333;
+        border-right: none; background-repeat: no-repeat; background-size: 150%">
+
+    </div>
+    <div class="panel panel-default col-sm-2" style="flex: 1; min-height: 35em; border-radius: 0 2em 2em 0;
+        border: 0.25em solid #333333;">
+        <div class="panel-heading" style="color: #007bff; font-size: 2.5rem; padding-top: 0.25em;
+            text-align: center; border-radius: 0 2em 0 0"><b>HOME</b></div>
+        <br>
+        <div class="panel-body">
+            <!--If there's an error, display the error-->
+            {{ if .ErrorTitle}}
+                <div class="alert alert-danger" role="alert">
+                    {{.ErrorTitle}}: {{.ErrorMessage}}
+                </div>
+            {{end}}
+            <div class="alert alert-primary" role="alert">
+                A simple GUI & Engine for a D&D / TTRPG oneshot,
+                Build for entertainment (On LAN), with friends and getting familiar with Go.
+                Do NOT look at this software as an example of anything.
+            </div>
+            <br>
+            {{ if .user }}
+                <p>Looking for campaigns?</p>
+                <a href="/campaign/select" class="btn btn-primary" style="width: 100%">Campaigns</a>
+            {{ else }}
+                <p>Already have a user?</p>
+                <a href="/u/login" class="btn btn-primary" style="width: 100%">Login</a>
+                <br><br>
+                <p>Need an account?</p>
+                <a href="/u/register" class="btn btn-primary" style="width: 100%">Register</a>
+            {{ end }}
+        </div>
+    </div>
+</div>
 
 <!--Embed the footer.html template at this location-->
 {{ template "footer.html" .}}

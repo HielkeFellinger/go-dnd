@@ -3,39 +3,47 @@
 <!--Embed the header.html template at this location-->
 {{ template "header.html" .}}
 
-<h1> Select Campaign, {{ .user.Name}} </h1>
-<button class="btn btn-primary" onClick="window.location.reload();" title="Refresh">
-    <b><i class="bi bi-arrow-clockwise"></i></b>
-</button>
-<a href="/campaign/new">Create a new Campaign</a>
+<div style="display: flex; align-items: center; justify-content: center; padding-top: 2em;">
+    <div class="panel panel-default col-sm-12 col-md-6" style="margin-top: 0.25em">
+        <div class="panel-body" style="padding: 1em; border-radius: 2em; border: 0.25em solid #333333;">
+            <h1> Select Campaign, {{ .user.Name}} </h1>
 
-<div class="panel panel-default" style="margin-top: 0.25em">
-    <div class="panel-body">
-        <!--If there's an error, display the error-->
-        {{ if .ErrorTitle}}
-            <p class="bg-danger">
+            <a class="btn btn-primary" href="/campaign/new"><i class="bi bi-plus"></i> Create a new Campaign</a>
+
+            <!--If there's an error, display the error-->
+            {{ if .ErrorTitle}}
+            <div class="alert alert-danger" role="alert">
                 {{.ErrorTitle}}: {{.ErrorMessage}}
-            </p>
-        {{end}}
-        <div>
-            <h2>My Campaigns</h2>
-            <div style="display: flex; flex-flow: row; flex-wrap: wrap; align-content: center; width: 100%;">
-            {{ range .userCampaigns }}
-                {{template "selectCampaignBox.html" .}}
-            {{ end }}
             </div>
-            <hr>
-        </div>
-        <div>
-            <h2>All Other Campaigns</h2>
-            <div style="display: flex; flex-flow: row; flex-wrap: wrap; align-content: center; width: 100%;">
-            {{ range .otherCampaigns }}
-                {{template "selectCampaignBox.html" .}}
-            {{ end }}
+            {{end}}
+            <br><br>
+            <div style="border-top: 0.25em solid #007bff; padding: 1em;">
+                <h2>My Campaigns</h2>
+                <div style="display: flex; flex-flow: row; flex-wrap: wrap; align-content: center; width: 100%;">
+                {{ range .userCampaigns }}
+                    {{template "selectCampaignBox.html" .}}
+                {{ end }}
+                {{ $userCount := len .userCampaigns }}
+                {{ if eq $userCount 0 }}
+                    <p>No Campaigns found; Please add one via "Create a new Campaign"</p>
+                {{ end }}
+                </div>
+                <br>
+            </div>
+            <div style="padding: 1em;">
+                <h2>All Other Campaigns</h2>
+                <div style="display: flex; flex-flow: row; flex-wrap: wrap; align-content: center; width: 100%;">
+                {{ range .otherCampaigns }}
+                    {{template "selectCampaignBox.html" .}}
+                {{ end }}
+                {{ $otherCount := len .otherCampaigns }}
+                {{ if eq $otherCount 0 }}
+                    <p>None Active....</p>
+                {{ end }}
+                </div>
             </div>
         </div>
     </div>
 </div>
-
 <!--Embed the footer.html template at this location-->
 {{ template "footer.html" .}}

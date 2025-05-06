@@ -1,23 +1,26 @@
 <!--menu.html-->
 <nav class="navbar navbar-default">
-    <div class="container">
-        <div class="navbar-header">
+    <div class="container" style="border-bottom: 0.25em solid #333333;">
+        <div class="navbar-header" style="font-size: 2.5rem">
             <a class="navbar-brand" href="/">
-                Home
+                HOME
             </a>
             {{ if .user }}
             <a class="navbar-brand" href="/u/logout">
-                Logout
+                LOGOUT
             </a>
             <a class="navbar-brand" href="/campaign/select">
-                Campaigns
+                CAMPAIGNS
             </a>
+            <button class="btn btn-primary" onClick="window.location.reload();" title="Refresh">
+                <b><i class="bi bi-arrow-clockwise"></i></b>
+            </button>
             {{ else }}
             <a class="navbar-brand" href="/u/login">
-                Login
+                LOGIN
             </a>
             <a class="navbar-brand" href="/u/register">
-                Register
+                REGISTER
             </a>
             {{end}}
         </div>
