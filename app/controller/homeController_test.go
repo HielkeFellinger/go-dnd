@@ -33,7 +33,7 @@ func TestHomePageWithoutUser(t *testing.T) {
 	// Assert
 	assert.EqualValues(t, http.StatusOK, w.Code)
 	bodyString := w.Body.String()
-	assert.Equal(t, strings.Contains(bodyString, "<h1> Test the world </h1>"), true)
+	assert.Equal(t, strings.Contains(bodyString, "<b>GO-DND</b>"), true)
 	assert.Equal(t, strings.Contains(bodyString, "/u/login"), true)
 	assert.Equal(t, strings.Contains(bodyString, "/u/register"), true)
 }
@@ -52,7 +52,7 @@ func TestHomePageWithUser(t *testing.T) {
 	// Assert
 	assert.EqualValues(t, http.StatusOK, w.Code)
 	bodyString := w.Body.String()
-	assert.Equal(t, strings.Contains(bodyString, "<h1> Test the world </h1>"), true)
+	assert.Equal(t, strings.Contains(bodyString, "<b>GO-DND</b>"), true)
 	assert.Equal(t, strings.Contains(bodyString, "/u/logout"), true)
 	assert.Equal(t, strings.Contains(bodyString, "/campaign/select"), true)
 }

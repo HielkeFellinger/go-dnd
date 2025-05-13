@@ -10,14 +10,14 @@ func TestHandleEventMessageLoadFullGame(t *testing.T) {
 	// Arrange
 	t.Setenv("TEMPLATE_DIR", "../../web/templates/")
 	testPool := initTestCampaignPool()
-	baseEventMessageHandler := baseEventMessageHandler{}
+	baseEventMessageHndlr := baseEventMessageHandler{}
 	messageStartGame := NewEventMessage()
 	messageStartGame.Type = TypeLoadFullGame
 	messageStartGame.Source = playerOneId
 	messageStartGame.ReloadDateTime()
 
 	// Act
-	result := baseEventMessageHandler.HandleEventMessage(messageStartGame, testPool)
+	result := baseEventMessageHndlr.HandleEventMessage(messageStartGame, testPool)
 
 	// Assert
 	assert.Nil(t, result) // No Error
@@ -36,11 +36,11 @@ func TestHandleEventMessageEmpty(t *testing.T) {
 	// Arrange
 	t.Setenv("TEMPLATE_DIR", "../../web/templates/")
 	testPool := initTestCampaignPool()
-	baseEventMessageHandler := baseEventMessageHandler{}
+	baseEventMessageHndlr := baseEventMessageHandler{}
 	messageStartGame := NewEventMessage()
 
 	// Act
-	result := baseEventMessageHandler.HandleEventMessage(messageStartGame, testPool)
+	result := baseEventMessageHndlr.HandleEventMessage(messageStartGame, testPool)
 
 	// Assert
 	assert.Error(t, result)

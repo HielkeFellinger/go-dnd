@@ -7,7 +7,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/html"
 	"net/http"
-	"time"
 )
 
 func LoginPage(c *gin.Context) {
@@ -34,19 +33,19 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	// Check if user exists
+	// Check if the user exists
 	var user models.User
 	models.DB.First(&user, "name = ?", body.Username)
 
-	// Check the validity of the password hash; if no user match, the password is an invalid hash or has a cost of 0
+	// Check the validity of the password hash; if no user matches, the password is an invalid hash or has a cost of 0
 	if cost, err := bcrypt.Cost([]byte(user.Password)); err != nil || cost == 0 {
-		time.Sleep(5 * time.Second) // Ensures minimal duration in auth attempt
+		//time.Sleep(5 * time.Second) // Ensures minimal duration in auth attempt
 		templateMap[errMessage], templateMap[errTitle] = "Invalid username and or password", "Error"
 		c.HTML(http.StatusBadRequest, template, templateMap)
 		return
 	}
 
-	// bcrypt.CompareHashAndPassword will only take time if hash is valid
+	// bcrypt.CompareHashAndPassword will only take time if the hash is valid
 	if errBcrypt := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password)); errBcrypt != nil {
 		templateMap[errMessage], templateMap[errTitle] = "Invalid username and or password", "Error"
 		c.HTML(http.StatusBadRequest, template, templateMap)
@@ -86,7 +85,7 @@ func Register(c *gin.Context) {
 	}
 	user.Name = html.EscapeString(user.Name)
 
-	// Attempt to insert user
+	// Attempt to insert the user
 	var service = models.UserService{}
 	if err := service.InsertUser(&user); err != nil {
 		templateMap[errMessage], templateMap[errTitle] = err.Error(), "Error"

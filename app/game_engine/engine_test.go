@@ -44,12 +44,12 @@ func initTestCampaignPool() *testCampaignPool {
 }
 
 func initTestGameEngine() Engine {
-	var baseEngine = baseEngine{}
+	var baseEngineInst = baseEngine{}
 
-	baseEngine.World = loadGame(SpaceGameTest)
-	baseEngine.EventHandler = &baseEventMessageHandler{}
+	baseEngineInst.World = loadGame(SpaceGameTest)
+	baseEngineInst.EventHandler = &baseEventMessageHandler{}
 
-	return &baseEngine
+	return &baseEngineInst
 }
 
 type testCampaignPool struct {

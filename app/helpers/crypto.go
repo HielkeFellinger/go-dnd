@@ -8,7 +8,7 @@ import (
 
 var minCryptoCost = 16
 
-// HashPassword Hash a models.User password
+// HashPassword Hash the models.User password
 func HashPassword(password string) ([]byte, error) {
 	return bcrypt.GenerateFromPassword([]byte(password), getCryptoCost())
 }

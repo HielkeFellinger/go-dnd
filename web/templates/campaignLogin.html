@@ -11,28 +11,29 @@
         </div>
         <br>
         <div class="panel-body">
-        <!--If there's an error, display the error-->
-        {{ if .ErrorTitle}}
-            <div class="alert alert-danger" role="alert">
-                {{.ErrorTitle}}: {{.ErrorMessage}}
-            </div>
-        {{end}}
+            <!--If there's an error, display the error-->
+            {{ if .ErrorTitle}}
+                <div class="alert alert-danger" role="alert">
+                    {{.ErrorTitle}}: {{.ErrorMessage}}
+                </div>
+            {{end}}
 
-        <!--Create a form that POSTs to the `/campaign/login/{{.ID}}` route-->
-        <form class="form" action="/campaign/login/{{.ID}}" method="POST">
-            <div class="form-group">
-                <label for="key">key</label>
-                <input class="form-control" type="password" id="key" name="key" required>
-            </div>
-            <div style="min-height: 4em; min-width: 12em; display: flex; flex-flow: row;" >
-                <div style="flex: 1 1 0;">
-                    <button id="submit" type="submit" class="btn btn-primary" style="width: 100%" onclick="loadSpinner()">Login</button>
+            <!--Create a form that POSTs to the `/campaign/login/{{.ID}}` route-->
+            <form class="form" action="/campaign/login/{{.ID}}" method="POST">
+                <div class="form-group">
+                    <label for="key">key</label>
+                    <input class="form-control" type="password" id="key" name="key" required>
                 </div>
-                <div id="spinner" style="flex: 1 1 0; width: 100%; display: none; margin-top: 1em; text-align: center;">
-                    {{ template "diceSpinnerSvg.html" .}}
+                <div style="min-height: 4em; min-width: 12em; display: flex; flex-flow: row;" >
+                    <div style="flex: 1 1 0;">
+                        <button id="submit" type="submit" class="btn btn-primary" style="width: 100%" onclick="loadSpinner()">Login</button>
+                    </div>
+                    <div id="spinner" style="flex: 1 1 0; width: 100%; display: none; margin-top: 1em; text-align: center;">
+                        {{ template "diceSpinnerSvg.html" .}}
+                    </div>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 </div>
 
