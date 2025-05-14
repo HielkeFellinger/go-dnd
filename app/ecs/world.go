@@ -17,9 +17,13 @@ type World interface {
 	GetItemEntities() []Entity
 	GetFactionEntities() []Entity
 	GetInventoryEntities() []Entity
+	GetMapContentEntities() []Entity
+	GetOtherEntities() []Entity
 	GetEntityByUuid(uuid uuid.UUID) (Entity, bool)
 	GetMapEntityByUuid(uuid uuid.UUID) (Entity, bool)
 	GetItemEntityByUuid(uuid uuid.UUID) (Entity, bool)
+	GetOtherEntityByUuid(uuid uuid.UUID) (Entity, bool)
+	GetMapContentEntityByUuid(uuid uuid.UUID) (Entity, bool)
 	GetInventoryEntityByUuid(uuid uuid.UUID) (Entity, bool)
 	GetCharacterEntityByUuid(uuid uuid.UUID) (Entity, bool)
 }
@@ -28,22 +32,26 @@ type BaseWorld struct {
 	systems  []System
 	entities []Entity
 
-	UuidToEntity          map[uuid.UUID]Entity
-	UuidToItemEntity      map[uuid.UUID]Entity
-	UuidToCharacterEntity map[uuid.UUID]Entity
-	UuidToMapEntity       map[uuid.UUID]Entity
-	UuidToFactionEntity   map[uuid.UUID]Entity
-	UuidToInventoryEntity map[uuid.UUID]Entity
+	UuidToEntity           map[uuid.UUID]Entity
+	UuidToItemEntity       map[uuid.UUID]Entity
+	UuidToCharacterEntity  map[uuid.UUID]Entity
+	UuidToMapEntity        map[uuid.UUID]Entity
+	UuidToFactionEntity    map[uuid.UUID]Entity
+	UuidToInventoryEntity  map[uuid.UUID]Entity
+	UuidToMapContentEntity map[uuid.UUID]Entity
+	UuidToOtherEntity      map[uuid.UUID]Entity
 }
 
 func NewBaseWorld() BaseWorld {
 	return BaseWorld{
-		UuidToEntity:          make(map[uuid.UUID]Entity),
-		UuidToItemEntity:      make(map[uuid.UUID]Entity),
-		UuidToCharacterEntity: make(map[uuid.UUID]Entity),
-		UuidToMapEntity:       make(map[uuid.UUID]Entity),
-		UuidToFactionEntity:   make(map[uuid.UUID]Entity),
-		UuidToInventoryEntity: make(map[uuid.UUID]Entity),
+		UuidToEntity:           make(map[uuid.UUID]Entity),
+		UuidToItemEntity:       make(map[uuid.UUID]Entity),
+		UuidToCharacterEntity:  make(map[uuid.UUID]Entity),
+		UuidToMapEntity:        make(map[uuid.UUID]Entity),
+		UuidToFactionEntity:    make(map[uuid.UUID]Entity),
+		UuidToInventoryEntity:  make(map[uuid.UUID]Entity),
+		UuidToMapContentEntity: make(map[uuid.UUID]Entity),
+		UuidToOtherEntity:      make(map[uuid.UUID]Entity),
 	}
 }
 
@@ -69,6 +77,11 @@ func (w *BaseWorld) AddEntity(e Entity) error {
 		w.UuidToInventoryEntity[e.GetId()] = e
 	} else if e.HasComponentType(ItemComponentType) {
 		w.UuidToItemEntity[e.GetId()] = e
+	} else if e.HasComponentType(MapContentComponentType) || e.HasComponentType(BlockerComponentType) {
+		w.UuidToMapContentEntity[e.GetId()] = e
+	} else {
+		// Add Leftover
+		w.UuidToOtherEntity[e.GetId()] = e
 	}
 
 	w.entities = append(w.entities, e)
@@ -98,6 +111,9 @@ func (w *BaseWorld) RemoveEntity(e Entity) error {
 	delete(w.UuidToMapEntity, e.GetId())
 	delete(w.UuidToFactionEntity, e.GetId())
 	delete(w.UuidToInventoryEntity, e.GetId())
+	delete(w.UuidToMapContentEntity, e.GetId())
+	delete(w.UuidToOtherEntity, e.GetId())
+
 	// Remove from entity
 	w.entities = slices.DeleteFunc(w.entities, func(e Entity) bool { return e.GetId() == rawItem.GetId() })
 
@@ -129,6 +145,14 @@ func (w *BaseWorld) GetInventoryEntities() []Entity {
 	return w.getEntityValuesOfMap(w.UuidToInventoryEntity)
 }
 
+func (w *BaseWorld) GetMapContentEntities() []Entity {
+	return w.getEntityValuesOfMap(w.UuidToMapContentEntity)
+}
+
+func (w *BaseWorld) GetOtherEntities() []Entity {
+	return w.getEntityValuesOfMap(w.UuidToOtherEntity)
+}
+
 func (w *BaseWorld) GetEntityByUuid(uuid uuid.UUID) (Entity, bool) {
 	entity, ok := w.UuidToEntity[uuid]
 	return entity, ok
@@ -151,6 +175,16 @@ func (w *BaseWorld) GetInventoryEntityByUuid(uuid uuid.UUID) (Entity, bool) {
 
 func (w *BaseWorld) GetCharacterEntityByUuid(uuid uuid.UUID) (Entity, bool) {
 	entity, ok := w.UuidToCharacterEntity[uuid]
+	return entity, ok
+}
+
+func (w *BaseWorld) GetOtherEntityByUuid(uuid uuid.UUID) (Entity, bool) {
+	entity, ok := w.UuidToOtherEntity[uuid]
+	return entity, ok
+}
+
+func (w *BaseWorld) GetMapContentEntityByUuid(uuid uuid.UUID) (Entity, bool) {
+	entity, ok := w.UuidToMapContentEntity[uuid]
 	return entity, ok
 }
 

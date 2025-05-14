@@ -46,7 +46,9 @@
             <b><i class="bi bi-card-image"></i></b>
         </button>
         <b style="margin-left: 0.25em; margin-right: 0.25em;">|</b>
-            
+        <button class="btn" id="toggleBlockerCell{{ .id }}" onclick="toggleBlockerPlacementMode('{{ .id }}')" title="Place Blockers Mode">
+            <b><i class="bi bi-stop-fill"></i></b>
+        </button>
         {{ end }}
     </div>
     <div class="campaign-map" onscroll="onMapScroll(this)">
@@ -54,15 +56,17 @@
             {{ range $yVal := .y}}
                 {{ range $xVal := $.x}}
                     <div class="cell" id="{{$.id}}-cell-y{{$yVal}}-x{{$xVal}}" oncontextmenu="showContextMenuOfDefaultCell(event)" style="overflow: hidden">
-                        <div class="content" id="{{$.id}}-cell-y{{$yVal}}-x{{$xVal}}-content" ondrop="drop(event)" ondragover="allowDrop(event)">
-
+                        <div class="content" id="{{$.id}}-cell-y{{$yVal}}-x{{$xVal}}-content"
+                             onclick="mapCellLeftClick('{{$.id}}','{{$yVal}}','{{$xVal}}'); event.stopPropagation()"
+                             ondrop="drop(event)" ondragover="allowDrop(event)">
                         </div>
                         <div id="{{$.id}}-cell-y{{$yVal}}-x{{$xVal}}-default-context-menu" class="context-menu" onclick="hideCellContextMenu(event)">
                             <div class="context-menu-item" onclick="sendSignal('{{$.id}}','{{$yVal}}','{{$xVal}}','info')">Send Info Signal</div>
                             <div class="context-menu-item" onclick="sendSignal('{{$.id}}','{{$yVal}}','{{$xVal}}','warn')">Send Warning Signal</div>
                             <div class="context-menu-item" onclick="sendSignal('{{$.id}}','{{$yVal}}','{{$xVal}}','danger')">Send Danger Signal</div>
                             {{ if $.lead }}
-                            <div class="context-menu-item" onclick="sendSignal('{{$.id}}','{{$yVal}}','{{$xVal}}','danger')"><i>Block Access To Cell</i></div>
+                            <div class="context-menu-item" onclick="sendSignal('{{$.id}}','{{$yVal}}','{{$xVal}}','danger')"><i>Block Access To Row</i></div>
+                            <div class="context-menu-item" onclick="sendSignal('{{$.id}}','{{$yVal}}','{{$xVal}}','danger')"><i>Block Access To Column</i></div>
                             <div class="context-menu-item" onclick="sendSignal('{{$.id}}','{{$yVal}}','{{$xVal}}','danger')"><i>Link Cell to other Map</i></div>
                             {{ end }}
                             <div class="context-menu-item end" onclick="hideCellContextMenu(event)">Close</div>

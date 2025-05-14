@@ -52,6 +52,10 @@ func MapIntToTypeV0(rawId int) uint64 {
 		return ecs.PlayerComponentType
 	case 23:
 		return ecs.LootComponentType
+	case 24:
+		return ecs.BlockerComponentType
+	case 25:
+		return ecs.MapContentComponentType
 
 	case 40:
 		return ecs.ControlsRelationComponentType
@@ -65,6 +69,8 @@ func MapIntToTypeV0(rawId int) uint64 {
 		return ecs.FilterRelationComponentType
 	case 45:
 		return ecs.MapItemRelationComponentType
+	case 46:
+		return ecs.MapLinkRelationComponentType
 	default:
 		return ecs.UnknownComponentType
 	}
@@ -120,6 +126,10 @@ func MapTypeToConstructorFunction(componentType uint64) func() ecs.Component {
 		return NewPlayerComponent
 	case ecs.LootComponentType:
 		return NewLootComponent
+	case ecs.BlockerComponentType:
+		return NewBlockerComponent
+	case ecs.MapContentComponentType:
+		return NewMapContentComponent
 
 	case ecs.ControlsRelationComponentType:
 		return NewControlsRelationComponent
@@ -133,6 +143,8 @@ func MapTypeToConstructorFunction(componentType uint64) func() ecs.Component {
 		return NewFilterRelationComponent
 	case ecs.MapItemRelationComponentType:
 		return NewMapItemRelationComponent
+	case ecs.MapLinkRelationComponentType:
+		return NewMapLinkRelationComponent
 	default:
 		return nil
 	}

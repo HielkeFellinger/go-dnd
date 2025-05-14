@@ -29,6 +29,10 @@ func saveGame(world ecs.World, gameFile string) error {
 	rawGame.Factions = parseEntityIntoRawEntity(world.GetFactionEntities())
 	log.Println("   - Saving Inventories (Entities)")
 	rawGame.Inventories = parseEntityIntoRawEntity(world.GetInventoryEntities())
+	log.Println("   - Saving Map Content (Entities)")
+	rawGame.MapContent = parseEntityIntoRawEntity(world.GetMapContentEntities())
+	log.Println("   - Saving Other (Entities)")
+	rawGame.Others = parseEntityIntoRawEntity(world.GetOtherEntities())
 
 	gameFileContent, err := yaml.Marshal(rawGame)
 	if err != nil {

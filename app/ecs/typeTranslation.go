@@ -26,6 +26,8 @@ const (
 	ImageComponentType        uint64 = 1 << 21
 	PlayerComponentType       uint64 = 1 << 22
 	LootComponentType         uint64 = 1 << 23
+	BlockerComponentType      uint64 = 1 << 24
+	MapContentComponentType   uint64 = 1 << 25
 
 	/* Relational ComponentTypes */
 
@@ -35,6 +37,7 @@ const (
 	CreatesRelationComponentType  uint64 = 1 << 43
 	FilterRelationComponentType   uint64 = 1 << 44
 	MapItemRelationComponentType  uint64 = 1 << 45
+	MapLinkRelationComponentType  uint64 = 1 << 46
 )
 
 // @todo merge with const? maybe...
@@ -63,6 +66,8 @@ var TypeNameToNthBit = map[uint64]TypeTranslationStruct{
 	ImageComponentType:        newTypeTranslation("Image", 21),
 	PlayerComponentType:       newTypeTranslation("Player", 22),
 	LootComponentType:         newTypeTranslation("Loot", 23),
+	BlockerComponentType:      newTypeTranslation("Blocker", 24),
+	MapContentComponentType:   newTypeTranslation("Blocker", 25),
 
 	/* Relational ComponentTypes */
 
@@ -72,6 +77,7 @@ var TypeNameToNthBit = map[uint64]TypeTranslationStruct{
 	CreatesRelationComponentType:  newTypeTranslation("CreatesRelation", 43),
 	FilterRelationComponentType:   newTypeTranslation("FilterRelation", 44),
 	MapItemRelationComponentType:  newTypeTranslation("MapItemRelation", 45),
+	MapLinkRelationComponentType:  newTypeTranslation("MapLinkRelation", 46),
 }
 
 type TypeTranslationStruct struct {

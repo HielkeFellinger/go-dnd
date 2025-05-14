@@ -65,6 +65,18 @@ func loadGame(gameFile string) ecs.World {
 		log.Fatalln(err.Error())
 	}
 
+	log.Println("Parsing raw/base Game Map Content (Entities)")
+	err, mapContent := parseRawEntity(game.MapContent, idToUuidDict, uuidToEntityDict)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	log.Println("Parsing raw/base Game Other Content (Entities)")
+	err, otherItems := parseRawEntity(game.Others, idToUuidDict, uuidToEntityDict)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
 	log.Println("Parsing raw/base Game Items (Entity Components)")
 	parseRawComponentsOfEntity(game, game.Items, uuidToEntityDict, idToUuidDict)
 	log.Println("Parsing raw/base Game Characters (Entity Components)")
@@ -75,24 +87,34 @@ func loadGame(gameFile string) ecs.World {
 	parseRawComponentsOfEntity(game, game.Maps, uuidToEntityDict, idToUuidDict)
 	log.Println("Parsing raw/base Game Inventory (Entity Components)")
 	parseRawComponentsOfEntity(game, game.Inventories, uuidToEntityDict, idToUuidDict)
+	log.Println("Parsing raw/base Game Map Content (Entity Components)")
+	parseRawComponentsOfEntity(game, game.MapContent, uuidToEntityDict, idToUuidDict)
+	log.Println("Parsing raw/base Game Other Items (Entity Components)")
+	parseRawComponentsOfEntity(game, game.Others, uuidToEntityDict, idToUuidDict)
 
 	// Add the fully updated Entities to the world
 	log.Println("Done loading raw/base Game. Now filling world")
 	world := ecs.NewBaseWorld()
-	if err := world.AddEntities(items); err != nil {
-		log.Fatalln(err.Error())
+	if errAdd := world.AddEntities(items); errAdd != nil {
+		log.Fatalln(errAdd.Error())
 	}
-	if err := world.AddEntities(chars); err != nil {
-		log.Fatalln(err.Error())
+	if errAdd := world.AddEntities(chars); errAdd != nil {
+		log.Fatalln(errAdd.Error())
 	}
-	if err := world.AddEntities(factions); err != nil {
-		log.Fatalln(err.Error())
+	if errAdd := world.AddEntities(factions); errAdd != nil {
+		log.Fatalln(errAdd.Error())
 	}
-	if err := world.AddEntities(maps); err != nil {
-		log.Fatalln(err.Error())
+	if errAdd := world.AddEntities(maps); errAdd != nil {
+		log.Fatalln(errAdd.Error())
 	}
-	if err := world.AddEntities(inventories); err != nil {
-		log.Fatalln(err.Error())
+	if errAdd := world.AddEntities(inventories); errAdd != nil {
+		log.Fatalln(errAdd.Error())
+	}
+	if errAdd := world.AddEntities(mapContent); errAdd != nil {
+		log.Fatalln(errAdd.Error())
+	}
+	if errAdd := world.AddEntities(otherItems); errAdd != nil {
+		log.Fatalln(errAdd.Error())
 	}
 	log.Println("Done filling world")
 	return &world

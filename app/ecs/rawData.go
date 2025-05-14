@@ -8,6 +8,8 @@ type RawGameFile struct {
 	Factions        []RawEntity    `yaml:"base_factions"`
 	Chars           []RawEntity    `yaml:"base_characters"`
 	Inventories     []RawEntity    `yaml:"base_inventories"`
+	MapContent      []RawEntity    `yaml:"base_map_content"`
+	Others          []RawEntity    `yaml:"others"`
 }
 
 type RawComponent struct {

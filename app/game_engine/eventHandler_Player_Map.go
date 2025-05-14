@@ -313,16 +313,22 @@ func (e *baseEventMessageHandler) typeSignalMapItem(message EventMessage, pool C
 
 func (e *baseEventMessageHandler) typeMapInteraction(message EventMessage, pool CampaignPool) error {
 	// Undo escaping @ TODO: Interaction!
-	//clearedBody := html.UnescapeString(message.Body)
+	clearedBody := html.UnescapeString(message.Body)
+
+	var mapInteraction MapInteraction
+	if err := json.Unmarshal([]byte(clearedBody), &mapInteraction); err != nil {
+		return err
+	}
 
 	// Check if user is lead
-	//if message.Source != pool.GetLeadId() {
-	//	return errors.New("removing items to map is not allowed as non-lead")
-	//}
+	if message.Source != pool.GetLeadId() {
+		return errors.New("removing items to map is not allowed as non-lead")
+	}
 
 	// Add Stuff
 
 	// Interact with stuff
+	log.Printf("Map interaction: %v", mapInteraction)
 
 	return nil
 }
@@ -692,6 +698,13 @@ func (e *baseEventMessageHandler) buildMapData(model models.CampaignMap, isLead 
 	data["x"] = xVal
 	data["y"] = yVal
 	return data
+}
+
+type MapInteraction struct {
+	Type  string `json:"type"`
+	MapId string `json:"mapId"`
+	X     string `json:"cellX"`
+	Y     string `json:"cellY"`
 }
 
 type SendSignal struct {

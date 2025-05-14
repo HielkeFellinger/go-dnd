@@ -1177,6 +1177,41 @@
         sendEvent(wrapMessage(JSON.stringify(signalItem), 547));
     }
 
+    let blockerPlacementMode = {};
+    let toggleBlockerPlacementMode = (mapId) => {
+        let button = document.getElementById("toggleBlockerCell" + mapId)
+        if (button) {
+            blockerPlacementMode[mapId] = ! blockerPlacementMode[mapId]
+            if (blockerPlacementMode[mapId]) {
+                button.className = 'btn btn-success';
+            } else {
+                button.className = 'btn';
+            }
+        }
+    }
+
+    let disableBlockerPlacementMode = (mapId) => {
+        if (blockerPlacementMode[mapId]) {
+            toggleBlockerPlacementMode(mapId)
+        }
+    }
+
+    let mapCellLeftClick = (mapId, cellY, cellX) => {
+        // Test Action / Mode
+        if (blockerPlacementMode[mapId]) {
+            let addBlocker = {}
+            addBlocker.type = "blocker"
+            addBlocker.mapId = mapId
+            if (cellY >= 0) {
+                addBlocker.cellY = cellY
+            }
+            if (cellX >= 0) {
+                addBlocker.cellX = cellX
+            }
+            sendEvent(wrapMessage(JSON.stringify(addBlocker), 549));
+        }
+    }
+
     let hideCellContextMenu = (event) => {
         let cell = findParentWithSpecificClass(event.target, 'cell');
         if (cell) {
