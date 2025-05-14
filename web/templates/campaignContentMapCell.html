@@ -1,6 +1,7 @@
 {{define "campaignContentMapCell"}}
-<div id="{{.mapId}}-{{.id}}-cell-element" class="element" {{ if .hasControl }} onclick="loadCharDetailsByMapItem('{{.id}}')" draggable="true" ondragstart="drag(event)" {{ end }}
-style="background-image: url('{{.backgroundImage}}'); display: flex; flex-direction: column; justify-content: space-between; opacity: 0.95;">
+<div id="{{.mapId}}-{{.id}}-cell-element" class="element"
+     {{ if .hasControl }} onclick="loadCharDetailsByMapItem('{{.id}}')" draggable="true" ondragstart="drag(event)" {{ end }}
+    style="background-image: url('{{.backgroundImage}}'); display: flex; flex-direction: column; justify-content: space-between; opacity: 0.95;">
     <span style="min-width: 100%; background: rgba(34,34,34,.8); font-size: smaller;">
         <b>{{.entityName}}</b>{{ if .hidden }}<i class="bi bi-eye-slash-fill" style="float: right; padding-right: 5px;"></i>{{ end}}
     </span>

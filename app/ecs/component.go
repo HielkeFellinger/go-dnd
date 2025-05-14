@@ -36,7 +36,7 @@ func (c *BaseComponent) IsRelationalComponent() bool {
 
 func (c *BaseComponent) CheckValuesParsedFromRaw(loadedValues int, raw RawComponent) error {
 	if loadedValues != len(raw.Params) {
-		return errors.New(fmt.Sprintf("Mismatch on Type: (%v)'%v'. Loaded '%d' items total '%d'. Values: '%v'",
+		return errors.New(fmt.Sprintf("Mismatch on Type: (%v) '%v'. Loaded '%d' items total '%d'. Values: '%v'",
 			c.ComponentType(), raw.ComponentType, loadedValues, len(raw.Params), raw.Params))
 	}
 	return nil

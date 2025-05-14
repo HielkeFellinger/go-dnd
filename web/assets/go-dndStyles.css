@@ -183,7 +183,7 @@ div .nav-link {
     z-index: 10000;
     display: none;
     height: fit-content;
-    min-width: 10em;
+    min-width: 12em;
     border: 2px solid #A9A9A9;
 }
 
@@ -192,6 +192,10 @@ div .nav-link {
     border-bottom: 2px solid #A9A9A9;
     cursor: pointer;
     width: 100%;
+}
+
+.context-menu .context-menu-item:hover {
+    background-color: #333333;
 }
 
 .context-menu .context-menu-item.end{

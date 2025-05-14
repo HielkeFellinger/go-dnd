@@ -2,11 +2,11 @@
 <div id="{{.id}}" class="tab-content">
 
     <div style="margin-top: 0.5em; margin-bottom: 0.25em;">
-        <button class="btn" onclick="makeMapsSmaller()" style="height: 2.5em; width: 2.5em" title="Shrink Map Cell Size">
-            <b><i class="bi bi-dash"></i></b>
+        <button class="btn" onclick="makeMapsSmaller()" style="height: 2.5em; width: 2.5em" title="Zoom Out">
+            <b><i class="bi bi-zoom-out"></i></b>
         </button>
-        <button class="btn" onclick="makeMapsBigger()" style="height: 2.5em; width: 2.5em" title="Expand Map Cell Size">
-            <b><i class="bi bi-plus"></i></b>
+        <button class="btn" onclick="makeMapsBigger()" style="height: 2.5em; width: 2.5em" title="Zoom In Map">
+            <b><i class="bi bi-zoom-in"></i></b>
         </button>
         <b style="margin-left: 0.25em; margin-right: 0.25em;">|</b>
         <button class="btn" onclick="clearAllSignals();clearAllMenus()" style="height: 2.5em; width: 2.5em" title="Clean Signals and Menu's">
@@ -61,6 +61,10 @@
                             <div class="context-menu-item" onclick="sendSignal('{{$.id}}','{{$yVal}}','{{$xVal}}','info')">Send Info Signal</div>
                             <div class="context-menu-item" onclick="sendSignal('{{$.id}}','{{$yVal}}','{{$xVal}}','warn')">Send Warning Signal</div>
                             <div class="context-menu-item" onclick="sendSignal('{{$.id}}','{{$yVal}}','{{$xVal}}','danger')">Send Danger Signal</div>
+                            {{ if $.lead }}
+                            <div class="context-menu-item" onclick="sendSignal('{{$.id}}','{{$yVal}}','{{$xVal}}','danger')"><i>Block Access To Cell</i></div>
+                            <div class="context-menu-item" onclick="sendSignal('{{$.id}}','{{$yVal}}','{{$xVal}}','danger')"><i>Link Cell to other Map</i></div>
+                            {{ end }}
                             <div class="context-menu-item end" onclick="hideCellContextMenu(event)">Close</div>
                         </div>
                     </div>

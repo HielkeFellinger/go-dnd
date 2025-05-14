@@ -641,6 +641,7 @@ func (e *baseEventMessageHandler) parseObjectToJson(object any) []byte {
 	return rawJsonBytes
 }
 
+// @TODO allow rendering of other non-player entities!
 func (e *baseEventMessageHandler) buildMapItem(mapItemModel models.CampaignScreenMapItemElement, isLead bool, hasControl bool) models.CampaignScreenMapItemElement {
 	data := make(map[string]any)
 	data["id"] = mapItemModel.Id
