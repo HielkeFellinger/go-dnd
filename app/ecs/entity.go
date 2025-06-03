@@ -15,6 +15,7 @@ type Entity interface {
 	GetDescription() string
 	SetDescription(description string)
 	HasComponentType(ct uint64) bool
+	HasOneComponentOfTypes(cts []uint64) bool
 	HasComponentByUuid(uuid uuid.UUID) bool
 	GetComponentByUuid(uuid uuid.UUID) (Component, bool)
 	RemoveComponentByUuid(uuid uuid.UUID) bool
@@ -22,6 +23,8 @@ type Entity interface {
 	LoadFromRawEntity(raw RawEntity) error
 	GetAllComponents() []Component
 	GetAllComponentsOfType(ct uint64) []Component
+	GetAllComponentsOfTypes(cts []uint64) []Component
+	GetFirstComponentsOfType(ct uint64) Component
 	hasCircularRef(uuid uuid.UUID) bool
 	HasRelationWithEntityByUuid(uuid uuid.UUID) bool
 }
@@ -80,6 +83,15 @@ func (e *BaseEntity) LoadFromRawEntity(raw RawEntity) error {
 func (e *BaseEntity) HasComponentType(ct uint64) bool {
 	_, ok := e.componentTypeToComponentArrMap[ct]
 	return ok
+}
+
+func (e *BaseEntity) HasOneComponentOfTypes(cts []uint64) bool {
+	for _, ct := range cts {
+		if _, ok := e.componentTypeToComponentArrMap[ct]; ok {
+			return true
+		}
+	}
+	return false
 }
 
 func (e *BaseEntity) HasComponentByUuid(uuid uuid.UUID) bool {
@@ -211,8 +223,32 @@ func (e *BaseEntity) GetAllComponentsOfType(ct uint64) []Component {
 			return components
 		}
 	}
-
 	return make([]Component, 0)
+}
+
+func (e *BaseEntity) GetAllComponentsOfTypes(cts []uint64) []Component {
+	componentsResult := make([]Component, 0)
+	for _, ct := range cts {
+		if e.HasComponentType(ct) {
+			components := e.componentTypeToComponentArrMap[ct]
+			if components != nil && len(components) > 0 {
+				componentsResult = append(componentsResult, components...)
+			}
+		}
+	}
+	return componentsResult
+}
+
+func (e *BaseEntity) GetFirstComponentsOfType(ct uint64) Component {
+	if e.HasComponentType(ct) {
+		components := e.componentTypeToComponentArrMap[ct]
+		if components != nil && len(components) > 0 {
+			for i := range components {
+				return components[i]
+			}
+		}
+	}
+	return nil
 }
 
 func (e *BaseEntity) GetAllComponents() []Component {

@@ -334,6 +334,7 @@
 
     let fullRefresh = () => {
         resetIdFromRightBarHistory();
+        blockerPlacementMode = {};
         document.getElementById("entity-details-holder").innerHTML = "";
         sendEvent(wrapMessage('', 500));
     }
@@ -1054,14 +1055,14 @@
     }
 
     let fullRefreshMapLoadFromServer = (id) => {
+        blockerPlacementMode = {};
         sendEvent(wrapMessage(id, 531));
         sendEvent(wrapMessage(id, 532));
     }
 
     let requestMapLoadFromServer = (id) => {
         if (!campaignMapTabIds.includes(id)) {
-            sendEvent(wrapMessage(id, 531));
-            sendEvent(wrapMessage(id, 532));
+            fullRefreshMapLoadFromServer(id)
         } else {
             openTab(id);
         }
@@ -1158,6 +1159,7 @@
 
     let setContextMenuToActive = (target, scrollParent, ev) => {
         target.classList.add('active');
+        target["style"].zIndex = '9999999';
         target["style"].display = 'block';
         target["style"].marginTop = '' + (0 - scrollParent.scrollTop) + 'px';
         target["style"].marginLeft = '' + (0 - scrollParent.scrollLeft - 375) + 'px';
@@ -1181,7 +1183,7 @@
     let toggleBlockerPlacementMode = (mapId) => {
         let button = document.getElementById("toggleBlockerCell" + mapId)
         if (button) {
-            blockerPlacementMode[mapId] = ! blockerPlacementMode[mapId]
+            blockerPlacementMode[mapId] = !(blockerPlacementMode[mapId]);
             if (blockerPlacementMode[mapId]) {
                 button.className = 'btn btn-success';
             } else {
@@ -1200,13 +1202,13 @@
         // Test Action / Mode
         if (blockerPlacementMode[mapId]) {
             let addBlocker = {}
-            addBlocker.type = "blocker"
-            addBlocker.mapId = mapId
+            addBlocker.type = "Blocker";
+            addBlocker.mapId = mapId;
             if (cellY >= 0) {
-                addBlocker.cellY = cellY
+                addBlocker.cellY = cellY;
             }
             if (cellX >= 0) {
-                addBlocker.cellX = cellX
+                addBlocker.cellX = cellX;
             }
             sendEvent(wrapMessage(JSON.stringify(addBlocker), 549));
         }
@@ -1221,6 +1223,7 @@
         if (parent) {
             parent.classList.remove('active');
             parent["style"].display = 'none';
+            parent["style"].zIndex = 'auto';
         }
         event.preventDefault();
         event.stopPropagation();

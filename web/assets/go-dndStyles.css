@@ -180,7 +180,7 @@ div .nav-link {
 
 .context-menu {
     position: absolute;
-    z-index: 10000;
+    transform-style: flat;
     display: none;
     height: fit-content;
     min-width: 12em;

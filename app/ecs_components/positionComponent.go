@@ -59,6 +59,10 @@ func (c *PositionComponent) YFromString(y string) error {
 	return err
 }
 
+func (c *PositionComponent) CheckIfOnArea(areaX uint, areaY uint) bool {
+	return areaX >= c.X && areaY >= c.Y
+}
+
 func (c *PositionComponent) ComponentType() uint64 {
 	return ecs.PositionComponentType
 }

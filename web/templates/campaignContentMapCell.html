@@ -1,13 +1,28 @@
 {{define "campaignContentMapCell"}}
 <div id="{{.mapId}}-{{.id}}-cell-element" class="element"
-     {{ if .hasControl }} onclick="loadCharDetailsByMapItem('{{.id}}');event.stopPropagation()"
-     draggable="true" ondragstart="drag(event)" {{ end }} title="{{.entityName}}"
-    style="background-image: url('{{.backgroundImage}}'); display: flex; flex-direction: column;
-            justify-content: space-between; opacity: 0.95;">
-    <span style="min-width: 100%; background: rgba(34,34,34,.8); font-size: smaller;">
-        <b>{{.entityName}}</b>
-        {{ if .hidden }}<i class="bi bi-eye-slash-fill" style="float: right; padding-right: 5px;"></i>{{ end}}
+    title="{{.entityName}}"
+    {{ if .hasControl }}
+     {{ if eq .type "BLOCKER" }}
+
+     {{ else }}
+         onclick="loadCharDetailsByMapItem('{{.id}}');event.stopPropagation()"
+     {{ end }}
+     draggable="true"
+     ondragstart="drag(event)"
+    {{ end }}
+    style="{{ if .backgroundImage }} background-image: url('{{.backgroundImage}}'); {{ else }} background: none; {{end}}
+            display: flex; flex-direction: column; justify-content: space-between;" >
+
+    {{ if eq .type "BLOCKER" }}
+    <span style="min-width: 100%; background: none; text-align: center">
+        <b><i class="bi bi-stop-circle-fill"></i></b> {{ if .hidden }}<i class="bi bi-eye-slash-fill" style="float: right; padding-right: 5px; font-size: smaller;"></i>{{ end}}
     </span>
+    {{ else }}
+    <span style="min-width: 100%; background: rgba(34,34,34,.8); font-size: smaller;">
+        <b>{{.entityName}}</b> {{ if .hidden }}<i class="bi bi-eye-slash-fill" style="float: right; padding-right: 5px;"></i>{{ end}}
+    </span>
+    {{ end }}
+
     <!--  Hide / Hidden icon  -->
 
     <!--  Health bar  -->
@@ -17,7 +32,7 @@
     {{ end }}
 
     {{ if .hasControl }}
-    <div id="{{.mapId}}-{{.id}}-cell-element-menu" class="context-menu" onclick="hideCellContextMenu(event)">
+    <div id="{{.mapId}}-{{.id}}-cell-element-menu" class="context-menu" onclick="hideCellContextMenu(event)" >
         <div class="context-menu-item" onclick="toggleVisibilityFromContextMenu('{{.mapId}}-{{.id}}-cell-element')">Toggle Visibility</div>
         {{ if .lead }}
             <div class="context-menu-item" onclick="removeItemFromMap('{{.mapId}}', '{{.id}}')">Remove from map</div>

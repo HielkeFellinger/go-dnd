@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
+	"github.com/hielkefellinger/go-dnd/app/ecs_builders"
 	"github.com/hielkefellinger/go-dnd/app/ecs_components"
 	"github.com/hielkefellinger/go-dnd/app/ecs_model_translation"
 	"github.com/hielkefellinger/go-dnd/app/helpers"
@@ -16,7 +17,7 @@ import (
 )
 
 func (e *baseEventMessageHandler) typeLoadMapEntity(message EventMessage, pool CampaignPool) error {
-	// No filter in body equals no map entity to load
+	// No filter in the body equals no map entity to load
 	if len(message.Body) == 0 {
 		return nil
 	}
@@ -115,6 +116,7 @@ func (e *baseEventMessageHandler) typeLoadMapEntities(message EventMessage, pool
 
 		// load models
 		mapItems := mapEntity.GetAllComponentsOfType(ecs.MapItemRelationComponentType)
+		log.Printf("Map mapItems count: %v", len(mapItems))
 		mapItemsModel := models.CampaignScreenMapItems{
 			MapId:    componentMap.Id,
 			Elements: make(map[string]models.CampaignScreenMapItemElement, len(mapItems)),
@@ -325,10 +327,139 @@ func (e *baseEventMessageHandler) typeMapInteraction(message EventMessage, pool 
 		return errors.New("removing items to map is not allowed as non-lead")
 	}
 
-	// Add Stuff
+	// Get Map
+	mapUuid, err := helpers.ParseStringToUuid(mapInteraction.MapId)
+	if err != nil {
+		return err
+	}
+	mapEntity, match := pool.GetEngine().GetWorld().GetMapEntityByUuid(mapUuid)
+	if !match || mapEntity == nil {
+		return errors.New("failure of loading MAP by UUID")
+	}
+
+	// CheckInteraction
+	reqX, err := strconv.ParseUint(mapInteraction.X, 10, 64)
+	if err != nil {
+		return fmt.Errorf("invalid X coordinate: %v", err)
+	}
+	reqY, err := strconv.ParseUint(mapInteraction.Y, 10, 64)
+	if err != nil {
+		return fmt.Errorf("invalid Y coordinate: %v", err)
+	}
+
+	// Get map size
+	var maxX uint = 0
+	var maxY uint = 0
+	if area := mapEntity.GetFirstComponentsOfType(ecs.AreaComponentType); area != nil {
+		areaComponent := area.(*ecs_components.AreaComponent)
+		maxX = areaComponent.Width
+		maxY = areaComponent.Length
+	}
+	if maxY == 0 || maxX == 0 {
+		return errors.New("map has no Width or Length; do not change map")
+	}
+
+	// Check if interaction is inside the area
+	interactionX := uint(reqX)
+	interactionY := uint(reqY)
+	if interactionX >= maxX || interactionY >= maxY {
+		return errors.New("Request is outside of ")
+	}
+
+	// Collect all Elements on the map; clean possible old missing links / off map items
+	mapGrid := make([][]ecs.RelationalComponent, maxX)
+	for i := range mapGrid {
+		mapGrid[i] = make([]ecs.RelationalComponent, maxY)
+	}
+	types := []uint64{ecs.MapItemRelationComponentType, ecs.MapItemRelationComponentType}
+	mapContent := mapEntity.GetAllComponentsOfTypes(types)
+	for _, item := range mapContent {
+		itemRel := item.(ecs.RelationalComponent)
+		cleanup := false
+		if itemRel.GetEntity() == nil {
+			cleanup = true
+		} else if itemRel.ComponentType() == ecs.MapItemRelationComponentType {
+			mapItem := item.(*ecs_components.MapItemRelationComponent)
+			// Check position
+			if mapItem.Position.CheckIfOnArea(maxX, maxY) {
+				mapGrid[mapItem.Position.X][mapItem.Position.Y] = mapItem
+			} else {
+				cleanup = true
+			}
+		} else if itemRel.ComponentType() == ecs.MapLinkRelationComponentType {
+			mapLink := item.(*ecs_components.MapLinkRelationComponent)
+			if mapLink.SourcePosition.CheckIfOnArea(maxX, maxY) {
+				mapGrid[mapLink.SourcePosition.X][mapLink.SourcePosition.Y] = mapLink
+			} else {
+				cleanup = true
+			}
+		}
+
+		// Item is no longer valid or is missing a position; clear from map
+		if cleanup {
+			mapEntity.RemoveComponentByUuid(item.GetId())
+		}
+	}
+
+	addIds := make([]string, 0)
+	removeIds := make([]string, 0)
+
+	// Add/Remove Blocker
+	if mapInteraction.Type == Blocker {
+		// If the position has blocker Remove; else Add if space
+		gridRelComponent := mapGrid[interactionX][interactionY]
+		if gridRelComponent == nil {
+			if newRelId, errBlockAdd := ecs_builders.AddBasicBlockerToMap(
+				pool.GetEngine().GetWorld(), mapEntity, interactionX, interactionY); errBlockAdd != nil {
+				return errBlockAdd
+			} else {
+				addIds = append(addIds, newRelId)
+			}
+		} else if gridRelComponent.GetEntity().HasComponentType(ecs.BlockerComponentType) {
+			removeIds = append(removeIds, gridRelComponent.GetId().String())
+		} else {
+			// Ignore
+		}
+
+	} else if mapInteraction.Type == AddBlocker {
+		// @TODO
+	} else if mapInteraction.Type == RemoveBlocker {
+		// @TODO
+	}
+
+	// Add/Remove Portal (Map link to another map)
+	if mapInteraction.Type == AddPortal {
+		// @TODO
+	} else if mapInteraction.Type == RemovePortal {
+		// @TODO
+	}
 
 	// Interact with stuff
 	log.Printf("Map interaction: %v", mapInteraction)
+
+	for _, addId := range addIds {
+		// Trigger update of map
+		updateMessage := NewEventMessage()
+		updateMessage.Source = ServerUser
+		updateMessage.Body = addId
+		updateMessage.Destinations = pool.GetAllClientIds()
+		updateMessage.Type = TypeLoadMapEntity
+		_ = e.typeLoadMapEntity(updateMessage, pool)
+	}
+	for _, removeId := range removeIds {
+		removeMapItemJson, _ := json.Marshal(RemoveMapItem{
+			MapId:     mapEntity.GetId().String(),
+			MapItemId: removeId,
+		})
+		removeMapItemMessage := NewEventMessage()
+		removeMapItemMessage.Source = pool.GetLeadId()
+		removeMapItemMessage.Type = TypeRemoveMapItem
+		removeMapItemMessage.Destinations = pool.GetAllClientIds()
+		removeMapItemMessage.Body = string(removeMapItemJson)
+		if removeErr := e.typeRemoveMapItem(removeMapItemMessage, pool); removeErr != nil {
+			log.Printf("Err removing map item: %v", removeErr.Error())
+		}
+	}
 
 	return nil
 }
@@ -460,8 +591,8 @@ func (e *baseEventMessageHandler) typeAddMapItem(message EventMessage, pool Camp
 	}
 
 	// Add if possible
-	if err := mapEntity.AddComponent(newMapItemRelation); err != nil {
-		return err
+	if errAddComponent := mapEntity.AddComponent(newMapItemRelation); errAddComponent != nil {
+		return errAddComponent
 	}
 
 	// Trigger update of map
@@ -499,7 +630,7 @@ func (e *baseEventMessageHandler) typeUpdateMapVisibility(message EventMessage, 
 		mapComponent.Active = mapActivity.Active
 	}
 
-	// Update Clients, if any are found
+	// Update Clients if any are found
 	rawJsonBytes, err := json.Marshal(mapActivity)
 	if err != nil {
 		return err
@@ -568,9 +699,9 @@ func (e *baseEventMessageHandler) typeUpdateMapEntity(message EventMessage, pool
 		updateMessage.Body = mapItemComponent.Id.String()
 		updateMessage.Source = ServerUser
 
-		err := e.typeLoadMapEntity(updateMessage, pool)
-		if err != nil {
-			return err
+		errLoadMap := e.typeLoadMapEntity(updateMessage, pool)
+		if errLoadMap != nil {
+			return errLoadMap
 		}
 	}
 
@@ -586,22 +717,22 @@ func (e *baseEventMessageHandler) typeUpdateMapEntity(message EventMessage, pool
 			visibilityComponent := ecs_components.NewVisibilityComponent().(*ecs_components.VisibilityComponent)
 			visibilityComponent.Hidden = messageMapItem.Hidden
 			updatedVisibility = true
-			err := mapItemComponent.Entity.AddComponent(visibilityComponent)
-			if err != nil {
-				return err
+			errAddComponent := mapItemComponent.Entity.AddComponent(visibilityComponent)
+			if errAddComponent != nil {
+				return errAddComponent
 			}
 		}
 
 		// Update possible Map Entities
 		mapEntities := pool.GetEngine().GetWorld().GetMapEntities()
-		for _, mapEntity := range mapEntities {
+		for _, mapUpdateEntity := range mapEntities {
 
 			// Only get the map with the relevant relation to entity
-			if !mapEntity.HasRelationWithEntityByUuid(mapItemComponent.Entity.GetId()) {
+			if !mapUpdateEntity.HasRelationWithEntityByUuid(mapItemComponent.Entity.GetId()) {
 				continue
 			}
 
-			for _, mapItem := range mapEntity.GetAllComponentsOfType(ecs.MapItemRelationComponentType) {
+			for _, mapItem := range mapUpdateEntity.GetAllComponentsOfType(ecs.MapItemRelationComponentType) {
 				mapItemRelComponent := mapItem.(*ecs_components.MapItemRelationComponent)
 
 				if mapItemRelComponent.Entity.GetId() == mapItemComponent.Entity.GetId() {
@@ -615,7 +746,7 @@ func (e *baseEventMessageHandler) typeUpdateMapEntity(message EventMessage, pool
 
 					// Remove old visible ghost mapItem of non-lead / non-controlling users
 					if messageMapItem.Hidden && updatedVisibility {
-						// Get list of controlling users to use as exclude filter
+						// Get list of controlling users to use as an exclude filter
 						controllers := make([]string, 0)
 						controllers = append(controllers, pool.GetLeadId())
 						players := mapItemRelComponent.Entity.GetAllComponentsOfType(ecs.PlayerComponentType)
@@ -651,6 +782,7 @@ func (e *baseEventMessageHandler) parseObjectToJson(object any) []byte {
 func (e *baseEventMessageHandler) buildMapItem(mapItemModel models.CampaignScreenMapItemElement, isLead bool, hasControl bool) models.CampaignScreenMapItemElement {
 	data := make(map[string]any)
 	data["id"] = mapItemModel.Id
+	data["type"] = mapItemModel.Type
 	data["mapId"] = mapItemModel.MapId
 	data["hidden"] = mapItemModel.Hidden
 	data["lead"] = isLead
@@ -700,11 +832,21 @@ func (e *baseEventMessageHandler) buildMapData(model models.CampaignMap, isLead 
 	return data
 }
 
+type MapInteractionType string
+
+const (
+	Blocker       MapInteractionType = "Blocker"
+	AddBlocker    MapInteractionType = "AddBlocker"
+	RemoveBlocker MapInteractionType = "RemoveBlocker"
+	AddPortal     MapInteractionType = "AddPortal"
+	RemovePortal  MapInteractionType = "RemovePortal"
+)
+
 type MapInteraction struct {
-	Type  string `json:"type"`
-	MapId string `json:"mapId"`
-	X     string `json:"cellX"`
-	Y     string `json:"cellY"`
+	MapId string             `json:"mapId"`
+	Type  MapInteractionType `json:"type"`
+	X     string             `json:"cellX"`
+	Y     string             `json:"cellY"`
 }
 
 type SendSignal struct {

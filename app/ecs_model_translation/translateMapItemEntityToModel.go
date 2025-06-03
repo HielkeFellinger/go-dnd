@@ -9,6 +9,7 @@ import (
 
 func MapItemEntityToCampaignMapItemElement(rawMapItemComponent ecs.Component, mapId string) models.CampaignScreenMapItemElement {
 
+	defaultImage := true
 	var image = ecs_components.NewMissingImageComponent()
 	var controllingPlayers = make([]string, 0)
 
@@ -29,7 +30,18 @@ func MapItemEntityToCampaignMapItemElement(rawMapItemComponent ecs.Component, ma
 	// Get (possible) Image
 	var imageDetails = mapItemComponent.Entity.GetAllComponentsOfType(ecs.ImageComponentType)
 	if imageDetails != nil && len(imageDetails) == 1 {
+		defaultImage = false
 		image = imageDetails[0].(*ecs_components.ImageComponent)
+	}
+
+	// Get Type
+	var itemType string
+	if mapItemComponent.Entity.HasComponentType(ecs.CharacterComponentType) {
+		itemType = "CHARACTER"
+	} else if mapItemComponent.Entity.HasComponentType(ecs.BlockerComponentType) {
+		itemType = "BLOCKER"
+	} else {
+		itemType = "UNKNOWN"
 	}
 
 	// Get (all possible) controlling players
@@ -50,15 +62,19 @@ func MapItemEntityToCampaignMapItemElement(rawMapItemComponent ecs.Component, ma
 
 	model := models.CampaignScreenMapItemElement{
 		Id:          mapItemComponent.GetId().String(),
+		Type:        itemType,
 		EntityName:  mapItemComponent.Entity.GetName(),
 		EntityId:    mapItemComponent.Entity.GetId().String(),
 		MapId:       mapId,
 		Hidden:      hidden,
 		Controllers: controllingPlayers,
-		Image: models.CampaignImage{
+	}
+
+	if !(defaultImage && model.Type == "BLOCKER") {
+		model.Image = models.CampaignImage{
 			Name: image.Name,
 			Url:  image.Url,
-		},
+		}
 	}
 
 	// Get (Possible Health Info

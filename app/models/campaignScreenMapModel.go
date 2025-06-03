@@ -7,6 +7,7 @@ type CampaignScreenMapItems struct {
 
 type CampaignScreenMapItemElement struct {
 	Id          string   `json:"Id"`
+	Type        string   `json:"Type"`
 	EntityName  string   `json:"EntityName"`
 	EntityId    string   `json:"EntityId"`
 	Hidden      bool     `json:"Hidden"`
