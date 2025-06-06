@@ -26,6 +26,8 @@ type World interface {
 	GetMapContentEntityByUuid(uuid uuid.UUID) (Entity, bool)
 	GetInventoryEntityByUuid(uuid uuid.UUID) (Entity, bool)
 	GetCharacterEntityByUuid(uuid uuid.UUID) (Entity, bool)
+	DoOtherEntitiesHaveARelationToSpecificEntity(matchEntity Entity, ignoredUidsFilter []uuid.UUID) bool
+	GetAllEntitiesWithRelationToSpecificEntity(matchEntity Entity, ignoredUidsFilter []uuid.UUID) []Entity
 }
 
 type BaseWorld struct {
@@ -118,6 +120,35 @@ func (w *BaseWorld) RemoveEntity(e Entity) error {
 	w.entities = slices.DeleteFunc(w.entities, func(e Entity) bool { return e.GetId() == rawItem.GetId() })
 
 	return nil
+}
+
+func (w *BaseWorld) DoOtherEntitiesHaveARelationToSpecificEntity(matchEntity Entity, ignoredUidsFilter []uuid.UUID) bool {
+	for _, entity := range w.entities {
+		// Skip refs to self and possible filtered Entities
+		if entity.GetId() == matchEntity.GetId() || slices.Contains(ignoredUidsFilter, entity.GetId()) {
+			continue
+		}
+		if entity.HasRelationWithEntityByUuid(matchEntity.GetId()) {
+			return true
+		}
+	}
+	return false
+}
+
+func (w *BaseWorld) GetAllEntitiesWithRelationToSpecificEntity(matchEntity Entity, ignoredUidsFilter []uuid.UUID) []Entity {
+	entitiesWithRelation := make([]Entity, 0)
+
+	for _, entity := range w.entities {
+		// Skip refs to self and possible filtered Entities
+		if entity.GetId() == matchEntity.GetId() || slices.Contains(ignoredUidsFilter, entity.GetId()) {
+			continue
+		}
+		if entity.HasRelationWithEntityByUuid(matchEntity.GetId()) {
+			entitiesWithRelation = append(entitiesWithRelation, entity)
+		}
+	}
+
+	return entitiesWithRelation
 }
 
 func (w *BaseWorld) GetCharacterEntities() []Entity {

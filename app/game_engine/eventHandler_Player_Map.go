@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/hielkefellinger/go-dnd/app/ecs"
 	"github.com/hielkefellinger/go-dnd/app/ecs_builders"
 	"github.com/hielkefellinger/go-dnd/app/ecs_components"
@@ -337,7 +338,17 @@ func (e *baseEventMessageHandler) typeMapInteraction(message EventMessage, pool 
 		return errors.New("failure of loading MAP by UUID")
 	}
 
-	// CheckInteraction
+	// CheckInteraction; recover defaults
+	if len(mapInteraction.X) == 0 && len(mapInteraction.Y) == 0 {
+		return errors.New("failure of parsing X and Y coordinate; request needs at least one")
+	}
+	if len(mapInteraction.X) == 0 {
+		mapInteraction.X = "0"
+	}
+	if len(mapInteraction.Y) == 0 {
+		mapInteraction.Y = "0"
+	}
+
 	reqX, err := strconv.ParseUint(mapInteraction.X, 10, 64)
 	if err != nil {
 		return fmt.Errorf("invalid X coordinate: %v", err)
@@ -421,10 +432,34 @@ func (e *baseEventMessageHandler) typeMapInteraction(message EventMessage, pool 
 			// Ignore
 		}
 
-	} else if mapInteraction.Type == AddBlocker {
-		// @TODO
-	} else if mapInteraction.Type == RemoveBlocker {
-		// @TODO
+	} else if mapInteraction.Type == AddBlockerRow {
+		log.Printf("Map interaction: %v", mapInteraction.Y)
+		for index := range mapGrid {
+			log.Printf("DUMP interaction: %v", index)
+			gridRelComponent := mapGrid[index][interactionY]
+			if gridRelComponent == nil {
+				if newRelId, errBlockAdd := ecs_builders.AddBasicBlockerToMap(
+					pool.GetEngine().GetWorld(), mapEntity, uint(index), interactionY); errBlockAdd != nil {
+					return errBlockAdd
+				} else {
+					addIds = append(addIds, newRelId)
+				}
+			}
+		}
+	} else if mapInteraction.Type == AddBlockerColumn {
+		log.Printf("Map interaction: %v", mapInteraction.X)
+		for index := range mapGrid[interactionX] {
+			log.Printf("DUMP interaction: %v", index)
+			gridRelComponent := mapGrid[interactionX][index]
+			if gridRelComponent == nil {
+				if newRelId, errBlockAdd := ecs_builders.AddBasicBlockerToMap(
+					pool.GetEngine().GetWorld(), mapEntity, interactionX, uint(index)); errBlockAdd != nil {
+					return errBlockAdd
+				} else {
+					addIds = append(addIds, newRelId)
+				}
+			}
+		}
 	}
 
 	// Add/Remove Portal (Map link to another map)
@@ -436,6 +471,7 @@ func (e *baseEventMessageHandler) typeMapInteraction(message EventMessage, pool 
 
 	// Interact with stuff
 	log.Printf("Map interaction: %v", mapInteraction)
+	log.Printf("Added Map interactions: '%v'. Removed Map Interactions: '%v'.", addIds, removeIds)
 
 	for _, addId := range addIds {
 		// Trigger update of map
@@ -481,7 +517,7 @@ func (e *baseEventMessageHandler) typeRemoveMapItem(message EventMessage, pool C
 	if err != nil {
 		return err
 	}
-	mapItemUuid, err := helpers.ParseStringToUuid(removeMapItem.MapItemId)
+	mapRelUuid, err := helpers.ParseStringToUuid(removeMapItem.MapItemId)
 	if err != nil {
 		return err
 	}
@@ -492,19 +528,35 @@ func (e *baseEventMessageHandler) typeRemoveMapItem(message EventMessage, pool C
 		return errors.New("failure of loading MAP by UUID")
 	}
 
-	// Check on the component
-	if component, ok := mapEntity.GetComponentByUuid(mapItemUuid); ok {
+	// Check on the Rel. Component
+	if component, ok := mapEntity.GetComponentByUuid(mapRelUuid); ok {
+		removed := false
 		if component.ComponentType() == ecs.MapItemRelationComponentType {
 			mapItemRelComponent := component.(*ecs_components.MapItemRelationComponent)
 			if oke := mapEntity.RemoveComponentByUuid(mapItemRelComponent.Id); oke {
-				removeMapItemMessage := NewEventMessage()
-				removeMapItemMessage.Source = ServerUser
-				removeMapItemMessage.Type = TypeRemoveMapItem
-				removeMapItemMessage.Destinations = make([]string, 0)
-				removeMapItemMessage.Body = mapItemRelComponent.Id.String()
-				pool.TransmitEventMessage(removeMapItemMessage)
-				return nil
+				removed = true
+				// Check if the downstream Entity needs to be cleaned up.
+				// @TODO make this ref cleanup selection more centrally managed
+				if mapItemRelComponent.Entity != nil && mapItemRelComponent.Entity.HasComponentType(ecs.BlockerComponentType) {
+					if !pool.GetEngine().GetWorld().DoOtherEntitiesHaveARelationToSpecificEntity(
+						mapItemRelComponent.Entity, make([]uuid.UUID, 0)) {
+						// Ignore not cleared items; due to link already removed
+						_ = pool.GetEngine().GetWorld().RemoveEntity(mapItemRelComponent.Entity)
+					}
+				}
 			}
+		} else if component.ComponentType() == ecs.MapLinkRelationComponentType {
+			mapLink := component.(*ecs_components.MapLinkRelationComponent)
+			removed = mapEntity.RemoveComponentByUuid(mapLink.Id)
+		}
+		if removed {
+			removeMapItemMessage := NewEventMessage()
+			removeMapItemMessage.Source = ServerUser
+			removeMapItemMessage.Type = TypeRemoveMapItem
+			removeMapItemMessage.Destinations = make([]string, 0)
+			removeMapItemMessage.Body = removeMapItem.MapItemId
+			pool.TransmitEventMessage(removeMapItemMessage)
+			return nil
 		}
 	}
 	return nil
@@ -835,11 +887,11 @@ func (e *baseEventMessageHandler) buildMapData(model models.CampaignMap, isLead 
 type MapInteractionType string
 
 const (
-	Blocker       MapInteractionType = "Blocker"
-	AddBlocker    MapInteractionType = "AddBlocker"
-	RemoveBlocker MapInteractionType = "RemoveBlocker"
-	AddPortal     MapInteractionType = "AddPortal"
-	RemovePortal  MapInteractionType = "RemovePortal"
+	Blocker          MapInteractionType = "Blocker"
+	AddBlockerRow    MapInteractionType = "AddBlockerRow"
+	AddBlockerColumn MapInteractionType = "AddBlockerColumn"
+	AddPortal        MapInteractionType = "AddPortal"
+	RemovePortal     MapInteractionType = "RemovePortal"
 )
 
 type MapInteraction struct {

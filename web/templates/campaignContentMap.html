@@ -65,8 +65,8 @@
                             <div class="context-menu-item" onclick="sendSignal('{{$.id}}','{{$yVal}}','{{$xVal}}','warn')">Send Warning Signal</div>
                             <div class="context-menu-item" onclick="sendSignal('{{$.id}}','{{$yVal}}','{{$xVal}}','danger')">Send Danger Signal</div>
                             {{ if $.lead }}
-                            <div class="context-menu-item" onclick="sendSignal('{{$.id}}','{{$yVal}}','{{$xVal}}','danger')"><i>Block Access To Row</i></div>
-                            <div class="context-menu-item" onclick="sendSignal('{{$.id}}','{{$yVal}}','{{$xVal}}','danger')"><i>Block Access To Column</i></div>
+                            <div class="context-menu-item" onclick="mapCellAddBlockersToRow('{{$.id}}','{{$yVal}}')"><i>Block Access To Row</i></div>
+                            <div class="context-menu-item" onclick="mapCellAddBlockersToColumn('{{$.id}}','{{$xVal}}')"><i>Block Access To Column</i></div>
                             <div class="context-menu-item" onclick="sendSignal('{{$.id}}','{{$yVal}}','{{$xVal}}','danger')"><i>Link Cell to other Map</i></div>
                             {{ end }}
                             <div class="context-menu-item end" onclick="hideCellContextMenu(event)">Close</div>

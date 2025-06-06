@@ -41,7 +41,7 @@ func (c *MapContentComponent) ParseToRawComponent() (ecs.RawComponent, error) {
 }
 
 func (c *MapContentComponent) ComponentType() uint64 {
-	return ecs.BlockerComponentType
+	return ecs.MapContentComponentType
 }
 
 func (c *MapContentComponent) ActiveFromString(bool string) error {

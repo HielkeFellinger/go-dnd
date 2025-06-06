@@ -67,7 +67,7 @@ var TypeNameToNthBit = map[uint64]TypeTranslationStruct{
 	PlayerComponentType:       newTypeTranslation("Player", 22),
 	LootComponentType:         newTypeTranslation("Loot", 23),
 	BlockerComponentType:      newTypeTranslation("Blocker", 24),
-	MapContentComponentType:   newTypeTranslation("Blocker", 25),
+	MapContentComponentType:   newTypeTranslation("MapContent", 25),
 
 	/* Relational ComponentTypes */
 

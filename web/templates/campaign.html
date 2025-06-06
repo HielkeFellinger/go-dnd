@@ -1201,17 +1201,29 @@
     let mapCellLeftClick = (mapId, cellY, cellX) => {
         // Test Action / Mode
         if (blockerPlacementMode[mapId]) {
-            let addBlocker = {}
-            addBlocker.type = "Blocker";
-            addBlocker.mapId = mapId;
-            if (cellY >= 0) {
-                addBlocker.cellY = cellY;
-            }
-            if (cellX >= 0) {
-                addBlocker.cellX = cellX;
-            }
-            sendEvent(wrapMessage(JSON.stringify(addBlocker), 549));
+            sendBlockerUpdate("Blocker", mapId, cellY, cellX)
         }
+    }
+
+    let mapCellAddBlockersToRow = (mapId, cellY) => {
+        sendBlockerUpdate("AddBlockerRow", mapId, cellY, -1)
+    }
+
+    let mapCellAddBlockersToColumn = (mapId, cellX) => {
+        sendBlockerUpdate("AddBlockerColumn", mapId, -1, cellX)
+    }
+
+    let sendBlockerUpdate = (type, mapId, cellY, cellX) => {
+        let addBlocker = {};
+        addBlocker.type = type;
+        addBlocker.mapId = mapId;
+        if (cellY >= 0) {
+            addBlocker.cellY = cellY;
+        }
+        if (cellX >= 0) {
+            addBlocker.cellX = cellX;
+        }
+        sendEvent(wrapMessage(JSON.stringify(addBlocker), 549));
     }
 
     let hideCellContextMenu = (event) => {
