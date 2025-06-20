@@ -160,7 +160,30 @@ func MapStringToFilterMode(filterMode string) ecs.FilterMode {
 		return ecs.LessThanFilterMode
 	case "more":
 		return ecs.MoreThanFilterMode
+	case "shouldHave":
+		return ecs.ShouldHaveFilterMode
+	case "shouldNotHave":
+		return ecs.ShouldNotHaveFilterMode
 	default:
 		return ecs.UnknownFilterMode
+	}
+}
+func MapFilterModeToString(filterMode ecs.FilterMode) string {
+	switch filterMode {
+	case ecs.BlockFilterMode:
+		return "block"
+	case ecs.AllowFilterMode:
+		return "allow"
+	case ecs.LessThanFilterMode:
+		return "less"
+	case ecs.MoreThanFilterMode:
+		return "more"
+	case ecs.ShouldHaveFilterMode:
+		return "shouldHave"
+	case ecs.ShouldNotHaveFilterMode:
+		return "shouldNotHave"
+
+	default:
+		return "unknown"
 	}
 }

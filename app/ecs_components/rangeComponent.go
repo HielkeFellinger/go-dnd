@@ -62,3 +62,11 @@ func (c *RangeComponent) MaxFromString(max string) error {
 func (c *RangeComponent) ComponentType() uint64 {
 	return ecs.RangeComponentType
 }
+
+func (c *RangeComponent) IsLessThanValue(value int) bool {
+	return c.Min < value
+}
+
+func (c *RangeComponent) IsMoreThanValue(value int) bool {
+	return c.Max > value
+}

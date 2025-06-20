@@ -12,6 +12,8 @@ type Component interface {
 	LoadFromRawComponent(raw RawComponent) error
 	ParseToRawComponent() (RawComponent, error)
 	IsRelationalComponent() bool
+	IsLessThanValue(value int) bool
+	IsMoreThanValue(value int) bool
 	GetId() uuid.UUID
 }
 
@@ -58,12 +60,22 @@ func (c *BaseComponent) ComponentType() uint64 {
 	return UnknownComponentType
 }
 
+func (c *BaseComponent) IsLessThanValue(value int) bool {
+	return false
+}
+
+func (c *BaseComponent) IsMoreThanValue(value int) bool {
+	return false
+}
+
 type FilterMode uint64
 
 const (
-	UnknownFilterMode  FilterMode = 1 << 0
-	AllowFilterMode    FilterMode = 1 << 1
-	BlockFilterMode    FilterMode = 1 << 2
-	LessThanFilterMode FilterMode = 1 << 3
-	MoreThanFilterMode FilterMode = 1 << 4
+	UnknownFilterMode       FilterMode = 1 << 0
+	AllowFilterMode         FilterMode = 1 << 1
+	BlockFilterMode         FilterMode = 1 << 2
+	LessThanFilterMode      FilterMode = 1 << 3
+	MoreThanFilterMode      FilterMode = 1 << 4
+	ShouldHaveFilterMode    FilterMode = 1 << 5
+	ShouldNotHaveFilterMode FilterMode = 1 << 6
 )

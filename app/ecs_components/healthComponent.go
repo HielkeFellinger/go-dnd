@@ -76,3 +76,11 @@ func (c *HealthComponent) MaximumFromString(maximum string) error {
 func (c *HealthComponent) ComponentType() uint64 {
 	return ecs.HealthComponentType
 }
+
+func (c *HealthComponent) IsLessThanValue(value int) bool {
+	return int(c.Maximum+c.Temporary)-int(c.Damage) < value
+}
+
+func (c *HealthComponent) IsMoreThanValue(value int) bool {
+	return int(c.Maximum+c.Temporary)-int(c.Damage) > value
+}

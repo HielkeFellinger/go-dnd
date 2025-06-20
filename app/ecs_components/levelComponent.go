@@ -48,3 +48,11 @@ func (c *LevelComponent) ParseToRawComponent() (ecs.RawComponent, error) {
 func (c *LevelComponent) ComponentType() uint64 {
 	return ecs.LevelComponentType
 }
+
+func (c *LevelComponent) IsLessThanValue(value int) bool {
+	return int(c.Level) < value
+}
+
+func (c *LevelComponent) IsMoreThanValue(value int) bool {
+	return int(c.Level) > value
+}

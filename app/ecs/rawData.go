@@ -3,6 +3,7 @@ package ecs
 type RawGameFile struct {
 	Version         string         `yaml:"version"`
 	TypeTranslation map[string]int `yaml:"type_translation"`
+	Engine          RawEngine      `yaml:"engine"`
 	Items           []RawEntity    `yaml:"base_items"`
 	Maps            []RawEntity    `yaml:"base_maps"`
 	Factions        []RawEntity    `yaml:"base_factions"`
@@ -10,6 +11,13 @@ type RawGameFile struct {
 	Inventories     []RawEntity    `yaml:"base_inventories"`
 	MapContent      []RawEntity    `yaml:"base_map_content"`
 	Others          []RawEntity    `yaml:"others"`
+}
+
+type RawEngine struct {
+	Systems []RawSystem `yaml:"systems"`
+}
+
+type RawSystem struct {
 }
 
 type RawComponent struct {

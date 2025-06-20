@@ -48,3 +48,11 @@ func (c *InventoryComponent) SlotsFromString(slots string) error {
 func (c *InventoryComponent) ComponentType() uint64 {
 	return ecs.InventoryComponentType
 }
+
+func (c *InventoryComponent) IsLessThanValue(value int) bool {
+	return int(c.Slots) < value
+}
+
+func (c *InventoryComponent) IsMoreThanValue(value int) bool {
+	return int(c.Slots) > value
+}

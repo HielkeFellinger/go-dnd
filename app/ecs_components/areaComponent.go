@@ -62,3 +62,11 @@ func (c *AreaComponent) WidthFromString(width string) error {
 func (c *AreaComponent) ComponentType() uint64 {
 	return ecs.AreaComponentType
 }
+
+func (c *AreaComponent) IsLessThanValue(value int) bool {
+	return int(c.Length*c.Width) < value
+}
+
+func (c *AreaComponent) IsMoreThanValue(value int) bool {
+	return int(c.Length*c.Width) > value
+}

@@ -48,3 +48,11 @@ func (c *AmountComponent) AmountFromString(amount string) error {
 func (c *AmountComponent) ComponentType() uint64 {
 	return ecs.AmountComponentType
 }
+
+func (c *AmountComponent) IsLessThanValue(value int) bool {
+	return c.Amount < value
+}
+
+func (c *AmountComponent) IsMoreThanValue(value int) bool {
+	return c.Amount > value
+}

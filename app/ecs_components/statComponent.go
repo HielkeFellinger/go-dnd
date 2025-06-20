@@ -9,8 +9,9 @@ import (
 
 type StatComponent struct {
 	ecs.BaseComponent
-	Name  string `yaml:"name"`
-	Value uint   `yaml:"value"`
+	Name       string `yaml:"name"`
+	Base       int    `yaml:"base"`
+	Calculated int    `yaml:"calculated"`
 }
 
 func NewStatComponent() ecs.Component {
@@ -25,8 +26,14 @@ func (c *StatComponent) LoadFromRawComponent(raw ecs.RawComponent) error {
 		c.Name = value
 		loadedValues++
 	}
-	if value, ok := raw.Params["value"]; ok {
-		if err := c.ValueFromString(value); err != nil {
+	if value, ok := raw.Params["base"]; ok {
+		if err := c.BaseFromString(value); err != nil {
+			return err
+		}
+		loadedValues++
+	}
+	if value, ok := raw.Params["calculated"]; ok {
+		if err := c.CalculatedFromString(value); err != nil {
 			return err
 		}
 		loadedValues++
@@ -39,19 +46,30 @@ func (c *StatComponent) ParseToRawComponent() (ecs.RawComponent, error) {
 	rawComponent := ecs.RawComponent{
 		ComponentType: ecs.TypeNameToNthBit[c.ComponentType()].Name,
 		Params: map[string]string{
-			"name":  html.EscapeString(html.UnescapeString(c.Name)),
-			"value": strconv.Itoa(int(c.Value)),
+			"name":       html.EscapeString(html.UnescapeString(c.Name)),
+			"base":       strconv.Itoa(c.Base),
+			"calculated": strconv.Itoa(c.Calculated),
 		},
 	}
 	return rawComponent, nil
 }
 
-func (c *StatComponent) ValueFromString(value string) error {
+func (c *StatComponent) BaseFromString(value string) error {
 	n, err := strconv.Atoi(value)
-	c.Value = uint(n)
+	c.Base = n
+	return err
+}
+
+func (c *StatComponent) CalculatedFromString(value string) error {
+	n, err := strconv.Atoi(value)
+	c.Calculated = n
 	return err
 }
 
 func (c *StatComponent) ComponentType() uint64 {
 	return ecs.StatComponentType
+}
+
+func (c *StatComponent) AllowMultipleOfType() bool {
+	return true
 }

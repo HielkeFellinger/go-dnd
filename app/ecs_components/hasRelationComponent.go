@@ -65,3 +65,11 @@ func (c *HasRelationComponent) IsRelationalComponent() bool {
 func (c *HasRelationComponent) GetEntity() ecs.Entity {
 	return c.Entity
 }
+
+func (c *HasRelationComponent) IsLessThanValue(value int) bool {
+	return int(c.Count) < value
+}
+
+func (c *HasRelationComponent) IsMoreThanValue(value int) bool {
+	return int(c.Count) > value
+}

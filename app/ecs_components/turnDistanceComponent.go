@@ -48,3 +48,11 @@ func (c *TurnDistanceComponent) ParseToRawComponent() (ecs.RawComponent, error) 
 func (c *TurnDistanceComponent) ComponentType() uint64 {
 	return ecs.TurnDistanceComponentType
 }
+
+func (c *TurnDistanceComponent) IsLessThanValue(value int) bool {
+	return int(c.Distance) < value
+}
+
+func (c *TurnDistanceComponent) IsMoreThanValue(value int) bool {
+	return int(c.Distance) > value
+}
