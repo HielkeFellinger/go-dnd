@@ -1,5 +1,10 @@
 # go-dnd
 
+
+# **DEPRECATED** Now: https://github.com/HielkeFellinger/dramatic_gopher
+### Lessons have been learned; the number of unknown unknows has been reduced. Now this V-1 code will be left as is, see the above link for a newer and cleaner V0
+
+
 [![Build and Test](https://github.com/HielkeFellinger/go-dnd/actions/workflows/go.yml/badge.svg)](https://github.com/HielkeFellinger/go-dnd/actions/workflows/go.yml)
 [![codecov](https://codecov.io/github/HielkeFellinger/go-dnd/graph/badge.svg?token=JXQX5TZOXE)](https://codecov.io/github/HielkeFellinger/go-dnd)
 
@@ -20,4 +25,4 @@ Art:
   - Individual elements are still property of inkarnate
 - Black and white maps are made using [dungeonscrawl](https://www.dungeonscrawl.com/)
 - AI "Art" is used to temp. fill in some holes (player tokens) and will be removed asap
-- System parsing will be done by https://expr-lang.org 
+- System parsing will be done by https://expr-lang.org
