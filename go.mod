@@ -13,7 +13,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/crypto v0.41.0
-	golang.org/x/net v0.42.0
+	golang.org/x/net v0.43.0
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.30.1
